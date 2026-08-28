@@ -42,3 +42,8 @@ next-env.d.ts
 
 # scripts
 scale_down.js
+
+# screenshots
+figma_screenshots/
+figma_screenshots
+
