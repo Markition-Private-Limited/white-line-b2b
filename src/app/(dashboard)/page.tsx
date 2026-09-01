@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import {
   Car,
@@ -14,8 +14,10 @@ import {
 
 export default function DashboardPage() {
   const [selectedYear, setSelectedYear] = useState("2026");
+  const chartScrollRef = useRef<HTMLDivElement>(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
-  // Monthly Analytics Data
+  // Full 12 Monthly Analytics Data
   const monthlyData = [
     { month: "Jan", paid: 260, unpaid: 160 },
     { month: "Feb", paid: 280, unpaid: 200 },
@@ -25,7 +27,35 @@ export default function DashboardPage() {
     { month: "Jun", paid: 260, unpaid: 150 },
     { month: "Jul", paid: 300, unpaid: 240 },
     { month: "Aug", paid: 265, unpaid: 170 },
+    { month: "Sep", paid: 290, unpaid: 210 },
+    { month: "Oct", paid: 245, unpaid: 175 },
+    { month: "Nov", paid: 280, unpaid: 190 },
+    { month: "Dec", paid: 310, unpaid: 260 },
   ];
+
+  const handleScroll = () => {
+    if (chartScrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = chartScrollRef.current;
+      const maxScroll = scrollWidth - clientWidth;
+      if (maxScroll > 0) {
+        setScrollProgress(scrollLeft / maxScroll);
+      }
+    }
+  };
+
+  const scrollByAmount = (amount: number) => {
+    if (chartScrollRef.current) {
+      chartScrollRef.current.scrollBy({ left: amount, behavior: "smooth" });
+    }
+  };
+
+  useEffect(() => {
+    const el = chartScrollRef.current;
+    if (el) {
+      el.addEventListener("scroll", handleScroll);
+      return () => el.removeEventListener("scroll", handleScroll);
+    }
+  }, []);
 
   return (
     <div className="space-y-4">
@@ -205,25 +235,27 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Chart Area */}
-          <div className="pt-2 overflow-x-auto">
-            <div className="min-w-[540px]">
-              {/* Main Chart Container with Y-Axis & Grid */}
-              <div className="flex gap-2">
-                {/* Left Y-Axis Labels */}
-                <div className="w-10 h-52 flex flex-col justify-between text-right text-[11px] text-gray-400 font-medium select-none pr-1">
-                  <span>300k</span>
-                  <span>250k</span>
-                  <span>200k</span>
-                  <span>150k</span>
-                  <span>100k</span>
-                  <span>50k</span>
-                  <span>0</span>
-                </div>
+          {/* Chart Area with Fixed Y-Axis and Scrollable Bars */}
+          <div className="pt-2">
+            <div className="flex gap-2 relative">
+              {/* Fixed Left Y-Axis Column */}
+              <div className="w-10 h-52 flex flex-col justify-between text-right text-[11px] text-gray-400 font-medium select-none pr-2 shrink-0 z-20 bg-white">
+                <span>300k</span>
+                <span>250k</span>
+                <span>200k</span>
+                <span>150k</span>
+                <span>100k</span>
+                <span>50k</span>
+                <span>0</span>
+              </div>
 
-                {/* Right Chart Bars + Horizontal Grid Lines */}
-                <div className="flex-1 relative h-52">
-                  {/* Horizontal Gridlines */}
+              {/* Scrollable Chart Body */}
+              <div
+                ref={chartScrollRef}
+                className="flex-1 overflow-x-auto scrollbar-hide scroll-smooth cursor-grab active:cursor-grabbing pb-1"
+              >
+                <div className="min-w-[760px] relative h-52">
+                  {/* Full-width Horizontal Gridlines */}
                   <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
                     <div className="border-b border-gray-100/80 w-full h-0" />
                     <div className="border-b border-gray-100/80 w-full h-0" />
@@ -235,54 +267,79 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Dual Bars per Month */}
-                  <div className="relative h-full flex items-end justify-between px-2">
+                  <div className="relative h-full flex items-end justify-between px-3">
                     {monthlyData.map((item, idx) => {
                       const paidHeight = (item.paid / 300) * 100;
                       const unpaidHeight = (item.unpaid / 300) * 100;
 
                       return (
-                        <div key={idx} className="flex flex-col items-center group z-10">
+                        <div key={idx} className="flex flex-col items-center group z-10 min-w-[50px]">
                           <div className="flex items-end gap-1 h-52 pb-0.5">
                             {/* Paid Bar */}
                             <div
                               className="w-5 sm:w-6 bg-[#199CA8] rounded-t-full transition-all duration-300 group-hover:brightness-105 cursor-pointer shadow-xs"
                               style={{ height: `${Math.min(100, paidHeight)}%` }}
-                              title={`Paid: SAR ${item.paid}k`}
+                              title={`${item.month} - Paid: SAR ${item.paid}k`}
                             />
                             {/* Unpaid Bar */}
                             <div
                               className="w-5 sm:w-6 bg-[#9FE4EE] rounded-t-full transition-all duration-300 group-hover:brightness-105 cursor-pointer shadow-xs"
                               style={{ height: `${Math.min(100, unpaidHeight)}%` }}
-                              title={`Unpaid: SAR ${item.unpaid}k`}
+                              title={`${item.month} - Unpaid: SAR ${item.unpaid}k`}
                             />
                           </div>
+                          {/* Month Label */}
+                          <span className="text-xs text-gray-700 font-medium mt-2.5 block select-none">
+                            {item.month}
+                          </span>
                         </div>
                       );
                     })}
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Month Labels row */}
-              <div className="flex gap-2 mt-2">
-                <div className="w-10 shrink-0" />
-                <div className="flex-1 flex justify-between px-2">
-                  {monthlyData.map((item, idx) => (
-                    <div key={idx} className="w-11 sm:w-13 text-center">
-                      <span className="text-xs text-gray-700 font-medium">{item.month}</span>
-                    </div>
-                  ))}
-                </div>
+            {/* Interactive Bottom Scroll/Timeline Slider */}
+            <div className="flex items-center justify-center gap-3 mt-4 text-gray-400">
+              <button
+                type="button"
+                onClick={() => scrollByAmount(-200)}
+                aria-label="Scroll left"
+                className="p-1 text-xs hover:text-gray-700 transition-colors cursor-pointer select-none"
+              >
+                ◄
+              </button>
+
+              <div
+                onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const clickX = e.clientX - rect.left;
+                  const ratio = clickX / rect.width;
+                  if (chartScrollRef.current) {
+                    const maxScroll = chartScrollRef.current.scrollWidth - chartScrollRef.current.clientWidth;
+                    chartScrollRef.current.scrollTo({ left: ratio * maxScroll, behavior: "smooth" });
+                  }
+                }}
+                className="w-44 h-1.5 bg-gray-100 rounded-full overflow-hidden relative cursor-pointer"
+              >
+                <div
+                  className="h-full bg-gray-300 rounded-full transition-all duration-150"
+                  style={{
+                    width: "40%",
+                    transform: `translateX(${scrollProgress * 150}%)`,
+                  }}
+                />
               </div>
 
-              {/* Bottom Scroll/Timeline Slider Indicator */}
-              <div className="flex items-center justify-center gap-2 mt-4 px-12 text-gray-300">
-                <span className="text-[10px] select-none text-gray-400">◄</span>
-                <div className="w-48 h-1 bg-gray-100 rounded-full overflow-hidden">
-                  <div className="w-1/2 h-full bg-gray-300 rounded-full" />
-                </div>
-                <span className="text-[10px] select-none text-gray-400">►</span>
-              </div>
+              <button
+                type="button"
+                onClick={() => scrollByAmount(200)}
+                aria-label="Scroll right"
+                className="p-1 text-xs hover:text-gray-700 transition-colors cursor-pointer select-none"
+              >
+                ►
+              </button>
             </div>
           </div>
         </div>
