@@ -30,19 +30,27 @@ export default function DashboardPage() {
   return (
     <div className="space-y-4">
       {/* 5 Top Stats Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {/* Card 1: Active Requests */}
-        <div className="card-base p-5 flex flex-col justify-between min-h-[145px] bg-[#E6F8FA] border-none shadow-[0_4px_20px_rgba(0,0,0,0.02)] relative overflow-hidden">
+        <div className="rounded-[28px] p-5 lg:p-6 flex flex-col justify-between min-h-[165px] bg-[#E2F8FA] border border-[#CDEEF2] shadow-[0_4px_24px_rgba(0,0,0,0.02)] relative overflow-hidden transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
           <div className="flex items-start justify-between">
-            <span className="text-fs-12 font-semibold text-gray-800 leading-tight">
+            <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">
               Active<br />Requests
             </span>
-            <div className="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center shadow-sm">
-              <Car className="w-3.5 h-3.5" />
+            <div className="w-8 h-8 rounded-full bg-[#005C66] text-white flex items-center justify-center shadow-xs">
+              {/* Steering Wheel Icon */}
+              <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="9" />
+                <circle cx="12" cy="12" r="3" />
+                <line x1="12" y1="3" x2="12" y2="9" />
+                <line x1="12" y1="15" x2="12" y2="21" />
+                <line x1="3" y1="12" x2="9" y2="12" />
+                <line x1="15" y1="12" x2="21" y2="12" />
+              </svg>
             </div>
           </div>
 
-          <div className="flex items-end justify-between mt-3">
+          <div className="flex items-end justify-between mt-4">
             {/* Avatar Stack */}
             <div className="flex -space-x-2 overflow-hidden">
               <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white overflow-hidden bg-gray-200">
@@ -56,24 +64,24 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <span className="text-fs-27 font-bold font-poppins text-text-primary leading-none">
+            <span className="text-[32px] font-bold font-poppins text-gray-900 leading-none">
               154
             </span>
           </div>
         </div>
 
         {/* Card 2: Pending Requests */}
-        <div className="card-base p-5 flex flex-col justify-between min-h-[145px] bg-[#EAF8E6] border-none shadow-[0_4px_20px_rgba(0,0,0,0.02)] relative overflow-hidden">
+        <div className="rounded-[28px] p-5 lg:p-6 flex flex-col justify-between min-h-[165px] bg-[#E7F9E4] border border-[#D5F0D0] shadow-[0_4px_24px_rgba(0,0,0,0.02)] relative overflow-hidden transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
           <div className="flex items-start justify-between">
-            <span className="text-fs-12 font-semibold text-gray-800 leading-tight">
+            <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">
               Pending<br />Requests
             </span>
-            <div className="w-7 h-7 rounded-full bg-[#12A150] text-white flex items-center justify-center shadow-sm">
-              <Calendar className="w-3.5 h-3.5" />
+            <div className="w-8 h-8 rounded-full bg-[#62C25D] text-white flex items-center justify-center shadow-xs">
+              <Calendar className="w-4 h-4" />
             </div>
           </div>
 
-          <div className="flex items-end justify-between mt-3">
+          <div className="flex items-end justify-between mt-4">
             {/* Avatar Stack */}
             <div className="flex -space-x-2 overflow-hidden">
               <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white overflow-hidden bg-gray-200">
@@ -84,64 +92,76 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <span className="text-fs-27 font-bold font-poppins text-text-primary leading-none">
+            <span className="text-[32px] font-bold font-poppins text-gray-900 leading-none">
               98
             </span>
           </div>
         </div>
 
         {/* Card 3: Open Complaints */}
-        <div className="card-base p-5 flex flex-col justify-between min-h-[145px] bg-[#FFF9E6] border-none shadow-[0_4px_20px_rgba(0,0,0,0.02)] relative overflow-hidden">
+        <div className="rounded-[28px] p-5 lg:p-6 flex flex-col justify-between min-h-[165px] bg-[#FEF9E2] border border-[#F5ECC4] shadow-[0_4px_24px_rgba(0,0,0,0.02)] relative overflow-hidden transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
           <div className="flex items-start justify-between">
-            <span className="text-fs-12 font-semibold text-gray-800 leading-tight">
+            <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">
               Open<br />Complaints
             </span>
-            <div className="w-7 h-7 rounded-full bg-[#EAB308] text-white flex items-center justify-center shadow-sm">
-              <UserCheck className="w-3.5 h-3.5" />
+            <div className="w-8 h-8 rounded-full bg-[#B2B042] text-white flex items-center justify-center shadow-xs">
+              <UserCheck className="w-4 h-4" />
             </div>
           </div>
 
-          <div className="flex items-end justify-end mt-3">
-            <span className="text-fs-27 font-bold font-poppins text-text-primary leading-none">
+          <div className="flex items-end justify-end mt-4">
+            <span className="text-[32px] font-bold font-poppins text-gray-900 leading-none">
               34
             </span>
           </div>
         </div>
 
         {/* Card 4: Resolved Complaints */}
-        <div className="card-base p-5 flex flex-col justify-between min-h-[145px] bg-[#E8EEFB] border-none shadow-[0_4px_20px_rgba(0,0,0,0.02)] relative overflow-hidden">
+        <div className="rounded-[28px] p-5 lg:p-6 flex flex-col justify-between min-h-[165px] bg-[#E4EEFD] border border-[#D0DFF8] shadow-[0_4px_24px_rgba(0,0,0,0.02)] relative overflow-hidden transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
           <div className="flex items-start justify-between">
-            <span className="text-fs-12 font-semibold text-gray-800 leading-tight">
+            <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">
               Resolved<br />Complaints
             </span>
-            <div className="w-7 h-7 rounded-full bg-[#3B82F6] text-white flex items-center justify-center shadow-sm">
-              <CheckCircle2 className="w-3.5 h-3.5" />
+            <div className="w-8 h-8 rounded-full bg-[#6888E0] text-white flex items-center justify-center shadow-xs">
+              <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
 
-          <div className="flex items-end justify-end mt-3">
-            <span className="text-fs-27 font-bold font-poppins text-text-primary leading-none">
+          <div className="flex items-end justify-end mt-4">
+            <span className="text-[32px] font-bold font-poppins text-gray-900 leading-none">
               12
             </span>
           </div>
         </div>
 
         {/* Card 5: Due Invoices (Hero Dark Teal Card) */}
-        <div className="card-base p-5 flex flex-col justify-between min-h-[145px] bg-primary text-white border-none shadow-[0_8px_30px_rgba(0,92,102,0.18)] relative overflow-hidden">
-          {/* Subtle Watermark Illustration */}
-          <Coins className="w-28 h-28 text-white/10 absolute -bottom-6 -left-6 pointer-events-none" />
+        <div className="rounded-[28px] p-5 lg:p-6 flex flex-col justify-between min-h-[165px] bg-[#005C66] text-white shadow-[0_8px_30px_rgba(0,92,102,0.22)] relative overflow-hidden transition-all duration-200 hover:shadow-[0_12px_36px_rgba(0,92,102,0.3)]">
+          {/* Subtle Money Bag Illustration */}
+          <svg
+            className="w-36 h-36 text-white/10 absolute -bottom-8 -left-6 pointer-events-none"
+            viewBox="0 0 100 100"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M50 20 C45 20, 42 12, 40 8 C48 10, 52 10, 60 8 C58 12, 55 20, 50 20 Z" fill="currentColor" fillOpacity="0.05" />
+            <circle cx="50" cy="22" r="4" fill="currentColor" fillOpacity="0.2" />
+            <path d="M50 24 C30 24, 15 45, 15 70 C15 88, 30 92, 50 92 C70 92, 85 88, 85 70 C85 45, 70 24, 50 24 Z" />
+            <path d="M42 24 C36 40, 36 60, 42 90" strokeDasharray="3 3" opacity="0.3" />
+            <path d="M58 24 C64 40, 64 60, 58 90" strokeDasharray="3 3" opacity="0.3" />
+          </svg>
 
           <div className="flex items-start justify-between relative z-10">
-            <span className="text-fs-12 font-semibold leading-tight">
+            <span className="text-sm font-bold leading-tight font-poppins text-white">
               Due<br />Invoices
             </span>
-            <div className="w-7 h-7 rounded-full bg-white/20 backdrop-blur-xs text-white flex items-center justify-center shadow-sm">
-              <FileText className="w-3.5 h-3.5" />
+            <div className="w-8 h-8 rounded-full bg-white text-[#005C66] flex items-center justify-center shadow-xs">
+              <FileText className="w-4 h-4" />
             </div>
           </div>
 
-          <div className="flex items-end justify-end mt-3 relative z-10">
-            <span className="text-fs-27 font-bold font-poppins leading-none">
+          <div className="flex items-end justify-end mt-4 relative z-10">
+            <span className="text-[32px] font-bold font-poppins leading-none text-white">
               23
             </span>
           </div>

@@ -143,47 +143,47 @@ export default function InvoicesPage() {
         {/* Left Column: 3 Vertical Stats Cards */}
         <div className="flex flex-col gap-3">
           {/* Stat 1: Paid Invoices */}
-          <div className="card-base p-5 flex flex-col justify-between min-h-[135px] bg-[#E6F8FA] border-none shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+          <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[145px] bg-[#E2F8FA] border border-[#CDEEF2] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
             <div className="flex items-start justify-between">
-              <span className="text-fs-12 font-semibold text-gray-800 leading-tight">
+              <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">
                 Paid<br />Invoices
               </span>
-              <div className="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center shadow-sm">
-                <CheckCircle2 className="w-3.5 h-3.5" />
+              <div className="w-8 h-8 rounded-full bg-[#005C66] text-white flex items-center justify-center shadow-xs">
+                <CheckCircle2 className="w-4 h-4" />
               </div>
             </div>
             <div className="flex items-end justify-end mt-3">
-              <span className="text-fs-22 font-semibold font-poppins text-text-primary leading-none">154</span>
+              <span className="text-[28px] font-bold font-poppins text-gray-900 leading-none">154</span>
             </div>
           </div>
 
           {/* Stat 2: Due Soon */}
-          <div className="card-base p-5 flex flex-col justify-between min-h-[135px] bg-[#FFF9E6] border-none shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+          <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[145px] bg-[#FEF9E2] border border-[#F5ECC4] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
             <div className="flex items-start justify-between">
-              <span className="text-fs-12 font-semibold text-gray-800 leading-tight">
+              <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">
                 Due<br />Soon
               </span>
-              <div className="w-7 h-7 rounded-full bg-[#EAB308] text-white flex items-center justify-center shadow-sm">
-                <Clock className="w-3.5 h-3.5" />
+              <div className="w-8 h-8 rounded-full bg-[#B2B042] text-white flex items-center justify-center shadow-xs">
+                <Clock className="w-4 h-4" />
               </div>
             </div>
             <div className="flex items-end justify-end mt-3">
-              <span className="text-fs-22 font-semibold font-poppins text-text-primary leading-none">98</span>
+              <span className="text-[28px] font-bold font-poppins text-gray-900 leading-none">98</span>
             </div>
           </div>
 
           {/* Stat 3: Unpaid Invoices */}
-          <div className="card-base p-5 flex flex-col justify-between min-h-[135px] bg-[#EAF8E6] border-none shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+          <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[145px] bg-[#E7F9E4] border border-[#D5F0D0] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
             <div className="flex items-start justify-between">
-              <span className="text-fs-12 font-semibold text-gray-800 leading-tight">
+              <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">
                 Unpaid<br />Invoices
               </span>
-              <div className="w-7 h-7 rounded-full bg-[#12A150] text-white flex items-center justify-center shadow-sm">
-                <AlertCircle className="w-3.5 h-3.5" />
+              <div className="w-8 h-8 rounded-full bg-[#62C25D] text-white flex items-center justify-center shadow-xs">
+                <AlertCircle className="w-4 h-4" />
               </div>
             </div>
             <div className="flex items-end justify-end mt-3">
-              <span className="text-fs-22 font-semibold font-poppins text-text-primary leading-none">154</span>
+              <span className="text-[28px] font-bold font-poppins text-gray-900 leading-none">154</span>
             </div>
           </div>
         </div>

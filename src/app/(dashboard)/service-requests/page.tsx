@@ -142,13 +142,20 @@ export default function ServiceRequestsPage() {
         {/* Left Column: 3 Vertical Stats Cards */}
         <div className="flex flex-col gap-3">
           {/* Stat 1: Total Service Request */}
-          <div className="card-base p-5 flex flex-col justify-between min-h-[135px] bg-[#E6F8FA] border-none shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+          <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[145px] bg-[#E2F8FA] border border-[#CDEEF2] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
             <div className="flex items-start justify-between">
-              <span className="text-fs-12 font-semibold text-gray-800 leading-tight">
+              <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">
                 Total<br />Service<br />Request
               </span>
-              <div className="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center shadow-sm">
-                <Car className="w-3.5 h-3.5" />
+              <div className="w-8 h-8 rounded-full bg-[#005C66] text-white flex items-center justify-center shadow-xs">
+                <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="9" />
+                  <circle cx="12" cy="12" r="3" />
+                  <line x1="12" y1="3" x2="12" y2="9" />
+                  <line x1="12" y1="15" x2="12" y2="21" />
+                  <line x1="3" y1="12" x2="9" y2="12" />
+                  <line x1="15" y1="12" x2="21" y2="12" />
+                </svg>
               </div>
             </div>
             <div className="flex items-end justify-between mt-3">
@@ -160,18 +167,18 @@ export default function ServiceRequestsPage() {
                   <Image src="/Avatar.png" alt="Avatar" width={20} height={20} className="object-cover" />
                 </div>
               </div>
-              <span className="text-fs-22 font-semibold font-poppins text-text-primary leading-none">154</span>
+              <span className="text-[28px] font-bold font-poppins text-gray-900 leading-none">154</span>
             </div>
           </div>
 
           {/* Stat 2: Active Service Request */}
-          <div className="card-base p-5 flex flex-col justify-between min-h-[135px] bg-[#EAF8E6] border-none shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+          <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[145px] bg-[#E7F9E4] border border-[#D5F0D0] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
             <div className="flex items-start justify-between">
-              <span className="text-fs-12 font-semibold text-gray-800 leading-tight">
+              <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">
                 Active<br />Service<br />Request
               </span>
-              <div className="w-7 h-7 rounded-full bg-[#12A150] text-white flex items-center justify-center shadow-sm">
-                <CheckCircle2 className="w-3.5 h-3.5" />
+              <div className="w-8 h-8 rounded-full bg-[#62C25D] text-white flex items-center justify-center shadow-xs">
+                <CheckCircle2 className="w-4 h-4" />
               </div>
             </div>
             <div className="flex items-end justify-between mt-3">
@@ -183,18 +190,18 @@ export default function ServiceRequestsPage() {
                   <Image src="/Avatar.png" alt="Avatar" width={20} height={20} className="object-cover" />
                 </div>
               </div>
-              <span className="text-fs-22 font-semibold font-poppins text-text-primary leading-none">98</span>
+              <span className="text-[28px] font-bold font-poppins text-gray-900 leading-none">98</span>
             </div>
           </div>
 
           {/* Stat 3: Pending Service Request */}
-          <div className="card-base p-5 flex flex-col justify-between min-h-[135px] bg-[#EAF8E6] border-none shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+          <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[145px] bg-[#E7F9E4] border border-[#D5F0D0] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
             <div className="flex items-start justify-between">
-              <span className="text-fs-12 font-semibold text-gray-800 leading-tight">
+              <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">
                 Pending<br />Service<br />Request
               </span>
-              <div className="w-7 h-7 rounded-full bg-[#12A150] text-white flex items-center justify-center shadow-sm">
-                <Clock className="w-3.5 h-3.5" />
+              <div className="w-8 h-8 rounded-full bg-[#62C25D] text-white flex items-center justify-center shadow-xs">
+                <Clock className="w-4 h-4" />
               </div>
             </div>
             <div className="flex items-end justify-between mt-3">
@@ -206,7 +213,7 @@ export default function ServiceRequestsPage() {
                   <Image src="/Avatar.png" alt="Avatar" width={20} height={20} className="object-cover" />
                 </div>
               </div>
-              <span className="text-fs-22 font-semibold font-poppins text-text-primary leading-none">154</span>
+              <span className="text-[28px] font-bold font-poppins text-gray-900 leading-none">154</span>
             </div>
           </div>
         </div>
