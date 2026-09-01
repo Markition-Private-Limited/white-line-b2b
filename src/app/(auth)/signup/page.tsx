@@ -217,9 +217,12 @@ export default function SignUpPage() {
                   onRightIconClick={() => setShowPassword(!showPassword)}
                 />
 
-                <Button type="submit" className="w-full h-10 text-fs-13 font-medium rounded-full mt-2 bg-primary text-white hover:bg-primary-dark shadow-sm flex items-center justify-center gap-2">
+                <Button
+                  type="submit"
+                  className="w-full h-10 text-[12px] font-medium rounded-full mt-2 bg-primary hover:bg-primary-dark text-white shadow-md shadow-primary/20 flex items-center justify-center gap-1.5 cursor-pointer"
+                >
                   Move to 2nd Step
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </Button>
               </div>
             )}
@@ -260,7 +263,7 @@ export default function SignUpPage() {
                     value={formData.companyAddress}
                     onChange={(e) => handleChange("companyAddress", e.target.value)}
                     placeholder="Enter registered address"
-                    className="w-full bg-input-bg border-none rounded-2xl px-4 py-2.5 text-fs-12 text-text-primary placeholder:text-input-placeholder focus:outline-none focus:ring-1 focus:ring-primary/20 resize-none"
+                    className="w-full bg-input-bg border-none rounded-2xl px-4 py-2.5 text-fs-12 text-text-primary placeholder:text-input-placeholder placeholder:font-light focus:outline-none focus:ring-1 focus:ring-primary/20 resize-none transition-all"
                   />
                 </div>
 
@@ -269,16 +272,16 @@ export default function SignUpPage() {
                     type="button"
                     variant="outline"
                     onClick={() => setStep(1)}
-                    className="flex-1 py-2.5 text-fs-12"
+                    className="flex-1 h-10 text-[12px] font-medium rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50 cursor-pointer"
                   >
                     Back
                   </Button>
                   <Button
                     type="submit"
-                    className="flex-1 py-2.5 text-fs-12 font-medium bg-primary text-white hover:bg-primary-dark flex items-center justify-center gap-2"
+                    className="flex-1 h-10 text-[12px] font-medium rounded-full bg-primary text-white hover:bg-primary-dark shadow-md shadow-primary/20 flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     Move to Last Step
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </Button>
                 </div>
               </div>
@@ -337,13 +340,13 @@ export default function SignUpPage() {
                     type="button"
                     variant="outline"
                     onClick={() => setStep(2)}
-                    className="flex-1 py-2.5 text-fs-12"
+                    className="flex-1 h-10 text-[12px] font-medium rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50 cursor-pointer"
                   >
                     Back
                   </Button>
                   <Button
                     type="submit"
-                    className="flex-1 py-2.5 text-fs-12 font-medium bg-primary text-white hover:bg-primary-dark"
+                    className="flex-1 h-10 text-[12px] font-medium rounded-full bg-primary text-white hover:bg-primary-dark shadow-md shadow-primary/20 cursor-pointer"
                   >
                     Submit Application
                   </Button>

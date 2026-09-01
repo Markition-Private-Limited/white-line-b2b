@@ -38,7 +38,7 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
           <input
             ref={ref}
             className={cn(
-              "w-full bg-input-bg border-none rounded-full h-[42px] text-fs-12 font-normal text-text-primary placeholder:text-input-placeholder placeholder:font-light focus:outline-none focus:ring-1 focus:ring-primary/20 transition-shadow",
+              "w-full bg-input-bg border-none rounded-full h-10 text-fs-12 font-normal text-text-primary placeholder:text-input-placeholder placeholder:font-light focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all",
               icon ? "pl-11" : "pl-4",
               rightIcon ? "pr-10" : "pr-4",
               error && "ring-1 ring-error",

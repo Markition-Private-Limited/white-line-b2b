@@ -173,10 +173,10 @@ export default function ForgotPasswordPage() {
 
               <Button
                 type="submit"
-                className="w-full h-10 text-fs-13 font-medium rounded-full mt-2 bg-primary text-white hover:bg-primary-dark shadow-sm flex items-center justify-center gap-2"
+                className="w-full h-10 text-[12px] font-medium rounded-full mt-2 bg-primary hover:bg-primary-dark text-white shadow-md shadow-primary/20 flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 Send OTP
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-3.5 h-3.5" />
               </Button>
 
               <div className="text-center pt-1">
@@ -236,10 +236,10 @@ export default function ForgotPasswordPage() {
 
               <Button
                 type="submit"
-                className="w-full h-10 text-fs-13 font-medium rounded-full mt-1 bg-primary text-white hover:bg-primary-dark flex items-center justify-center gap-2"
+                className="w-full h-10 text-[12px] font-medium rounded-full mt-1 bg-primary hover:bg-primary-dark text-white shadow-md shadow-primary/20 flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 Verify OTP
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-3.5 h-3.5" />
               </Button>
 
               <div className="text-center pt-1">
@@ -310,10 +310,10 @@ export default function ForgotPasswordPage() {
 
               <Button
                 type="submit"
-                className="w-full h-10 text-fs-13 font-medium rounded-full mt-2 bg-primary text-white hover:bg-primary-dark shadow-sm flex items-center justify-center gap-2"
+                className="w-full h-10 text-[12px] font-medium rounded-full mt-2 bg-primary hover:bg-primary-dark text-white shadow-md shadow-primary/20 flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 Reset Password
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-3.5 h-3.5" />
               </Button>
             </form>
           )}
