@@ -26,6 +26,7 @@ export interface DataTableProps<T> {
   headerClassName?: string;
   pagination?: PaginationProps;
   loading?: boolean;
+  emptyState?: React.ReactNode;
 }
 
 export function DataTable<T>({ 
@@ -33,9 +34,10 @@ export function DataTable<T>({
   columns, 
   onRowClick,
   className,
-  headerClassName = "bg-[#489196] text-white",
+  headerClassName = "bg-[#3D898F] text-white",
   pagination,
-  loading = false
+  loading = false,
+  emptyState,
 }: DataTableProps<T>) {
   // Using default values for presentation if not provided
   const {
@@ -47,16 +49,16 @@ export function DataTable<T>({
 
   // Dynamic padding based on column count
   const getPaddingClass = (cols: number) => {
-    if (cols <= 5) return "px-6 lg:px-10";
-    if (cols === 6) return "px-5 lg:px-8";
-    return "px-4 lg:px-6"; // For 7 or more columns
+    if (cols <= 5) return "px-5 lg:px-7";
+    if (cols === 6) return "px-4 lg:px-6";
+    return "px-3.5 lg:px-5"; // For 7 or more columns
   };
   const paddingClass = getPaddingClass(columns.length);
 
   return (
-    <div className={cn("card-lg flex flex-col bg-white overflow-hidden mt-1 shadow-sm border border-border flex-1 min-h-0", className)}>
+    <div className={cn("card-base flex flex-col bg-white overflow-hidden shadow-sm border border-gray-100 flex-1 min-h-0", className)}>
       <div className="w-full overflow-auto flex-1 scrollbar-thin">
-        <table className="w-full text-left border-collapse min-w-[1000px] lg:min-w-[850px]">
+        <table className="w-full text-left border-collapse min-w-[900px]">
           <thead className="sticky top-0 z-20">
             <tr className={headerClassName}>
               {columns.map((col, idx) => (
@@ -91,9 +93,13 @@ export function DataTable<T>({
                   colSpan={columns.length}
                   className="h-64 text-center align-middle"
                 >
-                  <div className="flex flex-col items-center justify-center py-12 text-gray-400 font-medium text-fs-13">
-                    <span>No records available</span>
-                  </div>
+                  {emptyState ? (
+                    emptyState
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-12 text-gray-400 font-medium text-fs-13">
+                      <span>No records available</span>
+                    </div>
+                  )}
                 </td>
               </tr>
             ) : (
@@ -131,29 +137,15 @@ export function DataTable<T>({
       </div>
 
       {/* Pagination Footer */}
-      <div className="border-t border-gray-100 p-4 px-5 flex flex-wrap lg:flex-nowrap items-center justify-between bg-white gap-y-3 lg:gap-y-0">
-        <div className="hidden lg:block text-fs-12 text-gray-500 order-3 lg:order-1 w-full lg:w-auto text-left lg:text-left mt-1 lg:mt-0">
+      <div className="border-t border-gray-100 p-3.5 px-5 flex flex-wrap lg:flex-nowrap items-center justify-between bg-white gap-y-3 lg:gap-y-0">
+        <div className="text-fs-12 text-gray-500 order-1">
           {totalItems === 0 || data.length === 0 ? (
-            <span>Showing <span className="font-semibold text-text-primary">0</span> Entities</span>
+            <span>Showing <span className="font-semibold text-text-primary">0</span> of <span className="font-semibold text-text-primary">0</span> results</span>
           ) : (
             <>
-              Showing <span className="font-semibold text-text-primary">{(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, totalItems)}</span> of <span className="font-semibold text-text-primary">{totalItems.toLocaleString()}</span> Entities
+              Showing <span className="font-semibold text-text-primary">{Math.min(data.length, itemsPerPage)}</span> of <span className="font-semibold text-text-primary">{totalItems.toLocaleString()}</span> results
             </>
           )}
-        </div>
-
-        <div className="order-1 lg:order-2 flex items-center lg:ml-5 lg:mr-auto relative">
-          <select 
-            value={itemsPerPage}
-            onChange={(e) => pagination?.onRowsChange?.(Number(e.target.value))}
-            className="appearance-none h-8 pl-3.5 pr-8 border border-gray-200 rounded-[12px] flex items-center text-fs-11 font-medium text-text-secondary hover:bg-gray-50 transition-colors focus:outline-none cursor-pointer bg-transparent"
-          >
-            <option value={10}>Rows: 10</option>
-            <option value={20}>Rows: 20</option>
-            <option value={50}>Rows: 50</option>
-            <option value={100}>Rows: 100</option>
-          </select>
-          <ChevronDown className="w-3.5 h-3.5 text-gray-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
 
         <div className="flex items-center gap-1 order-2 lg:order-3">

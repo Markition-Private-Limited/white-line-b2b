@@ -227,6 +227,20 @@ export default function ServiceRequestsPage() {
             data={paginatedRequests}
             columns={tableColumns}
             onRowClick={(row) => router.push(`/service-requests/${row.id.replace("#", "")}`)}
+            emptyState={
+              <div className="flex flex-col items-center justify-center py-16 gap-4">
+                <span className="text-fs-14 font-medium text-gray-500">No Request Found</span>
+                <Link href="/service-requests/create">
+                  <Button
+                    variant="outline"
+                    className="rounded-full py-2.5 px-6 text-fs-12 font-semibold text-primary border-primary/40 hover:bg-primary/5 flex items-center gap-1.5"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Create New Request
+                  </Button>
+                </Link>
+              </div>
+            }
             pagination={{
               currentPage: page,
               totalPages,

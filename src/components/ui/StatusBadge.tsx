@@ -19,34 +19,33 @@ export function getStatusStyle(status: string = ""): string {
     case "paid":
     case "available":
     case "resolved":
-      return "bg-[#e8f7f0] text-[#12a150]";
+      return "bg-[#D9F6E7] text-[#12A150]";
 
-    // Orange / Amber (In Progress / En Route / Arrived / Open / Expiring Soon / Pending Payment / Due Soon)
-    case "in_progress":
-    case "in_review":
-    case "review":
-    case "started":
-    case "en_route":
-    case "arrived":
+    // Orange / Amber (Pending / Open / Due / Expiring Soon)
+    case "pending":
     case "open":
-    case "expire_soon":
-    case "expiring_soon":
     case "pending_payment":
     case "due":
     case "due_soon":
     case "unpaid":
-      return "bg-[#fff0e6] text-[#ff6b00]";
+    case "expire_soon":
+    case "expiring_soon":
+      return "bg-[#FFEDE0] text-[#FF8A00]";
+
+    // Cyan / Blue (In Review / In Progress)
+    case "in_review":
+    case "review":
+    case "in_progress":
+    case "started":
+    case "en_route":
+    case "arrived":
+      return "bg-[#E0F2FE] text-[#0284C7]";
 
     // Olive / Muted Green (Assigned)
     case "assigned":
-      return "bg-[#f4f7e9] text-[#5b8c36]";
+      return "bg-[#F4F7E9] text-[#5B8C36]";
 
-    // Cyan / Teal (Pending / New Request)
-    case "pending":
-    case "new":
-      return "bg-[#e6f8fa] text-[#00b4d8]";
-
-    // Red / Danger (Cancelled / Rejected / Expired / Offline / Suspended / Inactive / Busy / Maintenance)
+    // Red / Danger (Cancelled / Rejected / Expired / Offline / Inactive)
     case "cancelled":
     case "canceled":
     case "rejected":
@@ -58,7 +57,7 @@ export function getStatusStyle(status: string = ""): string {
     case "maintenance":
     case "suspended":
     case "overdue":
-      return "bg-error/10 text-error";
+      return "bg-[#FEE2E2] text-[#EF4444]";
 
     default:
       return "bg-gray-100 text-gray-600";

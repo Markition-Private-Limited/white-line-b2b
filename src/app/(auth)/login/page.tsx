@@ -50,12 +50,16 @@ export default function LoginPage() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/60" />
 
-        {/* Top Brand */}
-        <div className="relative z-10 flex items-center gap-2.5">
-          <div className="w-8 h-8 relative">
-            <Image src="/logo.png" alt="Logo" width={32} height={32} className="object-contain invert" />
-          </div>
-          <span className="font-poppins font-bold text-fs-14 tracking-wide text-white">B2B Client Portal</span>
+        {/* Top Brand Logo */}
+        <div className="relative z-10 flex items-center">
+          <Image
+            src="/logo.png"
+            alt="WhiteLine B2B Client Portal"
+            width={160}
+            height={40}
+            className="object-contain"
+            priority
+          />
         </div>
 
         {/* Center/Bottom Content */}
@@ -80,9 +84,15 @@ export default function LoginPage() {
 
       {/* Right side - Login Form */}
       <div className="flex-1 flex flex-col bg-auth-bg relative h-full overflow-y-auto items-center justify-center p-5 sm:p-8">
-        {/* Subtle Watermark */}
-        <div className="absolute top-8 left-8 w-20 h-20 opacity-5 pointer-events-none hidden sm:block">
-          <Image src="/logo.png" alt="Watermark" width={80} height={80} className="object-contain" />
+        {/* Top left background logo watermark in right panel */}
+        <div className="absolute top-8 left-8 hidden sm:block">
+          <Image
+            src="/logo_back.png"
+            alt="Whiteline Watermark"
+            width={65}
+            height={65}
+            className="object-contain"
+          />
         </div>
 
         {/* Form Card */}
@@ -195,10 +205,10 @@ export default function LoginPage() {
             <Button
               type="submit"
               isLoading={isLoading}
-              className="w-full h-10 text-fs-13 font-medium rounded-full mt-1 bg-primary hover:bg-primary-dark text-white shadow-md shadow-primary/20 flex items-center justify-center gap-1.5"
+              className="w-full h-10 text-[12px] font-medium rounded-full mt-1 bg-primary hover:bg-primary-dark text-white shadow-md shadow-primary/20 flex items-center justify-center gap-1.5 cursor-pointer"
             >
               Login to Dashboard
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-3.5 h-3.5" />
             </Button>
           </form>
         </div>

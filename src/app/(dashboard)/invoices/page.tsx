@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import Image from "next/image";
 import {
   Clock,
   AlertCircle,
   Download,
   Building2,
   CheckCircle2,
+  Calendar,
 } from "lucide-react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Button } from "@/components/ui/Button";
@@ -239,8 +241,17 @@ export default function InvoicesPage() {
 
             {/* Company Info */}
             <div className="flex items-center gap-3 p-3 bg-gray-50/80 rounded-2xl border border-gray-100">
-              <div className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center shadow-xs">
-                <Building2 className="w-5 h-5 text-primary" />
+              <div className="w-11 h-11 rounded-xl bg-white border border-gray-200 flex items-center justify-center p-1 shadow-xs overflow-hidden">
+                <Image
+                  src="/company.png"
+                  alt="Company Logo"
+                  width={36}
+                  height={36}
+                  className="object-contain"
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = "none";
+                  }}
+                />
               </div>
               <div>
                 <h4 className="text-fs-12 font-bold text-text-primary">{selectedInvoice.companyName}</h4>
@@ -250,17 +261,23 @@ export default function InvoicesPage() {
 
             {/* Dates Grid */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 bg-gray-50/80 rounded-xl">
-                <span className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider block mb-1">
-                  CONTRACT PERIOD
-                </span>
-                <span className="text-fs-12 font-bold text-text-primary">Jan 01, 2024 — Dec 31, 2024</span>
+              <div className="p-3 bg-gray-50/80 rounded-xl space-y-1">
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                  <span className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider block">
+                    CONTRACT PERIOD
+                  </span>
+                </div>
+                <span className="text-fs-12 font-bold text-text-primary block pl-5">Jan 01, 2024 — Dec 31, 2024</span>
               </div>
-              <div className="p-3 bg-gray-50/80 rounded-xl">
-                <span className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider block mb-1">
-                  DUE DATE
-                </span>
-                <span className="text-fs-12 font-bold text-text-primary">{selectedInvoice.dueDate}</span>
+              <div className="p-3 bg-gray-50/80 rounded-xl space-y-1">
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                  <span className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider block">
+                    DUE DATE
+                  </span>
+                </div>
+                <span className="text-fs-12 font-bold text-text-primary block pl-5">{selectedInvoice.dueDate}</span>
               </div>
             </div>
 

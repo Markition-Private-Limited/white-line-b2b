@@ -58,12 +58,16 @@ export default function SignUpPage() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/60" />
 
-        {/* Top Brand */}
-        <div className="relative z-10 flex items-center gap-2.5">
-          <div className="w-8 h-8 relative">
-            <Image src="/logo.png" alt="Logo" width={32} height={32} className="object-contain invert" />
-          </div>
-          <span className="font-poppins font-bold text-fs-14 tracking-wide text-white">B2B Client Portal</span>
+        {/* Top Brand Logo */}
+        <div className="relative z-10 flex items-center">
+          <Image
+            src="/logo.png"
+            alt="WhiteLine B2B Client Portal"
+            width={160}
+            height={40}
+            className="object-contain"
+            priority
+          />
         </div>
 
         {/* Center/Bottom Content */}
@@ -88,6 +92,17 @@ export default function SignUpPage() {
 
       {/* Right Sign Up Card Container */}
       <div className="flex-1 flex flex-col bg-auth-bg relative h-full overflow-y-auto items-center justify-center p-5 sm:p-8">
+        {/* Top left background logo watermark in right panel */}
+        <div className="absolute top-8 left-8 hidden sm:block">
+          <Image
+            src="/logo_back.png"
+            alt="Whiteline Watermark"
+            width={65}
+            height={65}
+            className="object-contain"
+          />
+        </div>
+
         <div className="w-full max-w-[440px] bg-white rounded-[27px] p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/80 relative z-10">
           {/* Header */}
           <div className="mb-4">

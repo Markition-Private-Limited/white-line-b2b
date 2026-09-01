@@ -226,6 +226,15 @@ export default function DashboardPage() {
                   );
                 })}
               </div>
+
+              {/* Bottom Scroll/Timeline Slider Indicator */}
+              <div className="flex items-center justify-between px-2 pt-2 text-gray-300">
+                <span className="text-[10px] select-none">◄</span>
+                <div className="flex-1 mx-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="w-1/3 h-full bg-gray-300 rounded-full" />
+                </div>
+                <span className="text-[10px] select-none">►</span>
+              </div>
             </div>
           </div>
         </div>

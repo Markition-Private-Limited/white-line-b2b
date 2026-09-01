@@ -36,6 +36,7 @@ const mockComplaints: ComplaintItem[] = [
 ];
 
 export default function ComplaintsPage() {
+  const [complaints, setComplaints] = useState<ComplaintItem[]>(mockComplaints);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [dateFilter, setDateFilter] = useState<DatePickerValue | null>(null);
@@ -44,7 +45,7 @@ export default function ComplaintsPage() {
   const [limit, setLimit] = useState(10);
 
   const filteredComplaints = useMemo(() => {
-    return mockComplaints.filter((item) => {
+    return complaints.filter((item) => {
       const q = search.toLowerCase().trim();
       const matchesSearch =
         !q ||
@@ -263,10 +264,13 @@ export default function ComplaintsPage() {
             <div className="flex items-center justify-end pt-2 border-t border-gray-100">
               <Button
                 variant="outline"
-                onClick={() => setSelectedComplaint(null)}
-                className="py-2 px-5 text-fs-11 text-error border-error/20 hover:bg-error/5"
+                onClick={() => {
+                  setComplaints(complaints.filter((c) => c.id !== selectedComplaint.id));
+                  setSelectedComplaint(null);
+                }}
+                className="py-2.5 px-6 text-fs-12 font-medium text-error border-error/30 hover:bg-error/5 rounded-full"
               >
-                Close Details
+                Delete Complaint
               </Button>
             </div>
           </div>
