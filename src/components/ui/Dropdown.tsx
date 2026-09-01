@@ -40,33 +40,33 @@ export function Dropdown({ options, defaultValue, onSelect, className, buttonCla
   };
 
   return (
-    <div className={cn("relative min-w-[130px]", isOpen ? "z-50" : "z-20", className)} ref={dropdownRef}>
+    <div className={cn("relative min-w-[125px]", isOpen ? "z-[999]" : "z-20", className)} ref={dropdownRef}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "w-full h-[39px] px-4 transition-colors flex items-center justify-between gap-1.5 text-fs-12 font-medium text-text-secondary border-none normal-case tracking-normal cursor-pointer",
+          "w-full h-[38px] px-3.5 transition-colors flex items-center justify-between gap-1.5 text-[11px] font-medium text-gray-700 border-none normal-case tracking-normal cursor-pointer select-none",
           isOpen ? "rounded-t-xl bg-[#E6E6E6]" : "rounded-full bg-background-panel hover:bg-gray-100",
           buttonClassName
         )}
       >
-        <span>{selected}</span>
-        <ChevronDown className={cn("w-3.5 h-3.5 transition-transform duration-200", isOpen && "rotate-180")} />
+        <span className="truncate">{selected}</span>
+        <ChevronDown className={cn("w-3 h-3 transition-transform duration-200 text-gray-500 shrink-0", isOpen && "rotate-180")} />
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 w-full min-w-max bg-white rounded-b-xl shadow-[0px_4px_20px_0px_rgba(0,0,0,0.12)] z-50 max-h-[160px] overflow-y-auto flex flex-col border border-gray-100 border-t-0 scrollbar-thin">
+        <div className="absolute top-full left-0 w-full min-w-[140px] bg-white rounded-b-xl shadow-[0px_8px_30px_rgba(0,0,0,0.12)] z-[999] max-h-[180px] overflow-y-auto flex flex-col border border-gray-100 border-t-0 scrollbar-thin">
           {options.map((option) => (
             <button
               key={option}
               type="button"
               onClick={() => handleSelect(option)}
               className={cn(
-                "w-full text-left px-4 py-2 text-fs-12 hover:bg-gray-50 transition-colors cursor-pointer",
-                selected === option ? "text-primary font-medium bg-primary/5" : "text-text-secondary"
+                "w-full text-left px-3.5 py-2 text-[11px] hover:bg-gray-50 transition-colors cursor-pointer",
+                selected === option ? "text-primary font-semibold bg-primary/5" : "text-gray-600"
               )}
             >
-              <span className="normal-case text-fs-12 tracking-normal font-medium">{option}</span>
+              <span className="normal-case text-[11px] tracking-normal">{option}</span>
             </button>
           ))}
         </div>

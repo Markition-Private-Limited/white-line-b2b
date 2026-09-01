@@ -223,6 +223,7 @@ export default function InvoicesPage() {
       <Modal
         isOpen={!!selectedInvoice}
         onClose={() => setSelectedInvoice(null)}
+        showCloseButton={false}
         maxWidth="max-w-md"
         className="p-6 md:p-8"
       >

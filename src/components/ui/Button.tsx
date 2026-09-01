@@ -21,11 +21,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
               variant === "secondary",
             "text-primary hover:underline active:text-primary-dark":
               variant === "tertiary",
-            "border border-gray-200 bg-white text-text-secondary hover:bg-gray-50 hover:text-text-primary":
+            "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-400 font-medium shadow-2xs":
               variant === "outline",
-            "text-text-secondary hover:bg-gray-100 hover:text-text-primary":
+            "text-gray-700 hover:bg-gray-100 hover:text-gray-900":
               variant === "ghost",
-            "bg-error/10 text-error hover:bg-error/20 border border-error/20":
+            "border border-[#EA5B5B] bg-white text-[#EA5B5B] hover:bg-red-50 hover:border-red-400 font-medium shadow-2xs":
               variant === "danger",
           },
           {

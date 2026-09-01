@@ -153,17 +153,17 @@ export function PageToolbar({
   children
 }: PageToolbarProps) {
   return (
-    <div className={cn("flex items-center justify-between bg-white rounded-full p-1.5 mt-1 shadow-[0px_2px_10px_0px_rgba(0,0,0,0.02)] border border-gray-50 relative z-30", className)}>
+    <div className={cn("flex items-center justify-between bg-white rounded-full p-1.5 mt-1 shadow-[0px_2px_10px_0px_rgba(0,0,0,0.02)] border border-gray-50 relative z-40", className)}>
       <div className="flex-1 min-w-[200px] max-w-[383px] relative shrink-0 sm:shrink">
-        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary">
-          <Search className="w-[15px] h-[15px]" />
+        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+          <Search className="w-3.5 h-3.5" />
         </div>
         <input
           type="text"
           placeholder={searchPlaceholder}
           value={searchValue}
           onChange={(e) => onSearch?.(e.target.value)}
-          className="w-full h-[39px] bg-background-panel border-none rounded-full pl-8 pr-3.5 text-fs-12 text-text-primary placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-primary/20 transition-colors"
+          className="w-full h-[38px] bg-background-panel border-none rounded-full pl-8 pr-3.5 text-[11px] text-gray-800 placeholder:text-gray-400 placeholder:text-[11px] focus:outline-none focus:ring-1 focus:ring-primary/20 transition-colors"
         />
       </div>
 

@@ -101,12 +101,12 @@ export function DatePickerDropdown({
   };
 
   return (
-    <div className={cn("relative min-w-[140px]", isOpen ? "z-50" : "z-20", className)} ref={dropdownRef}>
+    <div className={cn("relative min-w-[135px]", isOpen ? "z-[999]" : "z-20", className)} ref={dropdownRef}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "w-full h-[39px] px-3.5 transition-colors flex items-center justify-between gap-2 text-fs-12 font-medium text-text-secondary border-none normal-case tracking-normal shrink-0 cursor-pointer",
+          "w-full h-[38px] px-3.5 transition-colors flex items-center justify-between gap-1.5 text-[11px] font-medium text-gray-700 border-none normal-case tracking-normal shrink-0 cursor-pointer select-none",
           isOpen ? "rounded-t-xl bg-[#E6E6E6]" : "rounded-full bg-background-panel hover:bg-gray-100",
           buttonClassName
         )}
@@ -115,11 +115,11 @@ export function DatePickerDropdown({
           <Calendar className="w-3.5 h-3.5 text-gray-500 shrink-0" />
           <span className="truncate">{getDisplayButtonText()}</span>
         </div>
-        <ChevronDown className={cn("w-3.5 h-3.5 transition-transform duration-200 text-gray-500 shrink-0", isOpen && "rotate-180")} />
+        <ChevronDown className={cn("w-3 h-3 transition-transform duration-200 text-gray-500 shrink-0", isOpen && "rotate-180")} />
       </button>
 
       {isOpen && (
-        <div className="absolute top-full right-0 lg:left-0 min-w-[240px] bg-white rounded-b-xl rounded-tl-xl shadow-[0px_6px_24px_0px_rgba(0,0,0,0.12)] z-50 overflow-hidden flex flex-col border border-gray-100 border-t-0 p-1.5">
+        <div className="absolute top-full right-0 lg:left-0 min-w-[230px] bg-white rounded-b-xl rounded-tl-xl shadow-[0px_8px_30px_rgba(0,0,0,0.14)] z-[999] overflow-hidden flex flex-col border border-gray-100 border-t-0 p-1.5">
           {!isCustomMode ? (
             <div className="flex flex-col py-1">
               {PRESET_OPTIONS.map((option) => {
@@ -130,8 +130,8 @@ export function DatePickerDropdown({
                     type="button"
                     onClick={() => handleSelectPreset(option)}
                     className={cn(
-                      "w-full text-left px-3.5 py-2 text-fs-12 rounded-lg transition-colors flex items-center justify-between cursor-pointer",
-                      isSelected ? "text-primary font-semibold bg-primary/5" : "text-text-secondary hover:bg-gray-50"
+                      "w-full text-left px-3 py-1.5 text-[11px] rounded-lg transition-colors flex items-center justify-between cursor-pointer",
+                      isSelected ? "text-primary font-semibold bg-primary/5" : "text-gray-600 hover:bg-gray-50"
                     )}
                   >
                     <span>{option === "All" ? "All Dates" : option}</span>
