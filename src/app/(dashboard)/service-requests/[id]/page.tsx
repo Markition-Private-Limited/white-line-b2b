@@ -141,13 +141,13 @@ export default function ServiceDetailPage() {
       {/* Action Button */}
       {status !== "cancelled" && (
         <div className="flex items-center justify-end pt-2">
-          <Button
-            variant="danger"
+          <button
+            type="button"
             onClick={() => setCancelModalOpen(true)}
-            className="py-2.5 px-6 text-fs-12 font-medium rounded-full"
+            className="px-6 py-2 rounded-full text-xs font-semibold border border-[#EA5B5B] text-[#EA5B5B] bg-white hover:bg-red-50 shadow-xs transition-colors cursor-pointer"
           >
             Cancel Request
-          </Button>
+          </button>
         </div>
       )}
 
@@ -159,7 +159,7 @@ export default function ServiceDetailPage() {
         className="text-center p-8"
       >
         <div className="flex flex-col items-center">
-          <div className="w-14 h-14 rounded-full bg-success/10 text-success flex items-center justify-center mb-4">
+          <div className="w-14 h-14 rounded-full bg-[#12A150] text-white flex items-center justify-center mb-4 shadow-md shadow-[#12A150]/20">
             <CheckCircle2 className="w-8 h-8" />
           </div>
 
@@ -174,17 +174,17 @@ export default function ServiceDetailPage() {
           <div className="flex items-center gap-3 w-full">
             <Button
               onClick={() => setCancelModalOpen(false)}
-              className="flex-1 py-2.5 text-fs-12 font-medium bg-primary text-white hover:bg-primary-dark"
+              className="flex-1 py-2.5 text-xs font-semibold rounded-full bg-[#005C66] text-white hover:bg-[#004b54] cursor-pointer"
             >
               Keep Request
             </Button>
-            <Button
-              variant="outline"
+            <button
+              type="button"
               onClick={handleConfirmCancel}
-              className="flex-1 py-2.5 text-fs-12 font-medium text-error border-error/20 hover:bg-error/5"
+              className="flex-1 py-2.5 text-xs font-semibold rounded-full border border-[#EA5B5B] text-[#EA5B5B] hover:bg-red-50 transition-colors cursor-pointer"
             >
               Yes, Cancel
-            </Button>
+            </button>
           </div>
         </div>
       </Modal>

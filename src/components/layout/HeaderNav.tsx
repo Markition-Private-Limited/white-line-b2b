@@ -79,27 +79,15 @@ export function HeaderNav() {
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
         <div className="max-w-[1440px] mx-auto px-4 lg:px-8 h-18 flex items-center justify-between gap-4">
           {/* Left: Brand Logo */}
-          <Link href="/" className="flex items-center gap-3 shrink-0">
-            <div className="w-9 h-9 relative flex items-center justify-center">
-              <Image
-                src="/logo.png"
-                alt="WhiteLine Logo"
-                width={36}
-                height={36}
-                className="object-contain"
-                onError={(e) => {
-                  (e.target as HTMLElement).style.display = "none";
-                }}
-              />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-poppins font-bold text-base text-gray-900 leading-tight">
-                White line
-              </span>
-              <span className="text-[9px] font-bold tracking-widest text-gray-400 uppercase leading-none mt-0.5">
-                B2B PORTAL
-              </span>
-            </div>
+          <Link href="/" className="flex items-center shrink-0">
+            <Image
+              src="/dashboard_logo.png"
+              alt="WhiteLine B2B Portal Logo"
+              width={135}
+              height={36}
+              className="h-8 w-auto object-contain"
+              priority
+            />
           </Link>
 
           {/* Center: Navigation Links */}
