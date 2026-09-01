@@ -1,0 +1,65 @@
+@theme inline {
+  --color-primary: #005C66;
+  --color-primary-light: #1A9DAB;
+  --color-primary-dark: #00464E;
+  --color-primary-50: #ECF3F4;
+  --color-primary-100: #D9E8EA;
+  --color-primary-200: #C2DFE2;
+
+  --color-secondary: #10b981;
+  --color-accent: #f59e0b;
+
+  --color-success: #10b981;
+  --color-error: #FF383C;
+
+  /* Grays */
+  --color-gray-900: #1A1C1C;
+  --color-gray-800: #2D2D2D;
+  --color-gray-600: #4C595A;
+  --color-gray-500: #5E5E5E;
+  --color-gray-400: #828282;
+  --color-gray-300: #989898;
+  --color-gray-100: #F3F4F6;
+  --color-gray-50: #F3F3F3;
+
+  /* Cyans */
+  --color-cyan-500: #00C3D0;
+  --color-cyan-400: #00C0E8;
+  --color-cyan-300: #71DBE7;
+
+  /* Text Semantic */
+  --color-text-primary: #1A1C1C;
+  --color-text-secondary: #4C595A;
+  --color-text-tertiary: #989898;
+  --color-gray-text: #828282;
+
+  --color-border: #e2e8f0;
+  --color-background: #f8fafc;
+  --color-background-panel: #f3f3f3;
+  --color-surface: #ffffff;
+
+  --color-auth-bg: #eaf3f5;
+
+  /* Inputs */
+  --color-input-bg: #f6f6f6;
+  --color-input-text: #a4a4a4;
+  --color-input-placeholder: #a4a4a4;
+
+  /* Data Visualization */
+  --color-chart-1: #064e4b;
+  --color-chart-2: #10b981;
+  --color-chart-3: #f59e0b;
+  --color-chart-4: #ef4444;
+}
+
+:root {
+  --background: var(--color-background);
+  --foreground: var(--color-text-primary);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}

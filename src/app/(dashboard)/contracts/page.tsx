@@ -28,54 +28,56 @@ export default function ContractsPage() {
   );
 
   return (
-    <div className="space-y-6">
-      {/* Top Header Row */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-4">
+      {/* Top Header Row with Search Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold font-poppins text-gray-900">Contract Documents</h1>
-          <p className="text-xs text-gray-400">Access and download your corporate agreements and policies</p>
+          <h1 className="h1 font-bold text-text-primary">Contract Documents</h1>
+          <p className="body-2 text-gray-text">Access and download your corporate agreements and policies</p>
         </div>
 
-        <div className="relative w-full sm:w-72">
-          <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search documents..."
-            className="w-full bg-white border border-gray-200 rounded-full pl-10 pr-4 py-2 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#005C66]"
-          />
+        <div className="relative w-full sm:w-80 bg-white rounded-full p-1 shadow-[0px_2px_10px_0px_rgba(0,0,0,0.02)] border border-gray-50">
+          <div className="relative flex items-center">
+            <Search className="w-3.5 h-3.5 text-text-secondary absolute left-3.5 pointer-events-none" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search documents..."
+              className="w-full h-[37px] bg-background-panel border-none rounded-full pl-9 pr-3.5 text-fs-12 text-text-primary placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-primary/20 transition-colors"
+            />
+          </div>
         </div>
       </div>
 
       {/* Grid of Document Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pt-1">
         {filteredContracts.map((doc) => (
           <div
             key={doc.id}
-            className="bg-white rounded-[24px] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-gray-100 flex flex-col justify-between hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:border-[#005C66]/20 transition-all duration-200 group"
+            className="card-base p-5 flex flex-col justify-between hover:shadow-md transition-all duration-200 group min-h-[170px]"
           >
             {/* Top Row: PDF Badge & Download Button */}
-            <div className="flex items-center justify-between mb-8">
-              <div className="w-11 h-11 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center border border-red-100/60 shadow-xs">
-                <FileText className="w-6 h-6 stroke-[1.5]" />
+            <div className="flex items-center justify-between mb-6">
+              <div className="w-10 h-10 rounded-2xl bg-error/10 text-error flex items-center justify-center border border-error/20 shadow-xs">
+                <FileText className="w-5 h-5 stroke-[1.5]" />
               </div>
 
               <button
                 type="button"
-                className="w-8 h-8 rounded-full bg-gray-50 text-gray-500 hover:bg-[#005C66] hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full bg-background-panel text-text-secondary hover:bg-primary hover:text-white flex items-center justify-center transition-colors cursor-pointer"
                 title="Download PDF"
               >
-                <Download className="w-4 h-4" />
+                <Download className="w-3.5 h-3.5" />
               </button>
             </div>
 
             {/* Bottom Content */}
-            <div className="space-y-1.5">
-              <h3 className="text-sm font-bold font-poppins text-gray-900 leading-snug group-hover:text-[#005C66] transition-colors">
+            <div className="space-y-1">
+              <h3 className="text-fs-13 font-bold font-poppins text-text-primary leading-snug group-hover:text-primary transition-colors line-clamp-1">
                 {doc.title}
               </h3>
-              <p className="text-[11px] text-gray-400">
+              <p className="text-fs-10 text-gray-400">
                 Uploaded: {doc.uploadedDate} <span className="mx-1">•</span> {doc.fileSize}
               </p>
             </div>

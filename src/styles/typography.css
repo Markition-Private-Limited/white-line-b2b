@@ -1,0 +1,65 @@
+@theme inline {
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-heading: var(--font-poppins), system-ui, sans-serif;
+
+  --text-fs-6: 6px;
+  --text-fs-8: 8px;
+  --text-fs-9: 9px;
+  --text-fs-10: 10px;
+  --text-fs-11: 11px;
+  --text-fs-12: 12px;
+  --text-fs-13: 13px;
+  --text-fs-14: 14px;
+  --text-fs-15: 15px;
+  --text-fs-17: 17px;
+  --text-fs-20: 20px;
+  --text-fs-22: 22px;
+  --text-fs-27: 27px;
+  --text-fs-34: 34px;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+@layer utilities {
+  /* Headings (Poppins) */
+  .h1 {
+    font-family: var(--font-heading);
+    @apply text-fs-27 leading-tight;
+  }
+  .h2 {
+    font-family: var(--font-heading);
+    @apply text-fs-20 leading-snug;
+  }
+  .h3 {
+    font-family: var(--font-heading);
+    @apply text-fs-15 leading-normal;
+  }
+  
+  /* Body Texts (Inter) */
+  .body-1 {
+    font-family: var(--font-sans);
+    @apply text-fs-14 leading-relaxed;
+  }
+  .body-2 {
+    font-family: var(--font-sans);
+    @apply text-fs-12 leading-relaxed;
+  }
+  .body-3 {
+    font-family: var(--font-sans);
+    @apply text-fs-10 leading-normal;
+  }
+  .caption {
+    font-family: var(--font-sans);
+    @apply text-fs-10 leading-tight;
+  }
+  .text-mini {
+    font-family: var(--font-sans);
+    @apply text-fs-9 leading-tight;
+  }
+  .text-micro {
+    font-family: var(--font-sans);
+    @apply text-fs-9 leading-tight;
+  }
+}

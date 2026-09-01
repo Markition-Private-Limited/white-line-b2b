@@ -1,33 +1,39 @@
-"use client";
-
 import React from "react";
 import { cn } from "@/utils/cn";
 
 export interface ToggleProps {
   checked: boolean;
-  onChange: (checked: boolean) => void;
+  onChange?: (checked: boolean) => void;
+  disabled?: boolean;
   label?: string;
   className?: string;
 }
 
-export function Toggle({ checked, onChange, label, className }: ToggleProps) {
+export function Toggle({ checked, onChange, disabled = false, label, className }: ToggleProps) {
   return (
-    <label className={cn("inline-flex items-center gap-2.5 cursor-pointer select-none", className)}>
-      <div
-        onClick={() => onChange(!checked)}
-        className={cn(
-          "w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ease-in-out cursor-pointer",
-          checked ? "bg-[#12A150]" : "bg-gray-300"
-        )}
+    <div className={cn("inline-flex items-center gap-2", className)}>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        disabled={disabled}
+        onClick={() => onChange?.(!checked)}
+        className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${
+          checked ? 'bg-[#42b95b]' : 'bg-[#ea5b5b]'
+        }`}
       >
-        <div
-          className={cn(
-            "bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ease-in-out",
-            checked ? "translate-x-5" : "translate-x-0"
-          )}
+        <span
+          aria-hidden="true"
+          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+            checked ? 'translate-x-4' : 'translate-x-0'
+          }`}
         />
-      </div>
-      {label && <span className={cn("text-xs font-semibold", checked ? "text-[#12A150]" : "text-gray-500")}>{label}</span>}
-    </label>
+      </button>
+      {label && (
+        <span className="text-fs-12 font-medium text-text-primary select-none cursor-pointer" onClick={() => !disabled && onChange?.(!checked)}>
+          {label}
+        </span>
+      )}
+    </div>
   );
 }

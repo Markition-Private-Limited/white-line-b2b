@@ -24,8 +24,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${poppins.variable} h-full antialiased`}>
-      <body className="h-full flex flex-col bg-background text-foreground font-sans">
+    <html lang="en" className={`${inter.variable} ${poppins.variable} h-full antialiased overflow-hidden`}>
+      <body className="h-full flex flex-col bg-background text-foreground font-sans overflow-hidden">
         {children}
       </body>
     </html>
