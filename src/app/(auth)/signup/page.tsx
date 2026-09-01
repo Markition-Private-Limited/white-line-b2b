@@ -63,9 +63,9 @@ export default function SignUpPage() {
           <Image
             src="/logo.png"
             alt="WhiteLine B2B Client Portal"
-            width={160}
-            height={40}
-            className="object-contain"
+            width={220}
+            height={55}
+            className="w-[210px] h-auto object-contain"
             priority
           />
         </div>
@@ -97,9 +97,9 @@ export default function SignUpPage() {
           <Image
             src="/logo_back.png"
             alt="Whiteline Watermark"
-            width={65}
-            height={65}
-            className="object-contain"
+            width={90}
+            height={90}
+            className="w-[85px] h-auto object-contain"
           />
         </div>
 
