@@ -186,11 +186,11 @@ export default function SignUpPage() {
                 />
 
                 <div>
-                  <label className="text-fs-10 font-semibold text-gray-text uppercase tracking-wider ml-1 mb-1.5 block">
+                  <label className="text-[10px] font-semibold text-gray-text uppercase tracking-wider ml-1 mb-1.5 block">
                     PHONE NUMBER
                   </label>
                   <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1 bg-input-bg rounded-full px-3.5 h-[42px] text-fs-12 font-semibold text-text-primary shrink-0">
+                    <div className="flex items-center gap-1 bg-input-bg rounded-full px-3.5 h-10 text-[12px] font-semibold text-text-primary shrink-0">
                       <span>🇸🇦</span>
                       <span>+966</span>
                     </div>
@@ -200,7 +200,7 @@ export default function SignUpPage() {
                       value={formData.phone}
                       onChange={(e) => handleChange("phone", e.target.value)}
                       placeholder="000000000"
-                      className="w-full bg-input-bg border-none rounded-full h-[42px] px-4 text-fs-12 text-text-primary placeholder:text-input-placeholder focus:outline-none focus:ring-1 focus:ring-primary/20"
+                      className="w-full bg-input-bg border-none rounded-full h-10 px-4 text-[12px] font-normal text-text-primary placeholder:text-input-placeholder placeholder:font-light placeholder:text-[12px] focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all"
                     />
                   </div>
                 </div>
@@ -254,7 +254,7 @@ export default function SignUpPage() {
                 />
 
                 <div className="space-y-1">
-                  <label className="text-fs-10 font-semibold text-gray-text uppercase tracking-wider ml-1 mb-1.5 block">
+                  <label className="text-[10px] font-semibold text-gray-text uppercase tracking-wider ml-1 mb-1.5 block">
                     COMPANY ADDRESS
                   </label>
                   <textarea
@@ -263,7 +263,7 @@ export default function SignUpPage() {
                     value={formData.companyAddress}
                     onChange={(e) => handleChange("companyAddress", e.target.value)}
                     placeholder="Enter registered address"
-                    className="w-full bg-input-bg border-none rounded-2xl px-4 py-2.5 text-fs-12 text-text-primary placeholder:text-input-placeholder placeholder:font-light focus:outline-none focus:ring-1 focus:ring-primary/20 resize-none transition-all"
+                    className="w-full bg-input-bg border-none rounded-2xl px-4 py-2.5 text-[12px] font-normal text-text-primary placeholder:text-input-placeholder placeholder:font-light placeholder:text-[12px] focus:outline-none focus:ring-1 focus:ring-primary/20 resize-none transition-all"
                   />
                 </div>
 

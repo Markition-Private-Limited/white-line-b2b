@@ -192,14 +192,14 @@ export default function ForgotPasswordPage() {
           {step === 2 && (
             <form onSubmit={handleVerifyOtp} className="space-y-4 animate-in fade-in text-center">
               <div>
-                <h3 className="h2 font-medium text-text-primary mb-1">OTP Verification</h3>
-                <p className="body-2 text-gray-text">
+                <h3 className="text-fs-16 font-bold font-poppins text-text-primary mb-1">OTP Verification</h3>
+                <p className="text-[11px] text-gray-text">
                   Enter the verification code sent to your email address
                 </p>
               </div>
 
               {/* 6 Digit OTP Input Boxes */}
-              <div className="flex items-center justify-center gap-2 pt-2">
+              <div className="flex items-center justify-center gap-1.5 pt-1">
                 {otp.map((digit, idx) => (
                   <input
                     key={idx}
@@ -212,7 +212,7 @@ export default function ForgotPasswordPage() {
                     value={digit}
                     onChange={(e) => handleOtpChange(idx, e.target.value)}
                     onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                    className="w-10 h-11 text-center text-fs-17 font-bold bg-input-bg border-none rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all text-text-primary"
+                    className="w-9 h-10 text-center text-[13px] font-semibold bg-input-bg border-none rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all text-text-primary"
                   />
                 ))}
               </div>
@@ -220,7 +220,7 @@ export default function ForgotPasswordPage() {
               {/* Resend Timer */}
               <div className="pt-1">
                 {timer > 0 ? (
-                  <p className="text-fs-11 text-gray-400">
+                  <p className="text-fs-10 text-gray-400">
                     Resend code in <span className="font-semibold text-text-primary">00:{timer < 10 ? `0${timer}` : timer}</span>
                   </p>
                 ) : (
@@ -259,8 +259,8 @@ export default function ForgotPasswordPage() {
           {step === 3 && (
             <form onSubmit={handleResetPassword} className="space-y-4 animate-in fade-in">
               <div>
-                <h3 className="h2 font-medium text-text-primary mb-1">Create New Password</h3>
-                <p className="body-2 text-gray-text">
+                <h3 className="text-fs-16 font-bold font-poppins text-text-primary mb-1">Create New Password</h3>
+                <p className="text-[11px] text-gray-text">
                   Your new password must be different from your previous password to ensure maximum security.
                 </p>
               </div>
