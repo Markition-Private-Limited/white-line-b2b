@@ -77,7 +77,7 @@ export function HeaderNav() {
   return (
     <>
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
-        <div className="max-w-[1440px] mx-auto px-4 lg:px-8 h-18 flex items-center justify-between gap-4">
+        <div className="max-w-[1440px] mx-auto px-0 lg:px-0 h-18 flex items-center justify-between gap-4">
           {/* Left: Brand Logo */}
           <Link href="/" className="flex items-center shrink-0">
             <Image

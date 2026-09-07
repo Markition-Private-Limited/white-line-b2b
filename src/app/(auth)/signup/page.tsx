@@ -115,24 +115,24 @@ export default function SignUpPage() {
           </div>
 
           {/* Stepper Progress Indicator */}
-          <div className="flex items-center justify-between mb-5 relative">
-            <div className="absolute top-4 left-6 right-6 h-0.5 bg-gray-100 -z-0" />
+          <div className="flex items-center justify-between mb-4 relative px-4">
+            <div className="absolute top-3 left-8 right-8 h-[1.5px] bg-gray-100 -z-0" />
             <div
-              className="absolute top-4 left-6 h-0.5 bg-primary -z-0 transition-all duration-300"
-              style={{ width: step === 1 ? "0%" : step === 2 ? "50%" : "90%" }}
+              className="absolute top-3 left-8 h-[1.5px] bg-primary -z-0 transition-all duration-300"
+              style={{ width: step === 1 ? "0%" : step === 2 ? "50%" : "88%" }}
             />
 
             {/* Step 1 */}
             <div className="flex flex-col items-center gap-1 z-10">
               <div
                 className={cn(
-                  "w-7 h-7 rounded-full flex items-center justify-center text-fs-10 font-bold transition-colors",
-                  step >= 1 ? "bg-primary text-white" : "bg-gray-100 text-gray-400"
+                  "w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold transition-colors",
+                  step >= 1 ? "bg-primary text-white ring-2 ring-primary/15" : "bg-gray-100 text-gray-400"
                 )}
               >
                 01
               </div>
-              <span className={cn("text-fs-9 font-semibold", step >= 1 ? "text-primary" : "text-gray-400")}>
+              <span className={cn("text-[9px] font-medium tracking-tight", step >= 1 ? "text-primary font-semibold" : "text-gray-400")}>
                 Personal
               </span>
             </div>
@@ -141,13 +141,13 @@ export default function SignUpPage() {
             <div className="flex flex-col items-center gap-1 z-10">
               <div
                 className={cn(
-                  "w-7 h-7 rounded-full flex items-center justify-center text-fs-10 font-bold transition-colors",
-                  step >= 2 ? "bg-primary text-white" : "bg-gray-100 text-gray-400"
+                  "w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold transition-colors",
+                  step >= 2 ? "bg-primary text-white ring-2 ring-primary/15" : "bg-gray-100 text-gray-400"
                 )}
               >
                 02
               </div>
-              <span className={cn("text-fs-9 font-semibold", step >= 2 ? "text-primary" : "text-gray-400")}>
+              <span className={cn("text-[9px] font-medium tracking-tight", step >= 2 ? "text-primary font-semibold" : "text-gray-400")}>
                 Company
               </span>
             </div>
@@ -156,13 +156,13 @@ export default function SignUpPage() {
             <div className="flex flex-col items-center gap-1 z-10">
               <div
                 className={cn(
-                  "w-7 h-7 rounded-full flex items-center justify-center text-fs-10 font-bold transition-colors",
-                  step >= 3 ? "bg-primary text-white" : "bg-gray-100 text-gray-400"
+                  "w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold transition-colors",
+                  step >= 3 ? "bg-primary text-white ring-2 ring-primary/15" : "bg-gray-100 text-gray-400"
                 )}
               >
                 03
               </div>
-              <span className={cn("text-fs-9 font-semibold", step >= 3 ? "text-primary" : "text-gray-400")}>
+              <span className={cn("text-[9px] font-medium tracking-tight", step >= 3 ? "text-primary font-semibold" : "text-gray-400")}>
                 Preferences
               </span>
             </div>
@@ -172,8 +172,8 @@ export default function SignUpPage() {
             {/* Step 1: Personal Profile */}
             {step === 1 && (
               <div className="space-y-3 animate-in fade-in">
-                <h4 className="text-fs-11 font-bold text-text-primary uppercase tracking-wider">
-                  Step#1 Personal Profile
+                <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                  Step#1 · Personal Profile
                 </h4>
 
                 <FormInput
@@ -230,8 +230,8 @@ export default function SignUpPage() {
             {/* Step 2: Company Details */}
             {step === 2 && (
               <div className="space-y-3 animate-in fade-in">
-                <h4 className="text-fs-11 font-bold text-text-primary uppercase tracking-wider">
-                  Step#2 Company Details
+                <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                  Step#2 · Company Details
                 </h4>
 
                 <FormInput
@@ -290,8 +290,8 @@ export default function SignUpPage() {
             {/* Step 3: Company Contact & Preferences */}
             {step === 3 && (
               <div className="space-y-3 animate-in fade-in">
-                <h4 className="text-fs-11 font-bold text-text-primary uppercase tracking-wider">
-                  Step#3 Company Contact
+                <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                  Step#3 · Company Contact
                 </h4>
 
                 <FormInput
