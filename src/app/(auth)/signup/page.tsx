@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Lock, Eye, EyeOff, ArrowRight, Clock, User, Mail, Briefcase, DollarSign, Users } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
+import authService from "@/services/auth.service";
 import { FormInput } from "@/components/ui/FormInput";
 import { cn } from "@/utils/cn";
 
@@ -16,6 +17,8 @@ export default function SignUpPage() {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [showPassword, setShowPassword] = useState(false);
   const [pendingModalOpen, setPendingModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   // Form State
   const [formData, setFormData] = useState({
@@ -36,12 +39,33 @@ export default function SignUpPage() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleNextStep = (e: React.FormEvent) => {
+  const handleNextStep = async (e: React.FormEvent) => {
     e.preventDefault();
     if (step === 1) setStep(2);
     else if (step === 2) setStep(3);
     else if (step === 3) {
-      setPendingModalOpen(true);
+      setIsSubmitting(true);
+      setSubmitError("");
+      try {
+        await authService.register({
+          full_name: formData.name,
+          phone: `${formData.countryCode}${formData.phone}`,
+          password: formData.password,
+          company_name: formData.companyName,
+          company_email: formData.companyEmail,
+          company_address: formData.companyAddress,
+          designation: formData.designation,
+          annual_travel_budget: parseFloat(formData.travelBudget.replace(/[^0-9.]/g, "")) || 0,
+          company_size: formData.companySize,
+          terms_accepted: formData.termsAccepted,
+        });
+        setPendingModalOpen(true);
+      } catch (err: any) {
+        const msg = err?.response?.data?.message;
+        setSubmitError(typeof msg === "string" ? msg : "Registration failed. Please try again.");
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -335,6 +359,12 @@ export default function SignUpPage() {
                   </label>
                 </div>
 
+                {submitError && (
+                  <div className="p-2 rounded-xl bg-red-50 text-red-600 text-[11px]">
+                    {submitError}
+                  </div>
+                )}
+
                 <div className="flex items-center gap-3 pt-1">
                   <Button
                     type="button"
@@ -346,6 +376,7 @@ export default function SignUpPage() {
                   </Button>
                   <Button
                     type="submit"
+                    isLoading={isSubmitting}
                     className="flex-1 h-10 text-[12px] font-medium rounded-full bg-primary text-white hover:bg-primary-dark shadow-md shadow-primary/20 cursor-pointer"
                   >
                     Submit Application

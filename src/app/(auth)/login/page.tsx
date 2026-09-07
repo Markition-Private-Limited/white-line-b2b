@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import authService from "@/services/auth.service";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,23 +19,26 @@ export default function LoginPage() {
   const [status, setStatus] = useState<"idle" | "error" | "success">("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setStatus("idle");
+    setErrorMessage("");
 
-    setTimeout(() => {
+    try {
+      const result = await authService.login(email, password, rememberMe);
+      authService.saveSession(result, rememberMe);
+      setStatus("success");
+      setTimeout(() => {
+        router.push("/");
+      }, 600);
+    } catch (err: any) {
+      setStatus("error");
+      const msg = err?.response?.data?.message;
+      setErrorMessage(typeof msg === "string" ? msg : "Invalid credentials. Please try again.");
+    } finally {
       setIsLoading(false);
-      if (password === "wrong") {
-        setStatus("error");
-        setErrorMessage("Wrong Password. Please try again");
-      } else {
-        setStatus("success");
-        setTimeout(() => {
-          router.push("/");
-        }, 800);
-      }
-    }, 600);
+    }
   };
 
   return (

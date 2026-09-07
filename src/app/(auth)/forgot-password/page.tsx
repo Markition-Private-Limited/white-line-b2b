@@ -9,19 +9,23 @@ import { Button } from "@/components/ui/Button";
 import { SuccessModal } from "@/components/ui/SuccessModal";
 import { FormInput } from "@/components/ui/FormInput";
 import { cn } from "@/utils/cn";
+import apiClient from "@/lib/axios";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [email, setEmail] = useState("admin@whiteline.com");
+  const [email, setEmail] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [timer, setTimer] = useState(28);
+  const [resetToken, setResetToken] = useState("");
+  const [timer, setTimer] = useState(60);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [successModalOpen, setSuccessModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const otpInputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -52,20 +56,59 @@ export default function ForgotPasswordPage() {
     }
   };
 
-  const handleSendOtp = (e: React.FormEvent) => {
+  const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStep(2);
-    setTimer(28);
+    setIsLoading(true); setError("");
+    try {
+      await apiClient.post('/auth/b2b/forgot-password', { email });
+      setStep(2);
+      setTimer(60);
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      setError(typeof msg === "string" ? msg : "Failed to send OTP. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleVerifyOtp = (e: React.FormEvent) => {
-    e.preventDefault();
-    setStep(3);
+  const handleResendOtp = async () => {
+    setError("");
+    try {
+      await apiClient.post('/auth/b2b/forgot-password', { email });
+      setTimer(60);
+    } catch {}
   };
 
-  const handleResetPassword = (e: React.FormEvent) => {
+  const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSuccessModalOpen(true);
+    setIsLoading(true); setError("");
+    try {
+      const otpCode = otp.join("");
+      const { data } = await apiClient.post('/auth/b2b/verify-reset-otp', { email, otp: otpCode });
+      const result = data.data ?? data;
+      setResetToken(result.reset_token);
+      setStep(3);
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      setError(typeof msg === "string" ? msg : "Invalid or expired OTP.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) { setError("Passwords do not match."); return; }
+    setIsLoading(true); setError("");
+    try {
+      await apiClient.post('/auth/b2b/reset-password', { reset_token: resetToken, new_password: newPassword });
+      setSuccessModalOpen(true);
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      setError(typeof msg === "string" ? msg : "Failed to reset password. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Password strength calculation
@@ -167,12 +210,15 @@ export default function ForgotPasswordPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="e.g. admin@whiteline.com"
+                placeholder="e.g. spoc@company.com"
                 icon={<Mail className="w-4 h-4" />}
               />
 
+              {error && <p className="text-fs-11 text-red-500">{error}</p>}
+
               <Button
                 type="submit"
+                isLoading={isLoading}
                 className="w-full h-10 text-[12px] font-medium rounded-full mt-2 bg-primary hover:bg-primary-dark text-white shadow-md shadow-primary/20 flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 Send OTP
@@ -194,7 +240,7 @@ export default function ForgotPasswordPage() {
               <div>
                 <h3 className="text-fs-16 font-bold font-poppins text-text-primary mb-1">OTP Verification</h3>
                 <p className="text-[11px] text-gray-text">
-                  Enter the verification code sent to your email address
+                  Enter the verification code sent to <span className="font-semibold">{email}</span>
                 </p>
               </div>
 
@@ -217,6 +263,8 @@ export default function ForgotPasswordPage() {
                 ))}
               </div>
 
+              {error && <p className="text-fs-11 text-red-500">{error}</p>}
+
               {/* Resend Timer */}
               <div className="pt-1">
                 {timer > 0 ? (
@@ -226,7 +274,7 @@ export default function ForgotPasswordPage() {
                 ) : (
                   <button
                     type="button"
-                    onClick={() => setTimer(28)}
+                    onClick={handleResendOtp}
                     className="text-fs-11 font-semibold text-primary hover:underline cursor-pointer"
                   >
                     Resend OTP
@@ -236,6 +284,7 @@ export default function ForgotPasswordPage() {
 
               <Button
                 type="submit"
+                isLoading={isLoading}
                 className="w-full h-10 text-[12px] font-medium rounded-full mt-1 bg-primary hover:bg-primary-dark text-white shadow-md shadow-primary/20 flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 Verify OTP
@@ -245,7 +294,7 @@ export default function ForgotPasswordPage() {
               <div className="text-center pt-1">
                 <button
                   type="button"
-                  onClick={() => setStep(1)}
+                  onClick={() => { setStep(1); setError(""); setOtp(["", "", "", "", "", ""]); }}
                   className="inline-flex items-center gap-1.5 text-fs-11 text-text-secondary hover:text-text-primary font-medium cursor-pointer"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
@@ -308,8 +357,11 @@ export default function ForgotPasswordPage() {
                 onRightIconClick={() => setShowConfirmPassword(!showConfirmPassword)}
               />
 
+              {error && <p className="text-fs-11 text-red-500">{error}</p>}
+
               <Button
                 type="submit"
+                isLoading={isLoading}
                 className="w-full h-10 text-[12px] font-medium rounded-full mt-2 bg-primary hover:bg-primary-dark text-white shadow-md shadow-primary/20 flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 Reset Password

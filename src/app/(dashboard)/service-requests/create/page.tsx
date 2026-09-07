@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
@@ -9,6 +9,8 @@ import { CounterInput } from "@/components/ui/CounterInput";
 import { SuccessModal } from "@/components/ui/SuccessModal";
 import { FormInput } from "@/components/ui/FormInput";
 import { FormDropdown } from "@/components/ui/FormDropdown";
+import serviceRequestsService from "@/services/serviceRequests.service";
+import vehicleClassesService, { type VehicleClass } from "@/services/vehicleClasses.service";
 
 export default function CreateServiceRequestPage() {
   const router = useRouter();
@@ -17,23 +19,61 @@ export default function CreateServiceRequestPage() {
   const [endDate, setEndDate] = useState("");
   const [vehiclesCount, setVehiclesCount] = useState(0);
   const [driversCount, setDriversCount] = useState(0);
-  const [vehicleCategory, setVehicleCategory] = useState("");
+  const [selectedClassId, setSelectedClassId] = useState("");
   const [notes, setNotes] = useState("");
+  const [vehicleClasses, setVehicleClasses] = useState<VehicleClass[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    vehicleClassesService.list()
+      .then(setVehicleClasses)
+      .catch(() => {});
+  }, []);
+
+  const classOptions = vehicleClasses.map((c) => c.name);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSuccessModalOpen(true);
+    setError("");
+
+    if (!selectedClassId && vehicleClasses.length > 0) {
+      setError("Please select a vehicle category.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await serviceRequestsService.create({
+        start_date: startDate,
+        end_date: endDate,
+        num_drivers_required: driversCount,
+        num_vehicles_required: vehiclesCount,
+        vehicle_class_id: selectedClassId,
+        special_instructions: notes || undefined,
+      });
+      setIsSuccessModalOpen(true);
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      setError(typeof msg === "string" ? msg : "Failed to submit request. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  const handleClassSelect = (name: string) => {
+    const found = vehicleClasses.find((c) => c.name === name);
+    if (found) setSelectedClassId(found.id);
+  };
+
+  const selectedClassName = vehicleClasses.find((c) => c.id === selectedClassId)?.name ?? "";
 
   return (
     <div className="max-w-3xl mx-auto space-y-4">
       {/* Top Header */}
       <div className="flex items-center gap-3">
-        <Link
-          href="/service-requests"
-          className="w-9 h-9 rounded-full bg-white border border-gray-100 flex items-center justify-center text-text-secondary hover:text-text-primary shadow-xs transition-colors"
-        >
+        <Link href="/service-requests" className="w-9 h-9 rounded-full bg-white border border-gray-100 flex items-center justify-center text-text-secondary hover:text-text-primary shadow-xs transition-colors">
           <ArrowLeft className="w-4 h-4" />
         </Link>
         <div>
@@ -47,57 +87,26 @@ export default function CreateServiceRequestPage() {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Row 1: Start Date & End Date */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <FormInput
-              label="START DATE"
-              type="date"
-              required
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
-
-            <FormInput
-              label="END DATE"
-              type="date"
-              required
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-            />
+            <FormInput label="START DATE" type="date" required value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+            <FormInput label="END DATE" type="date" required value={endDate} onChange={(e) => setEndDate(e.target.value)} />
           </div>
 
-          {/* Row 2: Counter Inputs for Vehicles and Drivers */}
+          {/* Row 2: Counter Inputs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <CounterInput
-              label="NUMBER OF VEHICLES"
-              value={vehiclesCount}
-              onChange={setVehiclesCount}
-              min={0}
-              max={100}
-            />
-
-            <CounterInput
-              label="NUMBER OF DRIVERS"
-              value={driversCount}
-              onChange={setDriversCount}
-              min={0}
-              max={100}
-            />
+            <CounterInput label="NUMBER OF VEHICLES" value={vehiclesCount} onChange={setVehiclesCount} min={0} max={100} />
+            <CounterInput label="NUMBER OF DRIVERS" value={driversCount} onChange={setDriversCount} min={0} max={100} />
           </div>
 
           {/* Row 3: Vehicle Category */}
           <FormDropdown
             label="VEHICLE CATEGORY"
             placeholder="Select vehicle category"
-            options={[
-              "Premium Executive SUV",
-              "Business Class Sedan",
-              "First Class Luxury",
-              "Executive Chauffeur Van",
-            ]}
-            value={vehicleCategory}
-            onSelect={setVehicleCategory}
+            options={classOptions.length > 0 ? classOptions : ["Premium Executive SUV", "Business Class Sedan", "First Class Luxury", "Executive Chauffeur Van"]}
+            value={selectedClassName}
+            onSelect={classOptions.length > 0 ? handleClassSelect : setSelectedClassId}
           />
 
-          {/* Row 4: Notes (Optional) */}
+          {/* Row 4: Notes */}
           <div className="space-y-1">
             <label className="text-fs-10 font-semibold text-gray-text uppercase tracking-wider ml-1 mb-1.5 block">
               NOTES (OPTIONAL)
@@ -111,20 +120,16 @@ export default function CreateServiceRequestPage() {
             />
           </div>
 
+          {error && (
+            <div className="p-2.5 rounded-xl bg-red-50 text-red-600 text-fs-12">{error}</div>
+          )}
+
           {/* Action Buttons */}
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.push("/service-requests")}
-              className="py-2.5 px-6 text-fs-12 font-medium"
-            >
+            <Button type="button" variant="outline" onClick={() => router.push("/service-requests")} className="py-2.5 px-6 text-fs-12 font-medium">
               Cancel
             </Button>
-            <Button
-              type="submit"
-              className="py-2.5 px-6 text-fs-12 font-medium bg-primary text-white hover:bg-primary-dark shadow-sm"
-            >
+            <Button type="submit" isLoading={isSubmitting} className="py-2.5 px-6 text-fs-12 font-medium bg-primary text-white hover:bg-primary-dark shadow-sm">
               Submit Request
             </Button>
           </div>

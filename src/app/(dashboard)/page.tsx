@@ -1,31 +1,40 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import {
-  Car,
   Calendar,
   UserCheck,
   CheckCircle2,
   FileText,
   ChevronDown,
-  Coins,
 } from "lucide-react";
+import dashboardService, { type DashboardData } from "@/services/dashboard.service";
+
+const FALLBACK_MONTHLY: DashboardData["monthly_data"] = [
+  { month: "Jan", paid: 0, unpaid: 0 },
+  { month: "Feb", paid: 0, unpaid: 0 },
+  { month: "Mar", paid: 0, unpaid: 0 },
+  { month: "Apr", paid: 0, unpaid: 0 },
+  { month: "May", paid: 0, unpaid: 0 },
+  { month: "Jun", paid: 0, unpaid: 0 },
+  { month: "Jul", paid: 0, unpaid: 0 },
+  { month: "Aug", paid: 0, unpaid: 0 },
+];
 
 export default function DashboardPage() {
-  const [selectedYear, setSelectedYear] = useState("2026");
+  const [selectedYear] = useState(new Date().getFullYear().toString());
+  const [stats, setStats] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Monthly Analytics Data (Jan to Aug matching Figma design)
-  const monthlyData = [
-    { month: "Jan", paid: 260, unpaid: 160 },
-    { month: "Feb", paid: 280, unpaid: 200 },
-    { month: "Mar", paid: 230, unpaid: 140 },
-    { month: "Apr", paid: 300, unpaid: 240 },
-    { month: "May", paid: 190, unpaid: 220 },
-    { month: "Jun", paid: 260, unpaid: 150 },
-    { month: "Jul", paid: 300, unpaid: 240 },
-    { month: "Aug", paid: 265, unpaid: 170 },
-  ];
+  useEffect(() => {
+    dashboardService.getDashboard()
+      .then(setStats)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const monthlyData = stats?.monthly_data ?? FALLBACK_MONTHLY;
 
   return (
     <div className="space-y-4">
@@ -38,7 +47,6 @@ export default function DashboardPage() {
               Active<br />Requests
             </span>
             <div className="w-8 h-8 rounded-full bg-[#005C66] text-white flex items-center justify-center shadow-xs">
-              {/* Steering Wheel Icon */}
               <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="9" />
                 <circle cx="12" cy="12" r="3" />
@@ -49,9 +57,7 @@ export default function DashboardPage() {
               </svg>
             </div>
           </div>
-
           <div className="flex items-end justify-between mt-4">
-            {/* Avatar Stack */}
             <div className="flex -space-x-2 overflow-hidden">
               <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white overflow-hidden bg-gray-200">
                 <Image src="/driver.png" alt="Driver" width={24} height={24} className="object-cover" />
@@ -63,9 +69,8 @@ export default function DashboardPage() {
                 <Image src="/driver.png" alt="Driver" width={24} height={24} className="object-cover" />
               </div>
             </div>
-
             <span className="text-[32px] font-bold font-poppins text-gray-900 leading-none">
-              154
+              {loading ? "—" : (stats?.active_requests ?? 0)}
             </span>
           </div>
         </div>
@@ -80,9 +85,7 @@ export default function DashboardPage() {
               <Calendar className="w-4 h-4" />
             </div>
           </div>
-
           <div className="flex items-end justify-between mt-4">
-            {/* Avatar Stack */}
             <div className="flex -space-x-2 overflow-hidden">
               <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white overflow-hidden bg-gray-200">
                 <Image src="/driver.png" alt="Driver" width={24} height={24} className="object-cover" />
@@ -91,9 +94,8 @@ export default function DashboardPage() {
                 <Image src="/Avatar.png" alt="Passenger" width={24} height={24} className="object-cover" />
               </div>
             </div>
-
             <span className="text-[32px] font-bold font-poppins text-gray-900 leading-none">
-              98
+              {loading ? "—" : (stats?.pending_requests ?? 0)}
             </span>
           </div>
         </div>
@@ -108,10 +110,9 @@ export default function DashboardPage() {
               <UserCheck className="w-4 h-4" />
             </div>
           </div>
-
           <div className="flex items-end justify-end mt-4">
             <span className="text-[32px] font-bold font-poppins text-gray-900 leading-none">
-              34
+              {loading ? "—" : (stats?.open_complaints ?? 0)}
             </span>
           </div>
         </div>
@@ -126,31 +127,20 @@ export default function DashboardPage() {
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
-
           <div className="flex items-end justify-end mt-4">
             <span className="text-[32px] font-bold font-poppins text-gray-900 leading-none">
-              12
+              {loading ? "—" : (stats?.resolved_complaints ?? 0)}
             </span>
           </div>
         </div>
 
-        {/* Card 5: Due Invoices (Hero Dark Teal Card) */}
+        {/* Card 5: Due Invoices */}
         <div className="rounded-[28px] p-5 lg:p-6 flex flex-col justify-between min-h-[165px] bg-[#005C66] text-white shadow-[0_8px_30px_rgba(0,92,102,0.22)] relative overflow-hidden transition-all duration-200 hover:shadow-[0_12px_36px_rgba(0,92,102,0.3)]">
-          {/* Subtle Money Bag Illustration */}
-          <svg
-            className="w-36 h-36 text-white/10 absolute -bottom-8 -left-6 pointer-events-none"
-            viewBox="0 0 100 100"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
+          <svg className="w-36 h-36 text-white/10 absolute -bottom-8 -left-6 pointer-events-none" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M50 20 C45 20, 42 12, 40 8 C48 10, 52 10, 60 8 C58 12, 55 20, 50 20 Z" fill="currentColor" fillOpacity="0.05" />
             <circle cx="50" cy="22" r="4" fill="currentColor" fillOpacity="0.2" />
             <path d="M50 24 C30 24, 15 45, 15 70 C15 88, 30 92, 50 92 C70 92, 85 88, 85 70 C85 45, 70 24, 50 24 Z" />
-            <path d="M42 24 C36 40, 36 60, 42 90" strokeDasharray="3 3" opacity="0.3" />
-            <path d="M58 24 C64 40, 64 60, 58 90" strokeDasharray="3 3" opacity="0.3" />
           </svg>
-
           <div className="flex items-start justify-between relative z-10">
             <span className="text-sm font-bold leading-tight font-poppins text-white">
               Due<br />Invoices
@@ -159,28 +149,24 @@ export default function DashboardPage() {
               <FileText className="w-4 h-4" />
             </div>
           </div>
-
           <div className="flex items-end justify-end mt-4 relative z-10">
             <span className="text-[32px] font-bold font-poppins leading-none text-white">
-              23
+              {loading ? "—" : (stats?.due_invoices ?? 0)}
             </span>
           </div>
         </div>
       </div>
 
-      {/* Middle / Bottom Section: Analytics & Invoices */}
+      {/* Bottom Section: Analytics & Invoice Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        {/* Left Wide Card: Invoice Analytics Chart */}
+        {/* Left: Invoice Analytics Chart */}
         <div className="lg:col-span-8 rounded-[28px] p-6 lg:p-7 bg-white border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col justify-between">
-          {/* Header & Controls */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
             <div>
               <h3 className="text-base lg:text-lg font-bold text-gray-900 font-poppins">Invoice Analytics</h3>
               <p className="text-xs text-gray-400 font-medium">Monthly Vs Payment Status</p>
             </div>
-
             <div className="flex items-center gap-4 flex-wrap">
-              {/* Legend */}
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1.5">
                   <span className="w-3.5 h-3 rounded-xs bg-[#199CA8]" />
@@ -191,13 +177,8 @@ export default function DashboardPage() {
                   <span className="text-xs text-gray-700 font-medium">UnPaid</span>
                 </div>
               </div>
-
-              {/* Year Selector */}
               <div className="relative">
-                <button
-                  type="button"
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-gray-200 text-[11px] font-bold text-gray-700 hover:bg-gray-50 uppercase tracking-wider cursor-pointer transition-colors"
-                >
+                <button type="button" className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-gray-200 text-[11px] font-bold text-gray-700 hover:bg-gray-50 uppercase tracking-wider cursor-pointer transition-colors">
                   YEARLY {selectedYear}
                   <ChevronDown className="w-3 h-3 text-gray-400" />
                 </button>
@@ -205,54 +186,27 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Clean Single View Chart Area */}
           <div className="pt-2">
             <div className="flex gap-2">
-              {/* Left Y-Axis Labels */}
               <div className="w-9 h-52 flex flex-col justify-between text-right text-[11px] text-gray-400 font-medium select-none pr-1.5 shrink-0">
-                <span>300k</span>
-                <span>250k</span>
-                <span>200k</span>
-                <span>150k</span>
-                <span>100k</span>
-                <span>50k</span>
-                <span>0</span>
+                <span>300k</span><span>250k</span><span>200k</span><span>150k</span><span>100k</span><span>50k</span><span>0</span>
               </div>
-
-              {/* Right Chart Bars + Horizontal Grid Lines */}
               <div className="flex-1 relative h-52">
-                {/* Horizontal Gridlines */}
                 <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
-                  <div className="border-b border-gray-100/80 w-full h-0" />
-                  <div className="border-b border-gray-100/80 w-full h-0" />
-                  <div className="border-b border-gray-100/80 w-full h-0" />
-                  <div className="border-b border-gray-100/80 w-full h-0" />
-                  <div className="border-b border-gray-100/80 w-full h-0" />
-                  <div className="border-b border-gray-100/80 w-full h-0" />
-                  <div className="border-b border-gray-200 w-full h-0" />
+                  {[...Array(7)].map((_, i) => (
+                    <div key={i} className={`border-b ${i === 6 ? "border-gray-200" : "border-gray-100/80"} w-full h-0`} />
+                  ))}
                 </div>
-
-                {/* Sleek Dual Bars per Month */}
                 <div className="relative h-full flex items-end justify-between px-3">
                   {monthlyData.map((item, idx) => {
-                    const paidHeight = (item.paid / 300) * 100;
-                    const unpaidHeight = (item.unpaid / 300) * 100;
-
+                    const maxVal = 300;
+                    const paidH = (item.paid / maxVal) * 100;
+                    const unpaidH = (item.unpaid / maxVal) * 100;
                     return (
                       <div key={idx} className="flex flex-col items-center group z-10">
                         <div className="flex items-end gap-1 h-52 pb-0.5">
-                          {/* Paid Bar - Sleek pill */}
-                          <div
-                            className="w-4 sm:w-4.5 md:w-5 bg-[#199CA8] rounded-t-full transition-all duration-300 group-hover:brightness-105 cursor-pointer shadow-xs"
-                            style={{ height: `${Math.min(100, paidHeight)}%` }}
-                            title={`${item.month} - Paid: SAR ${item.paid}k`}
-                          />
-                          {/* Unpaid Bar - Sleek pill */}
-                          <div
-                            className="w-4 sm:w-4.5 md:w-5 bg-[#9FE4EE] rounded-t-full transition-all duration-300 group-hover:brightness-105 cursor-pointer shadow-xs"
-                            style={{ height: `${Math.min(100, unpaidHeight)}%` }}
-                            title={`${item.month} - Unpaid: SAR ${item.unpaid}k`}
-                          />
+                          <div className="w-4 sm:w-5 bg-[#199CA8] rounded-t-full transition-all duration-300 group-hover:brightness-105 cursor-pointer shadow-xs" style={{ height: `${Math.min(100, paidH)}%` }} title={`${item.month} - Paid`} />
+                          <div className="w-4 sm:w-5 bg-[#9FE4EE] rounded-t-full transition-all duration-300 group-hover:brightness-105 cursor-pointer shadow-xs" style={{ height: `${Math.min(100, unpaidH)}%` }} title={`${item.month} - Unpaid`} />
                         </div>
                       </div>
                     );
@@ -260,8 +214,6 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-
-            {/* Month Labels row */}
             <div className="flex gap-2 mt-2.5">
               <div className="w-9 shrink-0" />
               <div className="flex-1 flex justify-between px-3">
@@ -275,21 +227,18 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Right Stacked Cards: Paid & Unpaid Summary */}
+        {/* Right: Paid & Unpaid Summary */}
         <div className="lg:col-span-4 flex flex-col gap-4">
-          {/* Card 1: Paid Invoices */}
           <div className="flex-1 rounded-[28px] p-6 lg:p-7 bg-white border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col justify-center">
             <span className="text-sm font-medium text-gray-800 mb-3">Paid Invoices</span>
             <span className="text-[28px] lg:text-[32px] font-bold font-poppins text-gray-900 leading-none">
-              SAR 42,500
+              {loading ? "—" : `SAR ${(stats?.paid_invoices_amount ?? 0).toLocaleString()}`}
             </span>
           </div>
-
-          {/* Card 2: Unpaid Invoices */}
           <div className="flex-1 rounded-[28px] p-6 lg:p-7 bg-white border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col justify-center">
             <span className="text-sm font-medium text-gray-800 mb-3">Unpaid Invoices</span>
             <span className="text-[28px] lg:text-[32px] font-bold font-poppins text-gray-900 leading-none">
-              SAR 8,120.50
+              {loading ? "—" : `SAR ${(stats?.unpaid_invoices_amount ?? 0).toLocaleString()}`}
             </span>
           </div>
         </div>

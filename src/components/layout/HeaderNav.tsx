@@ -19,10 +19,14 @@ import {
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/utils/cn";
+import authService from "@/services/auth.service";
 
 export function HeaderNav() {
   const pathname = usePathname();
   const router = useRouter();
+
+  const spocUser = authService.getStoredUser();
+  const b2bClient = authService.getStoredClient();
 
   const [serviceMenuOpen, setServiceMenuOpen] = useState(false);
   const [complaintsMenuOpen, setComplaintsMenuOpen] = useState(false);
@@ -70,6 +74,7 @@ export function HeaderNav() {
     );
 
   const handleLogout = () => {
+    authService.logout();
     setLogoutModalOpen(false);
     router.push("/login");
   };
@@ -241,8 +246,8 @@ export function HeaderNav() {
               {profileMenuOpen && (
                 <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95">
                   <div className="px-4 py-2.5 border-b border-gray-100">
-                    <p className="text-xs font-bold text-gray-900">Alexander Miller</p>
-                    <p className="text-[10px] text-gray-500">WhiteLine Global • Admin</p>
+                    <p className="text-xs font-bold text-gray-900">{spocUser?.full_name ?? "User"}</p>
+                    <p className="text-[10px] text-gray-500">{b2bClient?.company_name ?? "WhiteLine B2B"} • {spocUser?.role ?? "Member"}</p>
                   </div>
 
                   <Link

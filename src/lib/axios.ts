@@ -36,9 +36,12 @@ apiClient.interceptors.response.use(
   (error) => {
     // Agar API 401 return karti hai, iska matlab token expire ho gaya ya invalid hai
     if (error.response && error.response.status === 401) {
-      // Yahan hum user ko logout karwa sakte hain aur login screen pe bhej sakte hain
       Cookies.remove('token');
-      // window.location.href = '/login'; 
+      Cookies.remove('spoc_user');
+      Cookies.remove('b2b_client');
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
