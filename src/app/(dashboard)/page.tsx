@@ -11,7 +11,13 @@ import {
 } from "lucide-react";
 import dashboardService, { type DashboardData } from "@/services/dashboard.service";
 
-const FALLBACK_MONTHLY: DashboardData["monthly_data"] = [
+interface MonthlyDataItem {
+  month: string;
+  paid: number;
+  unpaid: number;
+}
+
+const FALLBACK_MONTHLY: MonthlyDataItem[] = [
   { month: "Jan", paid: 0, unpaid: 0 },
   { month: "Feb", paid: 0, unpaid: 0 },
   { month: "Mar", paid: 0, unpaid: 0 },
