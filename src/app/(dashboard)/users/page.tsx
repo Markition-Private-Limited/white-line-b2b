@@ -230,7 +230,7 @@ export default function UsersPage() {
             <FormInput label="CONFIRM PASSWORD" type={showPassword ? "text" : "password"} required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm new password" icon={<Lock className="w-4 h-4" />} />
             {actionError && <p className="text-fs-11 text-red-600">{actionError}</p>}
             <div className="flex items-center gap-3 pt-3">
-              <Button type="button" variant="outline" onClick={() => setChangePasswordUser(null)} className="flex-1 py-2.5 text-fs-12">Cancel</Button>
+              <Button type="button" variant="outline" onClick={() => setChangePasswordUser(null)} className="flex-1 py-2.5 text-fs-12 text-red-600 hover:bg-red-50 hover:text-red-600">Cancel</Button>
               <Button type="submit" isLoading={actionLoading} className="flex-1 py-2.5 text-fs-12 font-medium bg-primary text-white hover:bg-primary-dark">Update Password →</Button>
             </div>
           </form>
@@ -255,7 +255,7 @@ export default function UsersPage() {
             />
             {actionError && <p className="text-fs-11 text-red-600">{actionError}</p>}
             <div className="flex items-center gap-3 pt-3">
-              <Button type="button" variant="outline" onClick={() => setTransferUser(null)} className="flex-1 py-2.5 text-fs-12">Cancel</Button>
+              <Button type="button" variant="outline" onClick={() => setTransferUser(null)} className="flex-1 py-2.5 text-fs-12 text-red-600 hover:bg-red-50 hover:text-red-600">Cancel</Button>
               <Button type="button" isLoading={actionLoading} onClick={handleTransferOwnership} disabled={!selectedNewOwnerId} className="flex-1 py-2.5 text-fs-12 font-medium bg-primary text-white hover:bg-primary-dark">Transfer Ownership →</Button>
             </div>
           </div>

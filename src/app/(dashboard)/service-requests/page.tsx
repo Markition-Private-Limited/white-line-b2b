@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
+import { FileText, CheckCircle2, Clock, Plus } from "lucide-react";
 import { DataTable, type ColumnDef } from "@/components/layout/DataTableContainer";
 import { PageToolbar } from "@/components/layout/PageToolbar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -68,20 +68,6 @@ export default function ServiceRequestsPage() {
 
   return (
     <div className="space-y-4">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {[
-          { label: "Total Service Requests", value: total },
-          { label: "Active Service Requests", value: activeCount },
-          { label: "Pending Service Requests", value: pendingCount },
-        ].map((card) => (
-          <div key={card.label} className="card-base p-5 flex items-center justify-between">
-            <span className="text-fs-12 font-semibold text-text-secondary">{card.label}</span>
-            <span className="text-[28px] font-bold font-poppins text-text-primary">{loading ? "—" : card.value}</span>
-          </div>
-        ))}
-      </div>
-
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -97,42 +83,82 @@ export default function ServiceRequestsPage() {
         </Link>
       </div>
 
-      {/* Toolbar */}
-      <PageToolbar
-        searchPlaceholder="Search by ID or service..."
-        searchValue={search}
-        onSearch={setSearch}
-        filters={[
-          {
-            defaultValue: statusFilter,
-            options: ["All", "Pending", "Active", "Cancelled"],
-            onSelect: setStatusFilter,
-          },
-        ]}
-      />
-
-      {/* Table */}
-      <DataTable
-        columns={columns}
-        data={filtered}
-        loading={loading}
-        onRowClick={(row) => router.push(`/service-requests/${row.id}`)}
-        pagination={{
-          currentPage: page,
-          totalPages,
-          totalItems: total,
-          itemsPerPage: LIMIT,
-          onPageChange: setPage,
-        }}
-        emptyState={
-          <div className="flex flex-col items-center gap-3 py-12 text-gray-400">
-            <p className="text-fs-13 font-medium">No service requests found</p>
-            <Link href="/service-requests/create" className="px-4 py-2 rounded-full bg-primary text-white text-fs-12 font-medium hover:bg-primary-dark">
-              Create New Request
-            </Link>
+      <div className="flex flex-col lg:flex-row gap-4">
+        {/* Left: Stats Cards */}
+        <div className="bg-white p-3 lg:p-4 rounded-[32px] border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] w-full lg:w-[280px] shrink-0 h-fit">
+          <div className="flex flex-col gap-3">
+            {[
+              { 
+                label: "Total", label2: "Requests", value: total, icon: FileText,
+                cardBg: "bg-[#E2F8FA] border-[#CDEEF2]", 
+                iconBg: "bg-[#005C66] text-white" 
+              },
+              { 
+                label: "Active", label2: "Requests", value: activeCount, icon: CheckCircle2,
+                cardBg: "bg-[#FEF9E2] border-[#F5ECC4]", 
+                iconBg: "bg-[#B2B042] text-white" 
+              },
+              { 
+                label: "Pending", label2: "Requests", value: pendingCount, icon: Clock,
+                cardBg: "bg-[#E7F9E4] border-[#D5F0D0]", 
+                iconBg: "bg-[#62C25D] text-white" 
+              },
+            ].map((card) => (
+              <div key={card.label} className={`rounded-[24px] p-5 flex flex-col justify-between min-h-[145px] border shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] ${card.cardBg}`}>
+                <div className="flex items-start justify-between">
+                  <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">{card.label}<br />{card.label2}</span>
+                  <div className={`w-8 h-8 rounded-full ${card.iconBg} flex items-center justify-center shadow-xs`}>
+                    <card.icon className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="flex items-end justify-end mt-3">
+                  <span className="text-[28px] font-bold font-poppins text-gray-900 leading-none">{loading ? "—" : card.value}</span>
+                </div>
+              </div>
+            ))}
           </div>
-        }
-      />
+        </div>
+
+        {/* Right: Table area */}
+        <div className="flex flex-col gap-2 flex-1 min-w-0">
+          {/* Toolbar */}
+          <PageToolbar
+            searchPlaceholder="Search by ID or service..."
+            searchValue={search}
+            onSearch={setSearch}
+            filters={[
+              {
+                defaultValue: statusFilter,
+                options: ["All", "Pending", "Active", "Cancelled"],
+                onSelect: setStatusFilter,
+              },
+            ]}
+          />
+
+          {/* Table */}
+          <DataTable
+            columns={columns}
+            data={filtered}
+            loading={loading}
+            onRowClick={(row) => router.push(`/service-requests/${row.id}`)}
+            pagination={{
+              currentPage: page,
+              totalPages,
+              totalItems: total,
+              itemsPerPage: LIMIT,
+              onPageChange: setPage,
+            }}
+            emptyState={
+              <div className="flex flex-col items-center gap-3 py-12 text-gray-400">
+                <p className="text-fs-13 font-medium">No service requests found</p>
+                <Link href="/service-requests/create" className="px-4 py-2 rounded-full bg-primary text-white text-fs-12 font-medium hover:bg-primary-dark">
+                  Create New Request
+                </Link>
+              </div>
+            }
+          />
+        </div>
+      </div>
     </div>
   );
 }

@@ -58,6 +58,10 @@ export default function ForgotPasswordPage() {
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
     setIsLoading(true); setError("");
     try {
       await apiClient.post('/auth/b2b/forgot-password', { email });
@@ -81,9 +85,13 @@ export default function ForgotPasswordPage() {
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
+    const otpCode = otp.join("");
+    if (otpCode.length !== 6) {
+      setError("Please enter the 6-digit OTP.");
+      return;
+    }
     setIsLoading(true); setError("");
     try {
-      const otpCode = otp.join("");
       const { data } = await apiClient.post('/auth/b2b/verify-reset-otp', { email, otp: otpCode });
       const result = data.data ?? data;
       setResetToken(result.reset_token);
@@ -98,6 +106,11 @@ export default function ForgotPasswordPage() {
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (newPassword.length < 8) { setError("Password must be at least 8 characters."); return; }
+    if (!/[A-Z]/.test(newPassword)) { setError("Password must contain an uppercase letter."); return; }
+    if (!/[0-9]/.test(newPassword)) { setError("Password must contain a number."); return; }
+    if (!/[^A-Za-z0-9]/.test(newPassword)) { setError("Password must contain a special character."); return; }
+    
     if (newPassword !== confirmPassword) { setError("Passwords do not match."); return; }
     setIsLoading(true); setError("");
     try {
@@ -139,9 +152,9 @@ export default function ForgotPasswordPage() {
           <Image
             src="/logo.png"
             alt="WhiteLine B2B Client Portal"
-            width={220}
-            height={55}
-            className="w-[210px] h-auto object-contain"
+            width={260}
+            height={65}
+            className="w-[260px] h-auto object-contain"
             priority
           />
         </div>

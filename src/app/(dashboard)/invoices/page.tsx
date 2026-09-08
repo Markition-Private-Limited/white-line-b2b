@@ -122,48 +122,50 @@ export default function InvoicesPage() {
         <h1 className="h1 font-bold text-text-primary">Billing &amp; Invoices</h1>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+      <div className="flex flex-col lg:flex-row gap-4">
         {/* Left: Stats Cards */}
-        <div className="flex flex-col gap-3">
-          <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[145px] bg-[#E2F8FA] border border-[#CDEEF2] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
-            <div className="flex items-start justify-between">
-              <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">Paid<br />Invoices</span>
-              <div className="w-8 h-8 rounded-full bg-[#005C66] text-white flex items-center justify-center shadow-xs">
-                <CheckCircle2 className="w-4 h-4" />
+        <div className="bg-white p-3 lg:p-4 rounded-[32px] border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] w-full lg:w-[280px] shrink-0 h-fit">
+          <div className="flex flex-col gap-3">
+            <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[145px] bg-[#E2F8FA] border border-[#CDEEF2] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
+              <div className="flex items-start justify-between">
+                <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">Paid<br />Invoices</span>
+                <div className="w-8 h-8 rounded-full bg-[#005C66] text-white flex items-center justify-center shadow-xs">
+                  <CheckCircle2 className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="flex items-end justify-end mt-3">
+                <span className="text-[28px] font-bold font-poppins text-gray-900 leading-none">{loading ? "—" : paidCount}</span>
               </div>
             </div>
-            <div className="flex items-end justify-end mt-3">
-              <span className="text-[28px] font-bold font-poppins text-gray-900 leading-none">{loading ? "—" : paidCount}</span>
-            </div>
-          </div>
 
-          <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[145px] bg-[#FEF9E2] border border-[#F5ECC4] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
-            <div className="flex items-start justify-between">
-              <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">Due<br />Soon</span>
-              <div className="w-8 h-8 rounded-full bg-[#B2B042] text-white flex items-center justify-center shadow-xs">
-                <Clock className="w-4 h-4" />
+            <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[145px] bg-[#FEF9E2] border border-[#F5ECC4] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
+              <div className="flex items-start justify-between">
+                <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">Due<br />Soon</span>
+                <div className="w-8 h-8 rounded-full bg-[#B2B042] text-white flex items-center justify-center shadow-xs">
+                  <Clock className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="flex items-end justify-end mt-3">
+                <span className="text-[28px] font-bold font-poppins text-gray-900 leading-none">{loading ? "—" : dueSoonCount}</span>
               </div>
             </div>
-            <div className="flex items-end justify-end mt-3">
-              <span className="text-[28px] font-bold font-poppins text-gray-900 leading-none">{loading ? "—" : dueSoonCount}</span>
-            </div>
-          </div>
 
-          <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[145px] bg-[#E7F9E4] border border-[#D5F0D0] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
-            <div className="flex items-start justify-between">
-              <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">Unpaid<br />Invoices</span>
-              <div className="w-8 h-8 rounded-full bg-[#62C25D] text-white flex items-center justify-center shadow-xs">
-                <AlertCircle className="w-4 h-4" />
+            <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[145px] bg-[#E7F9E4] border border-[#D5F0D0] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
+              <div className="flex items-start justify-between">
+                <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">Unpaid<br />Invoices</span>
+                <div className="w-8 h-8 rounded-full bg-[#62C25D] text-white flex items-center justify-center shadow-xs">
+                  <AlertCircle className="w-4 h-4" />
+                </div>
               </div>
-            </div>
-            <div className="flex items-end justify-end mt-3">
-              <span className="text-[28px] font-bold font-poppins text-gray-900 leading-none">{loading ? "—" : unpaidCount}</span>
+              <div className="flex items-end justify-end mt-3">
+                <span className="text-[28px] font-bold font-poppins text-gray-900 leading-none">{loading ? "—" : unpaidCount}</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Right: Table */}
-        <div className="lg:col-span-3 flex flex-col gap-2 flex-1">
+        <div className="flex flex-col gap-2 flex-1 min-w-0">
           <PageToolbar
             searchPlaceholder="Search by invoice #, description, or amount"
             searchValue={search}

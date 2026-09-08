@@ -96,37 +96,6 @@ export default function ComplaintsPage() {
 
   return (
     <div className="space-y-4">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="card-base p-5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-              <UserCheck className="w-4 h-4" />
-            </div>
-            <span className="text-fs-12 font-semibold text-text-secondary">Total Complaints</span>
-          </div>
-          <span className="text-[28px] font-bold font-poppins text-text-primary">{loading ? "—" : total}</span>
-        </div>
-        <div className="card-base p-5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-success/10 text-success flex items-center justify-center">
-              <CheckCircle2 className="w-4 h-4" />
-            </div>
-            <span className="text-fs-12 font-semibold text-text-secondary">Resolved</span>
-          </div>
-          <span className="text-[28px] font-bold font-poppins text-text-primary">{loading ? "—" : resolvedCount}</span>
-        </div>
-        <div className="card-base p-5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-accent/10 text-accent flex items-center justify-center">
-              <Clock className="w-4 h-4" />
-            </div>
-            <span className="text-fs-12 font-semibold text-text-secondary">Pending</span>
-          </div>
-          <span className="text-[28px] font-bold font-poppins text-text-primary">{loading ? "—" : pendingCount}</span>
-        </div>
-      </div>
-
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -142,27 +111,66 @@ export default function ComplaintsPage() {
         </Link>
       </div>
 
-      {/* Toolbar + Table */}
-      <PageToolbar
-        searchPlaceholder="Search by ID or subject..."
-        searchValue={search}
-        onSearch={(val) => { setSearch(val); setPage(1); }}
-        filters={toolbarFilters}
-      />
+      <div className="flex flex-col lg:flex-row gap-4">
+        {/* Left: Stats Cards */}
+        <div className="bg-white p-3 lg:p-4 rounded-[32px] border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] w-full lg:w-[280px] shrink-0 h-fit">
+          <div className="flex flex-col gap-3">
+            {[
+              { 
+                label: "Total", label2: "Complaints", value: total, icon: UserCheck, 
+                cardBg: "bg-[#E2F8FA] border-[#CDEEF2]", 
+                iconBg: "bg-[#005C66] text-white" 
+              },
+              { 
+                label: "Resolved", label2: "Complaints", value: resolvedCount, icon: CheckCircle2, 
+                cardBg: "bg-[#FEF9E2] border-[#F5ECC4]", 
+                iconBg: "bg-[#B2B042] text-white" 
+              },
+              { 
+                label: "Pending", label2: "Complaints", value: pendingCount, icon: Clock, 
+                cardBg: "bg-[#E7F9E4] border-[#D5F0D0]", 
+                iconBg: "bg-[#62C25D] text-white" 
+              },
+            ].map((card) => (
+              <div key={card.label} className={`rounded-[24px] p-5 flex flex-col justify-between min-h-[145px] border shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] ${card.cardBg}`}>
+                <div className="flex items-start justify-between">
+                  <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">{card.label}<br />{card.label2}</span>
+                  <div className={`w-8 h-8 rounded-full ${card.iconBg} flex items-center justify-center shadow-xs`}>
+                    <card.icon className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="flex items-end justify-end mt-3">
+                  <span className="text-[28px] font-bold font-poppins text-gray-900 leading-none">{loading ? "—" : card.value}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-      <DataTable
-        data={filteredComplaints}
-        columns={tableColumns}
-        loading={loading}
-        onRowClick={(row) => setSelectedComplaint(row)}
-        pagination={{
-          currentPage: page,
-          totalPages,
-          totalItems: total,
-          itemsPerPage: LIMIT,
-          onPageChange: setPage,
-        }}
-      />
+        {/* Right: Table area */}
+        <div className="flex flex-col gap-2 flex-1 min-w-0">
+          <PageToolbar
+            searchPlaceholder="Search by ID or subject..."
+            searchValue={search}
+            onSearch={(val) => { setSearch(val); setPage(1); }}
+            filters={toolbarFilters}
+          />
+
+          <DataTable
+            data={filteredComplaints}
+            columns={tableColumns}
+            loading={loading}
+            onRowClick={(row) => setSelectedComplaint(row)}
+            pagination={{
+              currentPage: page,
+              totalPages,
+              totalItems: total,
+              itemsPerPage: LIMIT,
+              onPageChange: setPage,
+            }}
+          />
+        </div>
+      </div>
 
       {/* Complaint Details Modal */}
       <Modal isOpen={!!selectedComplaint} onClose={() => setSelectedComplaint(null)} maxWidth="max-w-md" className="p-6 md:p-8">

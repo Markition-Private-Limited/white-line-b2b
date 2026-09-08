@@ -126,7 +126,7 @@ export default function CreateServiceRequestPage() {
 
           {/* Action Buttons */}
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100">
-            <Button type="button" variant="outline" onClick={() => router.push("/service-requests")} className="py-2.5 px-6 text-fs-12 font-medium">
+            <Button type="button" variant="outline" onClick={() => router.push("/service-requests")} className="py-2.5 px-6 text-fs-12 font-medium text-red-600 hover:bg-red-50 hover:text-red-600">
               Cancel
             </Button>
             <Button type="submit" isLoading={isSubmitting} className="py-2.5 px-6 text-fs-12 font-medium bg-primary text-white hover:bg-primary-dark shadow-sm">

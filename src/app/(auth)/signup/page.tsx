@@ -36,16 +36,41 @@ export default function SignUpPage() {
   });
 
   const handleChange = (field: string, value: any) => {
+    if (field === "phone" || field === "travelBudget" || field === "companySize") {
+      const numericValue = value.replace(/[^0-9]/g, "");
+      if (field === "phone" && numericValue.length > 9) return;
+      setFormData((prev) => ({ ...prev, [field]: numericValue }));
+      return;
+    }
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleNextStep = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (step === 1) setStep(2);
-    else if (step === 2) setStep(3);
+    setSubmitError("");
+    
+    if (step === 1) {
+      if (formData.phone.length !== 9) {
+        setSubmitError("Phone number must be exactly 9 digits.");
+        return;
+      }
+      const pwd = formData.password;
+      if (pwd.length < 8) { setSubmitError("Password must be at least 8 characters."); return; }
+      if (!/[A-Z]/.test(pwd)) { setSubmitError("Password must contain an uppercase letter."); return; }
+      if (!/[0-9]/.test(pwd)) { setSubmitError("Password must contain a number."); return; }
+      if (!/[^A-Za-z0-9]/.test(pwd)) { setSubmitError("Password must contain a special character."); return; }
+      
+      setStep(2);
+    }
+    else if (step === 2) {
+      if (!formData.companyEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.companyEmail)) {
+        setSubmitError("Please enter a valid company email address.");
+        return;
+      }
+      setStep(3);
+    }
     else if (step === 3) {
       setIsSubmitting(true);
-      setSubmitError("");
       try {
         await authService.register({
           full_name: formData.name,
@@ -87,9 +112,9 @@ export default function SignUpPage() {
           <Image
             src="/logo.png"
             alt="WhiteLine B2B Client Portal"
-            width={220}
-            height={55}
-            className="w-[210px] h-auto object-contain"
+            width={260}
+            height={65}
+            className="w-[260px] h-auto object-contain"
             priority
           />
         </div>
@@ -241,6 +266,12 @@ export default function SignUpPage() {
                   onRightIconClick={() => setShowPassword(!showPassword)}
                 />
 
+                {submitError && (
+                  <div className="p-2 rounded-xl bg-red-50 text-red-600 text-[11px]">
+                    {submitError}
+                  </div>
+                )}
+
                 <Button
                   type="submit"
                   className="w-full h-10 text-[12px] font-medium rounded-full mt-2 bg-primary hover:bg-primary-dark text-white shadow-md shadow-primary/20 flex items-center justify-center gap-1.5 cursor-pointer"
@@ -290,6 +321,12 @@ export default function SignUpPage() {
                     className="w-full bg-input-bg border-none rounded-2xl px-4 py-2.5 text-[12px] font-normal text-text-primary placeholder:text-input-placeholder placeholder:font-light placeholder:text-[12px] focus:outline-none focus:ring-1 focus:ring-primary/20 resize-none transition-all"
                   />
                 </div>
+
+                {submitError && (
+                  <div className="p-2 rounded-xl bg-red-50 text-red-600 text-[11px]">
+                    {submitError}
+                  </div>
+                )}
 
                 <div className="flex items-center gap-3 pt-1">
                   <Button

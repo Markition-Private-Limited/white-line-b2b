@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Building2, Globe, Lock, LogOut, Eye, EyeOff, Save, Mail, Phone, MapPin,
+  Building2, Globe, Lock, LogOut, Eye, EyeOff, Save, Mail, Phone, MapPin, CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
@@ -97,97 +97,122 @@ export default function SettingsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Left: Company Information */}
-        <div className="lg:col-span-2 card-base p-6 lg:p-7 space-y-5">
+        <div className="lg:col-span-2 card-base p-6 lg:p-7 space-y-5 flex flex-col justify-between">
           <div className="flex items-center gap-2">
             <Building2 className="w-4 h-4 text-primary" />
             <h2 className="text-fs-14 font-bold font-poppins text-text-primary">Company Information</h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <FormInput label="COMPANY NAME" value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Enter company name" icon={<Building2 className="w-4 h-4" />} />
-            <FormInput label="COMPANY EMAIL" type="email" value={companyEmail} onChange={(e) => setCompanyEmail(e.target.value)} placeholder="Enter company email" icon={<Mail className="w-4 h-4" />} readOnly />
+            <div className="sm:col-span-2">
+              <FormInput label="COMPANY NAME" value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Enter company name" icon={<Building2 className="w-4 h-4" />} />
+            </div>
+            <FormInput label="EMAIL ADDRESS" type="email" value={companyEmail} onChange={(e) => setCompanyEmail(e.target.value)} placeholder="Enter company email" icon={<Mail className="w-4 h-4" />} readOnly />
             <FormInput label="PHONE NUMBER" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Enter phone number" icon={<Phone className="w-4 h-4" />} />
-            <FormInput label="COMPANY ADDRESS" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Enter address" icon={<MapPin className="w-4 h-4" />} />
-          </div>
-
-          {/* Language */}
-          <div className="pt-2 border-t border-gray-100">
-            <div className="flex items-center gap-2 mb-3">
-              <Globe className="w-4 h-4 text-primary" />
-              <h3 className="text-fs-13 font-bold font-poppins text-text-primary">Language Preference</h3>
+            <div className="sm:col-span-2">
+              <FormInput label="REGISTERED ADDRESS" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Enter address" icon={<MapPin className="w-4 h-4" />} />
             </div>
-            <div className="flex items-center gap-2">
-              {(["en", "ar"] as const).map((lang) => (
-                <button
-                  key={lang}
-                  type="button"
-                  onClick={() => setLanguage(lang)}
-                  className={cn(
-                    "px-5 py-2 rounded-full text-fs-12 font-semibold transition-colors cursor-pointer",
-                    language === lang ? "bg-primary text-white shadow-sm" : "bg-input-bg text-text-secondary hover:bg-gray-200"
-                  )}
-                >
-                  {lang === "en" ? "English" : "العربية"}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {saveError && <p className="text-fs-11 text-red-600">{saveError}</p>}
-
-          <div className="flex items-center gap-3 pt-2">
-            <Button
-              onClick={handleSaveSettings}
-              isLoading={saving || loading}
-              className={cn(
-                "flex items-center gap-2 px-6 py-2.5 rounded-full text-fs-12 font-medium transition-colors",
-                saveSuccess ? "bg-success text-white" : "bg-primary text-white hover:bg-primary-dark"
-              )}
-            >
-              <Save className="w-4 h-4" />
-              {saveSuccess ? "Saved!" : "Save Changes"}
-            </Button>
           </div>
         </div>
 
-        {/* Right: Security + Logout */}
+        {/* Right: Language + Logout */}
         <div className="flex flex-col gap-4">
-          {/* Security Card */}
-          <div className="card-base p-6 space-y-4">
-            <div className="flex items-center gap-2">
-              <Lock className="w-4 h-4 text-primary" />
-              <h2 className="text-fs-14 font-bold font-poppins text-text-primary">Security Settings</h2>
+          <div className="card-base p-6 lg:p-7 space-y-5 flex-1 flex flex-col">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Globe className="w-4 h-4 text-primary" />
+                <h2 className="text-fs-14 font-bold font-poppins text-text-primary">Language</h2>
+              </div>
+              <p className="text-fs-12 text-text-secondary">Choose your preferred interface language.</p>
             </div>
-            <p className="text-fs-12 text-text-secondary leading-relaxed">
-              Keep your account secure by updating your password regularly.
-            </p>
-            <Button
-              onClick={() => { setChangePasswordModalOpen(true); setPasswordError(""); }}
-              variant="outline"
-              className="w-full py-2.5 text-fs-12 font-medium flex items-center justify-center gap-2 rounded-full"
-            >
-              <Lock className="w-4 h-4" />
-              Change Password
-            </Button>
-          </div>
+            
+            <div className="space-y-2 flex-1">
+              <button
+                type="button"
+                onClick={() => setLanguage("en")}
+                className={cn(
+                  "w-full flex items-center justify-between p-3 rounded-xl transition-all cursor-pointer",
+                  language === "en" ? "bg-gray-50 border border-gray-200" : "bg-transparent border border-transparent hover:bg-gray-50/50"
+                )}
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg">🇺🇸</span>
+                  <span className="text-fs-13 font-medium text-text-primary">English</span>
+                </div>
+                {language === "en" && <div className="w-4 h-4 rounded-full bg-primary text-white flex items-center justify-center"><CheckCircle2 className="w-3 h-3" /></div>}
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => setLanguage("ar")}
+                className={cn(
+                  "w-full flex items-center justify-between p-3 rounded-xl transition-all cursor-pointer",
+                  language === "ar" ? "bg-gray-50 border border-gray-200" : "bg-transparent border border-transparent hover:bg-gray-50/50"
+                )}
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg">🇸🇦</span>
+                  <span className="text-fs-13 font-medium text-text-primary">Arabic</span>
+                </div>
+                {language === "ar" && <div className="w-4 h-4 rounded-full bg-primary text-white flex items-center justify-center"><CheckCircle2 className="w-3 h-3" /></div>}
+              </button>
+            </div>
 
-          {/* Logout Card */}
-          <div className="card-base p-6 space-y-4">
-            <div className="flex items-center gap-2">
-              <LogOut className="w-4 h-4 text-error" />
-              <h2 className="text-fs-14 font-bold font-poppins text-text-primary">Logout</h2>
+            <div className="pt-4 border-t border-gray-100 mt-auto">
+              <p className="text-fs-10 font-bold text-gray-text uppercase tracking-wider mb-2.5">LOGOUT</p>
+              <button
+                type="button"
+                onClick={() => setLogoutModalOpen(true)}
+                className="w-fit px-6 py-2 rounded-full border border-error text-error text-fs-12 font-medium hover:bg-red-50 transition-colors cursor-pointer"
+              >
+                Logout
+              </button>
             </div>
-            <p className="text-fs-12 text-text-secondary">Sign out from the B2B portal.</p>
-            <button
-              type="button"
-              onClick={() => setLogoutModalOpen(true)}
-              className="w-full py-2.5 rounded-full border border-error text-error text-fs-12 font-medium hover:bg-red-50 transition-colors flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <LogOut className="w-4 h-4" />
-              Logout
-            </button>
           </div>
         </div>
+      </div>
+
+      {/* Bottom: Security Settings */}
+      <div className="card-base p-6 lg:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Lock className="w-4 h-4 text-primary" />
+            <h2 className="text-fs-14 font-bold font-poppins text-text-primary">Security Settings</h2>
+          </div>
+          <p className="text-fs-12 text-text-secondary">Update your password</p>
+        </div>
+        
+        <div className="flex items-end gap-4 w-full sm:w-auto">
+          <div className="flex-1 sm:w-64">
+            <label className="text-fs-10 font-bold text-gray-text uppercase tracking-wider block mb-1">CURRENT PASSWORD</label>
+            <div className="flex items-center justify-between border-b border-gray-200 pb-1.5">
+              <span className="text-lg tracking-widest text-text-primary leading-none mt-1">••••••••••••••••</span>
+              <EyeOff className="w-4 h-4 text-gray-400" />
+            </div>
+          </div>
+          <Button
+            onClick={() => { setChangePasswordModalOpen(true); setPasswordError(""); }}
+            variant="outline"
+            className="shrink-0 rounded-full h-[38px] px-5 text-xs font-medium border-gray-300 text-text-primary hover:bg-gray-50"
+          >
+            Change Password
+          </Button>
+        </div>
+      </div>
+
+      {/* Save Button */}
+      <div className="flex items-center justify-end pt-2 gap-3">
+        {saveError && <p className="text-fs-11 text-red-600 mr-2">{saveError}</p>}
+        <Button
+          onClick={handleSaveSettings}
+          isLoading={saving || loading}
+          className={cn(
+            "h-10 px-8 rounded-full text-fs-12 font-medium transition-colors shadow-md",
+            saveSuccess ? "bg-success text-white shadow-success/20" : "bg-primary text-white hover:bg-primary-dark shadow-primary/20"
+          )}
+        >
+          {saveSuccess ? "Saved Successfully!" : "Save Changes"}
+        </Button>
       </div>
 
       {/* Change Password Modal */}
@@ -202,8 +227,8 @@ export default function SettingsPage() {
           <FormInput label="CONFIRM PASSWORD" type={showPassword ? "text" : "password"} required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm new password" icon={<Lock className="w-4 h-4" />} />
           {passwordError && <p className="text-fs-11 text-red-600">{passwordError}</p>}
           <div className="flex items-center gap-3 pt-3">
-            <Button type="button" variant="outline" onClick={() => setChangePasswordModalOpen(false)} className="flex-1 py-2.5 text-fs-12">Cancel</Button>
-            <Button type="submit" isLoading={passwordLoading} className="flex-1 py-2.5 text-fs-12 font-medium bg-primary text-white hover:bg-primary-dark">Update Password →</Button>
+            <Button type="button" variant="outline" onClick={() => setChangePasswordModalOpen(false)} className="flex-1 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-50 hover:text-red-600">Cancel</Button>
+            <Button type="submit" isLoading={passwordLoading} className="flex-1 py-2.5 text-xs font-semibold bg-primary text-white hover:bg-primary-dark">Update Password →</Button>
           </div>
         </form>
       </Modal>
@@ -221,7 +246,7 @@ export default function SettingsPage() {
             <p className="text-fs-12 text-text-secondary">Are you sure you want to sign out?</p>
           </div>
           <div className="flex items-center gap-3 w-full">
-            <Button type="button" variant="outline" onClick={() => setLogoutModalOpen(false)} className="flex-1 py-2.5 text-fs-12">Cancel</Button>
+            <Button type="button" variant="outline" onClick={() => setLogoutModalOpen(false)} className="flex-1 py-2.5 text-fs-12 text-red-600 hover:bg-red-50 hover:text-red-600">Cancel</Button>
             <button type="button" onClick={handleLogout} className="flex-1 py-2.5 rounded-full bg-error text-white text-fs-12 font-medium hover:bg-red-700 transition-colors cursor-pointer">
               Yes, Logout
             </button>

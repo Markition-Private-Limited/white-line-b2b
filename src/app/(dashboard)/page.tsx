@@ -45,7 +45,8 @@ export default function DashboardPage() {
   return (
     <div className="space-y-4">
       {/* 5 Top Stats Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="bg-white p-3 lg:p-4 rounded-[32px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-gray-100">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {/* Card 1: Active Requests */}
         <div className="rounded-[28px] p-5 lg:p-6 flex flex-col justify-between min-h-[165px] bg-[#E2F8FA] border border-[#CDEEF2] shadow-[0_4px_24px_rgba(0,0,0,0.02)] relative overflow-hidden transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
           <div className="flex items-start justify-between">
@@ -142,11 +143,6 @@ export default function DashboardPage() {
 
         {/* Card 5: Due Invoices */}
         <div className="rounded-[28px] p-5 lg:p-6 flex flex-col justify-between min-h-[165px] bg-[#005C66] text-white shadow-[0_8px_30px_rgba(0,92,102,0.22)] relative overflow-hidden transition-all duration-200 hover:shadow-[0_12px_36px_rgba(0,92,102,0.3)]">
-          <svg className="w-36 h-36 text-white/10 absolute -bottom-8 -left-6 pointer-events-none" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M50 20 C45 20, 42 12, 40 8 C48 10, 52 10, 60 8 C58 12, 55 20, 50 20 Z" fill="currentColor" fillOpacity="0.05" />
-            <circle cx="50" cy="22" r="4" fill="currentColor" fillOpacity="0.2" />
-            <path d="M50 24 C30 24, 15 45, 15 70 C15 88, 30 92, 50 92 C70 92, 85 88, 85 70 C85 45, 70 24, 50 24 Z" />
-          </svg>
           <div className="flex items-start justify-between relative z-10">
             <span className="text-sm font-bold leading-tight font-poppins text-white">
               Due<br />Invoices
@@ -160,6 +156,7 @@ export default function DashboardPage() {
               {loading ? "—" : (stats?.due_invoices ?? 0)}
             </span>
           </div>
+        </div>
         </div>
       </div>
 

@@ -29,7 +29,9 @@ export function HeaderNav() {
   const b2bClient = authService.getStoredClient();
 
   const [serviceMenuOpen, setServiceMenuOpen] = useState(false);
+  const [serviceClicked, setServiceClicked] = useState(false);
   const [complaintsMenuOpen, setComplaintsMenuOpen] = useState(false);
+  const [complaintsClicked, setComplaintsClicked] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [notifMenuOpen, setNotifMenuOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
@@ -41,20 +43,22 @@ export function HeaderNav() {
 
   // Close dropdowns on outside click
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setProfileMenuOpen(false);
+      }
       if (serviceRef.current && !serviceRef.current.contains(event.target as Node)) {
         setServiceMenuOpen(false);
+        setServiceClicked(false);
       }
       if (complaintsRef.current && !complaintsRef.current.contains(event.target as Node)) {
         setComplaintsMenuOpen(false);
-      }
-      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
-        setProfileMenuOpen(false);
+        setComplaintsClicked(false);
       }
       if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
         setNotifMenuOpen(false);
       }
-    }
+    };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -82,15 +86,15 @@ export function HeaderNav() {
   return (
     <>
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
-        <div className="max-w-[1440px] mx-auto px-0 lg:px-0 h-18 flex items-center justify-between gap-4">
+        <div className="max-w-[1440px] mx-auto px-3.5 sm:px-5 lg:px-6 h-18 flex items-center justify-between gap-4">
           {/* Left: Brand Logo */}
           <Link href="/" className="flex items-center shrink-0">
             <Image
               src="/dashboard_logo.png"
               alt="WhiteLine B2B Portal Logo"
-              width={135}
-              height={36}
-              className="h-8 w-auto object-contain"
+              width={170}
+              height={45}
+              className="h-10 w-auto object-contain"
               priority
             />
           </Link>
@@ -102,14 +106,22 @@ export function HeaderNav() {
             </Link>
 
             {/* Service Requests with Dropdown */}
-            <div className="relative" ref={serviceRef}>
+            <div 
+              className="relative group" 
+              ref={serviceRef}
+              onMouseEnter={() => { if (!serviceClicked) setServiceMenuOpen(true); }}
+              onMouseLeave={() => { if (!serviceClicked) setServiceMenuOpen(false); }}
+            >
               <button
                 type="button"
-                onClick={() => setServiceMenuOpen(!serviceMenuOpen)}
+                onClick={() => {
+                  setServiceClicked(!serviceClicked);
+                  setServiceMenuOpen(!serviceClicked);
+                }}
                 className={navLinkStyles("/service-requests")}
               >
                 Service Requests
-                <ChevronDown className={cn("w-3.5 h-3.5 transition-transform", serviceMenuOpen && "rotate-180")} />
+                <ChevronDown className={cn("w-3.5 h-3.5 transition-transform group-hover:rotate-180", serviceMenuOpen && "rotate-180")} />
               </button>
 
               {serviceMenuOpen && (
@@ -139,14 +151,22 @@ export function HeaderNav() {
             </Link>
 
             {/* Complaints with Dropdown */}
-            <div className="relative" ref={complaintsRef}>
+            <div 
+              className="relative group" 
+              ref={complaintsRef}
+              onMouseEnter={() => { if (!complaintsClicked) setComplaintsMenuOpen(true); }}
+              onMouseLeave={() => { if (!complaintsClicked) setComplaintsMenuOpen(false); }}
+            >
               <button
                 type="button"
-                onClick={() => setComplaintsMenuOpen(!complaintsMenuOpen)}
+                onClick={() => {
+                  setComplaintsClicked(!complaintsClicked);
+                  setComplaintsMenuOpen(!complaintsClicked);
+                }}
                 className={navLinkStyles("/complaints")}
               >
                 Complaints
-                <ChevronDown className={cn("w-3.5 h-3.5 transition-transform", complaintsMenuOpen && "rotate-180")} />
+                <ChevronDown className={cn("w-3.5 h-3.5 transition-transform group-hover:rotate-180", complaintsMenuOpen && "rotate-180")} />
               </button>
 
               {complaintsMenuOpen && (
@@ -293,7 +313,7 @@ export function HeaderNav() {
             <Button
               variant="outline"
               onClick={() => setLogoutModalOpen(false)}
-              className="flex-1 py-2.5 text-xs font-semibold"
+              className="flex-1 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-50 hover:text-red-600"
             >
               Cancel
             </Button>
