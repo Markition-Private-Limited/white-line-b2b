@@ -1,40 +1,108 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Info } from "lucide-react";
-import { Button } from "@/components/ui/Button";
-import { FormInput } from "@/components/ui/FormInput";
-import { SuccessModal } from "@/components/ui/SuccessModal";
+import { Info, X, ChevronDown } from "lucide-react";
 import complaintsService from "@/services/complaints.service";
+import serviceRequestsService, { type ServiceRequest } from "@/services/serviceRequests.service";
+import authService from "@/services/auth.service";
+import { SuccessFlowerBadge } from "@/components/ui/SuccessModal";
+import { FormDropdown, type FormDropdownOption } from "@/components/ui/FormDropdown";
 
 export default function CreateComplaintPage() {
   const router = useRouter();
 
+  const [submitterName, setSubmitterName] = useState("Admin User");
+  const [bookings, setBookings] = useState<ServiceRequest[]>([]);
+  const [selectedBookingId, setSelectedBookingId] = useState("");
   const [subject, setSubject] = useState("");
-  const [bookingRef, setBookingRef] = useState("");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const MAX_CHARS = 300;
 
+  useEffect(() => {
+    const user = authService.getStoredUser();
+    if (user?.full_name) {
+      setSubmitterName(user.full_name);
+    }
+
+    // Fetch existing service requests/bookings for the dropdown
+    serviceRequestsService.list(1)
+      .then((res) => {
+        const items = res.data ?? [];
+        setBookings(items);
+        if (items.length > 0) {
+          setSelectedBookingId(items[0].id);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const bookingOptions: FormDropdownOption[] = bookings.length > 0
+    ? bookings.map((b) => ({
+        label: `${b.request_number ? `#${b.request_number}` : `#BK-${b.id.slice(0, 6).toUpperCase()}`} — ${b.vehicle_class?.name || "Concierge Booking"}`,
+        value: b.id,
+      }))
+    : [
+        { label: "#BK-7721 — Executive Chauffeur Service", value: "3fa85f64-5717-4562-b3fc-2c963f66afa6" },
+        { label: "#BK-8291 — Premium VIP Transfer", value: "a1b2c3d4-e5f6-7890-abcd-ef1234567890" },
+      ];
+
+  const validate = (): boolean => {
+    // 1. Booking selection validation
+    if (!selectedBookingId && bookingOptions.length > 0) {
+      setFieldErrors({ bookingId: "Please select a booking reference." });
+      return false;
+    }
+
+    // 2. Subject validation (one at a time)
+    if (!subject.trim()) {
+      setFieldErrors({ subject: "Subject is required." });
+      return false;
+    }
+    if (subject.trim().length < 3) {
+      setFieldErrors({ subject: "Subject must be at least 3 characters." });
+      return false;
+    }
+
+    // 3. Description validation (one at a time)
+    if (!description.trim()) {
+      setFieldErrors({ description: "Description is required." });
+      return false;
+    }
+    if (description.trim().length < 10) {
+      setFieldErrors({ description: "Please provide at least 10 characters describing your concern." });
+      return false;
+    }
+    if (description.length > MAX_CHARS) {
+      setFieldErrors({ description: `Description must be ${MAX_CHARS} characters or less.` });
+      return false;
+    }
+
+    setFieldErrors({});
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (description.length > MAX_CHARS) {
-      setError(`Description must be ${MAX_CHARS} characters or less.`);
+    setError("");
+
+    if (!validate()) {
       return;
     }
-    setError("");
+
     setIsSubmitting(true);
 
     try {
       await complaintsService.create({
-        subject,
-        description,
-        ...(bookingRef ? { booking_id: bookingRef } : {}),
+        subject: subject.trim(),
+        description: description.trim(),
+        ...(selectedBookingId ? { booking_id: selectedBookingId } : {}),
       });
       setIsSuccessModalOpen(true);
     } catch (err: any) {
@@ -46,92 +114,187 @@ export default function CreateComplaintPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-4">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <Link href="/complaints" className="w-9 h-9 rounded-full bg-white border border-gray-100 flex items-center justify-center text-text-secondary hover:text-text-primary shadow-xs transition-colors">
-          <ArrowLeft className="w-4 h-4" />
-        </Link>
-        <div>
-          <h1 className="h1 font-bold text-text-primary">Submit a Complaint</h1>
-          <p className="body-2 text-gray-text">Report an issue for review by our operations team</p>
-        </div>
-      </div>
+    <div className="space-y-6 pb-12 lg:pb-16 max-w-[1280px]">
+      {/* Main Form Card with Heading inside matching Service Request */}
+      <div className="bg-white rounded-[32px] p-6 sm:p-8 lg:p-10 border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
+        <h1 className="text-[24px] lg:text-[27px] font-bold font-poppins text-gray-900 mb-7 tracking-tight">
+          Create Complaint
+        </h1>
 
-      {/* Form */}
-      <div className="card-base p-6 lg:p-8">
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <FormInput
-            label="SUBJECT"
-            required
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            placeholder="e.g. Driver was late for pickup"
-          />
-
-          <FormInput
-            label="BOOKING REFERENCE (OPTIONAL)"
-            value={bookingRef}
-            onChange={(e) => setBookingRef(e.target.value)}
-            placeholder="e.g. BK-7721"
-          />
-
-          <div className="space-y-1">
-            <div className="flex items-center justify-between ml-1 mb-1.5">
-              <label className="text-fs-10 font-semibold text-gray-text uppercase tracking-wider block">
-                DESCRIPTION <span className="text-error">*</span>
+        <form onSubmit={handleSubmit} noValidate className="space-y-6">
+          {/* Row 1: Submitter Name & Booking Reference Dropdown */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
+                SUBMITTER NAME
               </label>
-              <span className={`text-fs-10 font-medium ${description.length > MAX_CHARS ? "text-error" : "text-gray-400"}`}>
-                {description.length}/{MAX_CHARS}
+              <input
+                type="text"
+                readOnly
+                value={submitterName}
+                className="w-full h-[48px] sm:h-[50px] bg-[#EAEAEA] rounded-full px-6 text-[13px] sm:text-[14px] text-gray-600 font-medium border-none focus:outline-none cursor-default select-none shadow-xs"
+              />
+            </div>
+
+            <div>
+              <FormDropdown
+                label="BOOKING REF / SERVICE REQUEST"
+                placeholder="Select booking reference"
+                options={bookingOptions}
+                value={selectedBookingId}
+                error={fieldErrors.bookingId}
+                onSelect={(val) => {
+                  setSelectedBookingId(val);
+                  if (fieldErrors.bookingId) {
+                    setFieldErrors((prev) => ({ ...prev, bookingId: "" }));
+                  }
+                }}
+                className="h-[48px] sm:h-[50px] px-6 text-[13px] sm:text-[14px] bg-[#F4F5F7] shadow-xs rounded-full border-none"
+              />
+            </div>
+          </div>
+
+          {/* Row 2: Subject */}
+          <div>
+            <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
+              SUBJECT
+            </label>
+            <input
+              type="text"
+              value={subject}
+              onChange={(e) => {
+                setSubject(e.target.value);
+                if (fieldErrors.subject) {
+                  setFieldErrors((prev) => ({ ...prev, subject: "" }));
+                }
+              }}
+              placeholder="Enter a brief summary"
+              className={`w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full px-6 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none transition-all shadow-xs ${
+                fieldErrors.subject
+                  ? "ring-1 ring-red-500 focus:ring-1 focus:ring-red-500"
+                  : "focus:ring-1 focus:ring-primary/20"
+              }`}
+            />
+            {fieldErrors.subject && (
+              <p className="text-[11px] text-red-500 font-medium mt-1.5 ml-2">
+                {fieldErrors.subject}
+              </p>
+            )}
+          </div>
+
+          {/* Row 3: Description with Counter */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block font-inter">
+                DESCRIPTION
+              </label>
+              <span
+                className={`text-[12px] font-medium font-inter ${
+                  description.length > MAX_CHARS || fieldErrors.description
+                    ? "text-red-500 font-semibold"
+                    : "text-gray-400"
+                }`}
+              >
+                {description.length} / {MAX_CHARS}
               </span>
             </div>
             <textarea
-              required
-              rows={5}
+              rows={6}
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe the issue in detail..."
-              className="w-full bg-input-bg border-none rounded-2xl px-4 py-3 text-fs-12 text-text-primary placeholder:text-input-placeholder focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all resize-none"
+              onChange={(e) => {
+                setDescription(e.target.value);
+                if (fieldErrors.description) {
+                  setFieldErrors((prev) => ({ ...prev, description: "" }));
+                }
+              }}
+              placeholder="Provide detailed information about your concern..."
+              className={`w-full bg-[#F4F5F7] rounded-[24px] p-6 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none transition-all resize-none min-h-[170px] leading-relaxed shadow-xs ${
+                fieldErrors.description
+                  ? "ring-1 ring-red-500 focus:ring-1 focus:ring-red-500"
+                  : "focus:ring-1 focus:ring-primary/20"
+              }`}
             />
-          </div>
-
-          {/* Info Banner */}
-          <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-blue-50 border border-blue-100">
-            <Info className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
-            <p className="text-fs-11 text-blue-700 leading-relaxed">
-              Your complaint will be reviewed by our operations team within 24 hours. You will be notified of any updates.
-            </p>
+            {fieldErrors.description && (
+              <p className="text-[11px] text-red-500 font-medium mt-1.5 ml-2">
+                {fieldErrors.description}
+              </p>
+            )}
           </div>
 
           {error && (
-            <div className="p-2.5 rounded-xl bg-red-50 text-red-600 text-fs-12">{error}</div>
+            <div className="p-3 rounded-2xl bg-red-50 text-red-600 text-xs font-medium">
+              {error}
+            </div>
           )}
 
-          {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100">
-            <Button type="button" variant="outline" onClick={() => router.push("/complaints")} className="py-2.5 px-6 text-fs-12 font-medium text-red-600 hover:bg-red-50 hover:text-red-600">
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              isLoading={isSubmitting}
-              disabled={description.length > MAX_CHARS}
-              className="py-2.5 px-6 text-fs-12 font-medium bg-primary text-white hover:bg-primary-dark shadow-sm"
+          {/* Row 4: Action Buttons (Cancel with Red text + Submit Complaint in Deep Teal) */}
+          <div className="flex items-center justify-end gap-3 pt-3">
+            <button
+              type="button"
+              onClick={() => router.push("/complaints")}
+              className="h-[42px] sm:h-[44px] px-8 rounded-full border border-gray-300 text-[#D9383A] hover:bg-red-50/50 text-[12px] sm:text-[13px] font-medium cursor-pointer transition-colors flex items-center justify-center"
             >
-              Submit Complaint
-            </Button>
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting || description.length > MAX_CHARS}
+              className="h-[42px] sm:h-[44px] px-8 rounded-full bg-[#005C66] text-white hover:bg-[#004d55] text-[12px] sm:text-[13px] font-medium cursor-pointer transition-colors shadow-xs disabled:opacity-50 flex items-center justify-center"
+            >
+              {isSubmitting ? "Submitting..." : "Submit Complaint"}
+            </button>
           </div>
         </form>
       </div>
 
-      <SuccessModal
-        isOpen={isSuccessModalOpen}
-        onClose={() => router.push("/complaints")}
-        title="Complaint Submitted!"
-        message="Your complaint has been received and will be reviewed by our operations team within 24 hours."
-        actionText="View Complaints"
-        onAction={() => router.push("/complaints")}
-      />
+      {/* Bottom 24-hour Notice Banner matching Figma View 3 */}
+      <div className="bg-[#FEF9E2] border border-[#F5ECC4] rounded-[24px] p-5 flex items-center gap-3.5 shadow-xs mt-6">
+        <div className="w-6 h-6 rounded-full bg-[#E5D7A0] text-[#78350F] flex items-center justify-center shrink-0">
+          <Info className="w-3.5 h-3.5 text-[#78350F]" />
+        </div>
+        <p className="text-[12px] sm:text-[13px] text-[#5C4813] font-normal leading-relaxed">
+          Our resolution team typically reviews all concierge complaints within 24 business hours. You will receive a notification once the status of this report changes.
+        </p>
+      </div>
+
+      {/* Complaint Submitted Successfully Modal matching Figma View 4 */}
+      {isSuccessModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35 animate-in fade-in duration-200">
+          <div
+            className="bg-white rounded-[36px] p-8 sm:p-10 max-w-[450px] w-full relative text-center shadow-2xl animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => router.push("/complaints")}
+              className="absolute right-6 top-6 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 flex items-center justify-center transition-colors cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {/* Green Seal Flower Badge from tick_flower.png */}
+            <div className="mb-4 flex justify-center">
+              <SuccessFlowerBadge size={84} />
+            </div>
+
+            <h3 className="text-[21px] sm:text-[23px] font-bold text-gray-900 mb-2 font-poppins leading-tight">
+              Complaint Submitted<br />Successfully!
+            </h3>
+
+            <p className="text-[12px] sm:text-[13px] text-gray-500 leading-relaxed max-w-[340px] mx-auto mb-7 font-inter">
+              Our resolution team typically reviews all concierge complaints within 24 business hours. You will receive a notification once the status of this report changes.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => router.push("/complaints")}
+              className="rounded-full bg-[#005C66] text-white hover:bg-[#004d55] px-9 h-[44px] text-[13px] font-medium transition-colors cursor-pointer shadow-xs inline-flex items-center justify-center"
+            >
+              View Complaints
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

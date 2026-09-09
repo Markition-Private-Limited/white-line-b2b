@@ -11,7 +11,15 @@ export interface Invoice {
   total_amount: number;
   status: string;
   paid_at?: string;
-  b2b_client?: { company_name: string };
+  b2b_client?: { company_name?: string; logo?: string; logo_url?: string; avatar?: string };
+}
+
+export interface InvoiceListParams {
+  page?: number;
+  status?: string;
+  search?: string;
+  start_date?: string;
+  end_date?: string;
 }
 
 export interface PaginatedResponse<T> {
@@ -22,8 +30,9 @@ export interface PaginatedResponse<T> {
 }
 
 const invoicesService = {
-  async list(page = 1): Promise<PaginatedResponse<Invoice>> {
-    const { data } = await apiClient.get('/b2b/invoices', { params: { page } });
+  async list(params: InvoiceListParams | number = 1): Promise<PaginatedResponse<Invoice>> {
+    const queryParams = typeof params === 'number' ? { page: params } : params;
+    const { data } = await apiClient.get('/b2b/invoices', { params: queryParams });
     return data.data ?? data;
   },
 

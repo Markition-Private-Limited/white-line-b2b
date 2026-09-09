@@ -9,6 +9,7 @@ import { Toggle } from "@/components/ui/Toggle";
 import { Modal } from "@/components/ui/Modal";
 import { SuccessModal } from "@/components/ui/SuccessModal";
 import { FormInput } from "@/components/ui/FormInput";
+import { PasswordStrengthBar } from "@/components/ui/PasswordStrengthBar";
 import { FormDropdown } from "@/components/ui/FormDropdown";
 import { DataTable, type ColumnDef } from "@/components/layout/DataTableContainer";
 import usersService, { type SpocUser } from "@/services/users.service";
@@ -163,7 +164,7 @@ export default function UsersPage() {
             <MoreVertical className="w-4 h-4" />
           </button>
           {activeMenuId === row.id && (
-            <div ref={menuRef} className="absolute right-0 top-full mt-1 w-44 bg-white rounded-2xl shadow-xl border border-gray-100 py-1.5 z-50 animate-in fade-in zoom-in-95 text-left">
+            <div ref={menuRef} className="absolute right-0 top-full mt-1 w-44 bg-white rounded-2xl shadow-xl border border-gray-100 py-1.5 z-30 animate-in fade-in zoom-in-95 text-left">
               <button
                 type="button"
                 onClick={() => { setChangePasswordUser(row); setActiveMenuId(null); }}
@@ -227,6 +228,7 @@ export default function UsersPage() {
               <p className="text-fs-11 text-gray-400">Update security credentials for {changePasswordUser.full_name}</p>
             </div>
             <FormInput label="NEW PASSWORD" type={showPassword ? "text" : "password"} required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Enter new password" icon={<Lock className="w-4 h-4" />} rightIcon={showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />} onRightIconClick={() => setShowPassword(!showPassword)} />
+            <PasswordStrengthBar password={newPassword} />
             <FormInput label="CONFIRM PASSWORD" type={showPassword ? "text" : "password"} required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm new password" icon={<Lock className="w-4 h-4" />} />
             {actionError && <p className="text-fs-11 text-red-600">{actionError}</p>}
             <div className="flex items-center gap-3 pt-3">

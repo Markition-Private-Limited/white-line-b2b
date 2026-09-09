@@ -1,10 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/Button";
 import { CounterInput } from "@/components/ui/CounterInput";
 import { SuccessModal } from "@/components/ui/SuccessModal";
 import { FormInput } from "@/components/ui/FormInput";
@@ -25,21 +22,55 @@ export default function CreateServiceRequestPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     vehicleClassesService.list()
       .then(setVehicleClasses)
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const classOptions = vehicleClasses.map((c) => c.name);
+
+  const validate = (): boolean => {
+    // 1. Start Date
+    if (!startDate) {
+      setFieldErrors({ startDate: "Start date is required." });
+      return false;
+    }
+
+    // 2. End Date
+    if (!endDate) {
+      setFieldErrors({ endDate: "End date is required." });
+      return false;
+    }
+
+    if (startDate && endDate && endDate < startDate) {
+      setFieldErrors({ endDate: "End date cannot be earlier than start date." });
+      return false;
+    }
+
+    // 3. Number of Vehicles
+    if (vehiclesCount <= 0) {
+      setFieldErrors({ vehiclesCount: "At least 1 vehicle is required." });
+      return false;
+    }
+
+    // 4. Vehicle Category
+    if (!selectedClassId && vehicleClasses.length > 0) {
+      setFieldErrors({ vehicleClass: "Please select a vehicle category." });
+      return false;
+    }
+
+    setFieldErrors({});
+    return true;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    if (!selectedClassId && vehicleClasses.length > 0) {
-      setError("Please select a vehicle category.");
+    if (!validate()) {
       return;
     }
 
@@ -64,37 +95,74 @@ export default function CreateServiceRequestPage() {
 
   const handleClassSelect = (name: string) => {
     const found = vehicleClasses.find((c) => c.name === name);
-    if (found) setSelectedClassId(found.id);
+    if (found) {
+      setSelectedClassId(found.id);
+      setFieldErrors((prev) => ({ ...prev, vehicleClass: "" }));
+    }
   };
 
   const selectedClassName = vehicleClasses.find((c) => c.id === selectedClassId)?.name ?? "";
 
   return (
-    <div className="max-w-3xl mx-auto space-y-4">
-      {/* Top Header */}
-      <div className="flex items-center gap-3">
-        <Link href="/service-requests" className="w-9 h-9 rounded-full bg-white border border-gray-100 flex items-center justify-center text-text-secondary hover:text-text-primary shadow-xs transition-colors">
-          <ArrowLeft className="w-4 h-4" />
-        </Link>
-        <div>
-          <h1 className="h1 font-bold text-text-primary">Create Service Request</h1>
-          <p className="body-2 text-gray-text">Request dedicated vehicles and chauffeurs for corporate mobility</p>
-        </div>
-      </div>
+    <div className="space-y-4">
+      {/* Form Container with Heading Inside */}
+      <div className="card-base p-6 lg:p-8 bg-white rounded-[28px] border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
+        <h1 className="text-fs-22 lg:text-fs-27 font-bold font-poppins text-text-primary mb-6">
+          Create Service Request
+        </h1>
 
-      {/* Form Container */}
-      <div className="card-base p-6 lg:p-8">
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
           {/* Row 1: Start Date & End Date */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <FormInput label="START DATE" type="date" required value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-            <FormInput label="END DATE" type="date" required value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+            <FormInput
+              label="START DATE"
+              type="date"
+              required
+              value={startDate}
+              error={fieldErrors.startDate}
+              onChange={(e) => {
+                const val = e.target.value;
+                setStartDate(val);
+                setFieldErrors((prev) => ({ ...prev, startDate: "" }));
+                if (endDate && val && endDate < val) {
+                  setEndDate("");
+                }
+              }}
+            />
+            <FormInput
+              label="END DATE"
+              type="date"
+              required
+              min={startDate || undefined}
+              value={endDate}
+              error={fieldErrors.endDate}
+              onChange={(e) => {
+                setEndDate(e.target.value);
+                setFieldErrors((prev) => ({ ...prev, endDate: "" }));
+              }}
+            />
           </div>
 
           {/* Row 2: Counter Inputs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <CounterInput label="NUMBER OF VEHICLES" value={vehiclesCount} onChange={setVehiclesCount} min={0} max={100} />
-            <CounterInput label="NUMBER OF DRIVERS" value={driversCount} onChange={setDriversCount} min={0} max={100} />
+            <CounterInput
+              label="NUMBER OF VEHICLES"
+              value={vehiclesCount}
+              error={fieldErrors.vehiclesCount}
+              onChange={(val) => {
+                setVehiclesCount(val);
+                if (val > 0) setFieldErrors((prev) => ({ ...prev, vehiclesCount: "" }));
+              }}
+              min={0}
+              max={100}
+            />
+            <CounterInput
+              label="NUMBER OF DRIVERS"
+              value={driversCount}
+              onChange={setDriversCount}
+              min={0}
+              max={100}
+            />
           </div>
 
           {/* Row 3: Vehicle Category */}
@@ -103,7 +171,11 @@ export default function CreateServiceRequestPage() {
             placeholder="Select vehicle category"
             options={classOptions.length > 0 ? classOptions : ["Premium Executive SUV", "Business Class Sedan", "First Class Luxury", "Executive Chauffeur Van"]}
             value={selectedClassName}
-            onSelect={classOptions.length > 0 ? handleClassSelect : setSelectedClassId}
+            error={fieldErrors.vehicleClass}
+            onSelect={classOptions.length > 0 ? handleClassSelect : (id) => {
+              setSelectedClassId(id);
+              setFieldErrors((prev) => ({ ...prev, vehicleClass: "" }));
+            }}
           />
 
           {/* Row 4: Notes */}
@@ -125,13 +197,21 @@ export default function CreateServiceRequestPage() {
           )}
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100">
-            <Button type="button" variant="outline" onClick={() => router.push("/service-requests")} className="py-2.5 px-6 text-fs-12 font-medium text-red-600 hover:bg-red-50 hover:text-red-600">
+          <div className="flex items-center justify-center gap-4 pt-4">
+            <button
+              type="button"
+              onClick={() => router.push("/service-requests")}
+              className="py-2.5 px-8 text-fs-12 font-medium border border-gray-300 text-red-600 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
+            >
               Cancel
-            </Button>
-            <Button type="submit" isLoading={isSubmitting} className="py-2.5 px-6 text-fs-12 font-medium bg-primary text-white hover:bg-primary-dark shadow-sm">
-              Submit Request
-            </Button>
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="py-2.5 px-8 text-fs-12 font-medium bg-[#005C66] text-white hover:bg-[#004b54] rounded-full shadow-sm transition-colors cursor-pointer disabled:opacity-50"
+            >
+              {isSubmitting ? "Submitting..." : "Submit Request"}
+            </button>
           </div>
         </form>
       </div>

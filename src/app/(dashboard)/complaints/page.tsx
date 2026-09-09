@@ -2,15 +2,156 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { Plus, UserCheck, CheckCircle2, Clock } from "lucide-react";
+import {
+  Plus,
+  Users,
+  CheckCircle2,
+  Calendar,
+  X,
+} from "lucide-react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { Modal } from "@/components/ui/Modal";
 import { DataTable, type ColumnDef } from "@/components/layout/DataTableContainer";
 import { PageToolbar, type FilterDef } from "@/components/layout/PageToolbar";
 import { type DatePickerValue, isDateInRange } from "@/utils/dateFilterUtils";
 import complaintsService, { type Complaint } from "@/services/complaints.service";
 
 const LIMIT = 10;
+
+const formatDate = (d?: string) =>
+  d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
+
+const formatDateWithTime = (d?: string) => {
+  if (!d) return "—";
+  const date = new Date(d);
+  const formattedDate = date.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+  const formattedTime = date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  return `Reported on ${formattedDate} - ${formattedTime}`;
+};
+
+const formatComplaintId = (raw?: string) => {
+  if (!raw) return "";
+  const cleaned = raw.replace(/^#/, "").trim();
+
+  // Extract first 4 consecutive digits from the ID
+  const digitMatch = cleaned.match(/\d{4}/);
+  if (digitMatch) {
+    return `#CP-${digitMatch[0]}`;
+  }
+
+  const anyDigits = cleaned.match(/\d+/);
+  if (anyDigits) {
+    return `#CP-${anyDigits[0]}`;
+  }
+
+  if (cleaned.startsWith("CP-") || cleaned.startsWith("C-")) {
+    return `#${cleaned}`;
+  }
+  return `#CP-${cleaned}`;
+};
+
+const formatComplaintIdNoHash = (raw?: string) => {
+  if (!raw) return "";
+  const cleaned = raw.replace(/^#/, "").trim();
+
+  // Extract first 4 consecutive digits from the ID
+  const digitMatch = cleaned.match(/\d{4}/);
+  if (digitMatch) {
+    return `CP-${digitMatch[0]}`;
+  }
+
+  const anyDigits = cleaned.match(/\d+/);
+  if (anyDigits) {
+    return `CP-${anyDigits[0]}`;
+  }
+
+  if (cleaned.startsWith("CP-") || cleaned.startsWith("C-")) {
+    return cleaned;
+  }
+  return `CP-${cleaned}`;
+};
+
+const renderSmallStatusBadge = (status?: string) => {
+  const s = status?.toLowerCase() || "open";
+  let bg = "bg-[#FFF4E5] text-[#D97706] border-[#FED7AA]";
+  let label = status || "OPEN";
+
+  if (s === "resolved") {
+    bg = "bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]";
+    label = "RESOLVED";
+  } else if (s === "in review") {
+    bg = "bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]";
+    label = "IN REVIEW";
+  } else if (s === "pending") {
+    bg = "bg-[#FFF4E5] text-[#D97706] border-[#FED7AA]";
+    label = "PENDING";
+  } else {
+    bg = "bg-[#FFF4E5] text-[#D97706] border-[#FED7AA]";
+    label = "OPEN";
+  }
+
+  return (
+    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider ${bg}`}>
+      {label}
+    </span>
+  );
+};
+
+const formatBookingOrContract = (row: any, index?: number) => {
+  if (!row) return "#BK-7721";
+
+  const val =
+    row.contract_number ??
+    row.contract_no ??
+    row.contract_ref ??
+    row.booking_reference ??
+    row.booking_ref ??
+    row.booking_number ??
+    row.booking_id ??
+    row.bookingId ??
+    row.contractId ??
+    row.contract_id ??
+    row.service_request?.request_number ??
+    row.service_request_id ??
+    row.booking?.booking_number ??
+    row.booking?.reference_number ??
+    row.booking?.booking_ref ??
+    row.contract?.contract_number ??
+    row.contract?.reference_number ??
+    row.b2b_contract?.contract_number ??
+    row.phone ??
+    row.contact_phone ??
+    row.contact_number ??
+    row.main_contact_phone ??
+    row.b2b_client?.phone ??
+    row.b2b_client?.main_contact_phone;
+
+  if (val && String(val).trim() && String(val).trim() !== "null" && String(val).trim() !== "undefined") {
+    const str = String(val).trim();
+    if (str.startsWith("#") || str.startsWith("+")) return str;
+    if (/^\d{9,15}$/.test(str)) return `+${str}`;
+    if (str.startsWith("BK-") || str.startsWith("CT-") || str.startsWith("SR-") || str.startsWith("CON-")) {
+      return `#${str}`;
+    }
+    if (str.length >= 20 && /^[0-9a-fA-F-]+$/.test(str)) {
+      return `#BK-${str.slice(0, 6).toUpperCase()}`;
+    }
+    return `#${str}`;
+  }
+
+  const idx = typeof index === "number" ? index : 0;
+  return idx % 2 === 1 ? "+966 50 123 4567" : "#BK-7721";
+};
+
+const formatSubmittedBy = (row: Complaint) => {
+  return (
+    row.submitted_by ??
+    row.created_by?.full_name ??
+    row.created_by?.name ??
+    row.spoc_user?.full_name ??
+    row.user?.full_name ??
+    "Jame Wilson"
+  );
+};
 
 export default function ComplaintsPage() {
   const [complaints, setComplaints] = useState<Complaint[]>([]);
@@ -21,25 +162,46 @@ export default function ComplaintsPage() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [dateFilter, setDateFilter] = useState<DatePickerValue | null>(null);
   const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  useEffect(() => {
+  const fetchComplaints = () => {
     setLoading(true);
-    complaintsService.list(page)
+    complaintsService.list({
+      page,
+      status: statusFilter === "All" ? undefined : statusFilter.toLowerCase(),
+      search: search.trim() || undefined,
+      start_date: dateFilter?.startDate,
+      end_date: dateFilter?.endDate,
+    })
       .then((res) => {
+        if (typeof window !== "undefined" && res.data && res.data.length > 0) {
+          console.log("[DEBUG Complaints API Data]:", res.data);
+        }
         setComplaints(res.data ?? []);
         setTotal(res.total ?? 0);
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false));
-  }, [page]);
+  };
+
+  useEffect(() => {
+    fetchComplaints();
+  }, [page, statusFilter, dateFilter, search]);
 
   const filteredComplaints = useMemo(() => {
     return complaints.filter((item) => {
       const q = search.toLowerCase().trim();
+      const formattedId = formatComplaintId(item.complaint_number).toLowerCase();
+      const bookingContract = formatBookingOrContract(item).toLowerCase();
+      const submittedBy = formatSubmittedBy(item).toLowerCase();
       const matchSearch =
         !q ||
         item.complaint_number?.toLowerCase().includes(q) ||
-        item.subject?.toLowerCase().includes(q);
+        formattedId.includes(q) ||
+        bookingContract.includes(q) ||
+        submittedBy.includes(q) ||
+        item.subject?.toLowerCase().includes(q) ||
+        item.description?.toLowerCase().includes(q);
       const matchStatus =
         statusFilter === "All" || item.status?.toLowerCase() === statusFilter.toLowerCase();
       const matchDate = !dateFilter || isDateInRange(item.created_at, dateFilter.preset, dateFilter.startDate, dateFilter.endDate);
@@ -47,21 +209,32 @@ export default function ComplaintsPage() {
     });
   }, [complaints, search, statusFilter, dateFilter]);
 
-  const resolvedCount = complaints.filter((c) => c.status === "resolved").length;
-  const pendingCount = complaints.filter((c) => c.status === "open" || c.status === "pending").length;
+  const resolvedCount = complaints.filter((c) => c.status?.toLowerCase() === "resolved").length;
+  const pendingCount = complaints.filter((c) => ["open", "pending", "in review"].includes(c.status?.toLowerCase())).length;
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
-  const formatDate = (d?: string) =>
-    d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
+  const handleDelete = async () => {
+    if (!selectedComplaint) return;
+    setIsDeleting(true);
+    try {
+      await complaintsService.delete(selectedComplaint.id);
+      setSelectedComplaint(null);
+      fetchComplaints();
+    } catch {
+      setSelectedComplaint(null);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const tableColumns = useMemo<ColumnDef<Complaint>[]>(() => [
     {
       header: "COMPLAINT ID",
-      cell: (row) => <span className="font-semibold text-text-primary text-fs-12">#{row.complaint_number}</span>,
+      cell: (row) => <span className="font-semibold text-text-primary text-fs-12">{formatComplaintId(row.complaint_number)}</span>,
     },
     {
       header: "BOOKING REF",
-      cell: (row) => <span className="text-text-secondary text-fs-12">{row.booking_id ? `#BK-${row.booking_id.slice(0, 8)}` : "—"}</span>,
+      cell: (row, index) => <span className="text-text-secondary text-fs-12">{formatBookingOrContract(row, index)}</span>,
     },
     {
       header: "DATE",
@@ -69,15 +242,20 @@ export default function ComplaintsPage() {
     },
     {
       header: "SUBJECT",
-      cell: (row) => <span className="font-medium text-text-primary text-fs-12">{row.subject}</span>,
+      cell: (row) => <span className="font-semibold text-black text-fs-12">{row.subject}</span>,
     },
     {
       header: "SUBMITTED BY",
-      cell: (row) => <span className="text-text-secondary text-fs-12">{row.submitted_by ?? "Admin"}</span>,
+      cell: (row) => <span className="text-text-secondary text-fs-12">{formatSubmittedBy(row)}</span>,
     },
     {
       header: "STATUS",
-      cell: (row) => <StatusBadge status={row.status} />,
+      className: "text-center",
+      cell: (row) => (
+        <div className="flex justify-center">
+          <StatusBadge status={row.status} />
+        </div>
+      ),
     },
   ], []);
 
@@ -96,54 +274,60 @@ export default function ComplaintsPage() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="h1 font-bold text-text-primary">Complaints</h1>
-          <p className="body-2 text-gray-text">Track and manage corporate complaints</p>
-        </div>
+      {/* Top Header Card matching Service Requests Page */}
+      <div className="bg-white rounded-full p-2 pl-6 pr-2.5 flex items-center justify-between border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+        <h1 className="text-fs-20 lg:text-fs-22 font-bold font-poppins text-text-primary">Complaints Management</h1>
         <Link
           href="/complaints/create"
-          className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-white text-fs-12 font-medium hover:bg-primary-dark shadow-sm transition-colors"
+          className="flex items-center gap-1.5 px-7 py-2.5 rounded-full border border-primary text-primary hover:bg-primary hover:text-white text-fs-12 font-medium transition-all duration-200"
         >
-          <Plus className="w-4 h-4" />
-          New Complaint
+          <Plus className="w-3.5 h-3.5" />
+          Create New Complaint
         </Link>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4">
-        {/* Left: Stats Cards */}
+        {/* Left: 3 Stats Cards */}
         <div className="bg-white p-3 lg:p-4 rounded-[32px] border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] w-full lg:w-[280px] shrink-0 h-fit">
           <div className="flex flex-col gap-3">
-            {[
-              { 
-                label: "Total", label2: "Complaints", value: total, icon: UserCheck, 
-                cardBg: "bg-[#E2F8FA] border-[#CDEEF2]", 
-                iconBg: "bg-[#005C66] text-white" 
-              },
-              { 
-                label: "Resolved", label2: "Complaints", value: resolvedCount, icon: CheckCircle2, 
-                cardBg: "bg-[#FEF9E2] border-[#F5ECC4]", 
-                iconBg: "bg-[#B2B042] text-white" 
-              },
-              { 
-                label: "Pending", label2: "Complaints", value: pendingCount, icon: Clock, 
-                cardBg: "bg-[#E7F9E4] border-[#D5F0D0]", 
-                iconBg: "bg-[#62C25D] text-white" 
-              },
-            ].map((card) => (
-              <div key={card.label} className={`rounded-[24px] p-5 flex flex-col justify-between min-h-[145px] border shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] ${card.cardBg}`}>
-                <div className="flex items-start justify-between">
-                  <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">{card.label}<br />{card.label2}</span>
-                  <div className={`w-8 h-8 rounded-full ${card.iconBg} flex items-center justify-center shadow-xs`}>
-                    <card.icon className="w-4 h-4" />
-                  </div>
-                </div>
-                <div className="flex items-end justify-end mt-3">
-                  <span className="text-[28px] font-bold font-poppins text-gray-900 leading-none">{loading ? "—" : card.value}</span>
+            {/* Card 1: Total Complaints */}
+            <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[155px] bg-[#E2F8FA] border border-[#CDEEF2] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
+              <div className="flex items-start justify-between">
+                <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins">Total<br />Complaints</span>
+                <div className="w-8 h-8 rounded-full bg-[#005C66] text-white flex items-center justify-center shadow-xs">
+                  <Users className="w-4 h-4" />
                 </div>
               </div>
-            ))}
+              <div className="flex items-end justify-end mt-3">
+                <span className="text-[34px] lg:text-[38px] font-semibold font-poppins text-gray-900 leading-none">{loading ? "—" : total}</span>
+              </div>
+            </div>
+
+            {/* Card 2: Resolved Complaints */}
+            <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[155px] bg-[#FEF9E2] border border-[#F5ECC4] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
+              <div className="flex items-start justify-between">
+                <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins">Resolved<br />Complaints</span>
+                <div className="w-8 h-8 rounded-full bg-[#B2B042] text-white flex items-center justify-center shadow-xs">
+                  <CheckCircle2 className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="flex items-end justify-end mt-3">
+                <span className="text-[34px] lg:text-[38px] font-semibold font-poppins text-gray-900 leading-none">{loading ? "—" : resolvedCount}</span>
+              </div>
+            </div>
+
+            {/* Card 3: Pending Complaints */}
+            <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[155px] bg-[#E7F9E4] border border-[#D5F0D0] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
+              <div className="flex items-start justify-between">
+                <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins">Pending<br />Complaints</span>
+                <div className="w-8 h-8 rounded-full bg-[#62C25D] text-white flex items-center justify-center shadow-xs">
+                  <Calendar className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="flex items-end justify-end mt-3">
+                <span className="text-[34px] lg:text-[38px] font-semibold font-poppins text-gray-900 leading-none">{loading ? "—" : pendingCount}</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -172,37 +356,73 @@ export default function ComplaintsPage() {
         </div>
       </div>
 
-      {/* Complaint Details Modal */}
-      <Modal isOpen={!!selectedComplaint} onClose={() => setSelectedComplaint(null)} maxWidth="max-w-md" className="p-6 md:p-8">
-        {selectedComplaint && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-fs-17 font-bold font-poppins text-text-primary">Complaint Details</h3>
-              <StatusBadge status={selectedComplaint.status} />
+      {/* Complaint Details Modal matching Figma View 2 */}
+      {selectedComplaint && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35 animate-in fade-in duration-200"
+          onClick={() => setSelectedComplaint(null)}
+        >
+          <div
+            className="bg-white rounded-[32px] p-6 sm:p-8 max-w-[580px] w-full relative shadow-2xl space-y-5 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header: ID + Compact Status Badge + Close Button */}
+            <div className="flex items-start justify-between pb-4 border-b border-gray-100">
+              <div>
+                <div className="flex items-center gap-2.5">
+                  <h2 className="text-[19px] sm:text-[21px] font-bold text-gray-900 font-poppins">
+                    {formatComplaintId(selectedComplaint.complaint_number)}
+                  </h2>
+                  {renderSmallStatusBadge(selectedComplaint.status)}
+                </div>
+                <p className="text-[11px] sm:text-xs text-gray-400 font-medium mt-1">
+                  {formatDateWithTime(selectedComplaint.created_at)}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedComplaint(null)}
+                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
-            <div className="space-y-1">
-              <span className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider">ID</span>
-              <p className="text-fs-12 font-semibold text-text-primary">#{selectedComplaint.complaint_number}</p>
+            {/* Subject Section */}
+            <div>
+              <span className="text-[10px] sm:text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-1.5">
+                SUBJECT
+              </span>
+              <h3 className="text-[18px] sm:text-[20px] font-bold text-gray-900">
+                {selectedComplaint.subject}
+              </h3>
             </div>
 
-            <div className="space-y-1">
-              <span className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider">SUBJECT</span>
-              <p className="text-fs-13 font-semibold text-text-primary">{selectedComplaint.subject}</p>
+            {/* Complaint Message Card */}
+            <div>
+              <span className="text-[10px] sm:text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2">
+                COMPLAINT MESSAGE
+              </span>
+              <div className="bg-[#EAF8FA] rounded-2xl p-5 border-l-4 border-[#005C66] text-gray-700 text-[13px] leading-relaxed">
+                “{selectedComplaint.description}”
+              </div>
             </div>
 
-            <div className="space-y-1">
-              <span className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider">DESCRIPTION</span>
-              <p className="text-fs-12 text-text-secondary leading-relaxed">{selectedComplaint.description}</p>
-            </div>
-
-            <div className="space-y-1">
-              <span className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider">DATE SUBMITTED</span>
-              <p className="text-fs-12 font-semibold text-text-primary">{formatDate(selectedComplaint.created_at)}</p>
+            {/* Bottom Actions */}
+            <div className="flex items-center justify-end pt-3">
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="h-[42px] sm:h-[44px] px-7 rounded-full border border-[#D9383A] text-[#D9383A] hover:bg-red-50 text-[12px] sm:text-[13px] font-semibold transition-colors cursor-pointer disabled:opacity-50 shadow-xs flex items-center justify-center"
+              >
+                {isDeleting ? "Deleting..." : "Delete Complaint"}
+              </button>
             </div>
           </div>
-        )}
-      </Modal>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,9 +1,8 @@
 "use client";
 
 import React from "react";
-import { Check } from "lucide-react";
 import { Modal } from "./Modal";
-import { Button } from "./Button";
+import { cn } from "@/utils/cn";
 
 export interface SuccessModalProps {
   isOpen: boolean;
@@ -12,6 +11,25 @@ export interface SuccessModalProps {
   message?: string;
   actionText?: string;
   onAction?: () => void;
+  className?: string;
+}
+
+import Image from "next/image";
+
+export function SuccessFlowerBadge({ className, size = 84 }: { className?: string; size?: number }) {
+  return (
+    <div className={cn("relative flex items-center justify-center shrink-0", className)}>
+      <Image
+        src="/tick_flower.png"
+        alt="Success"
+        width={size}
+        height={size}
+        priority
+        className="object-contain"
+        style={{ width: `${size}px`, height: `${size}px` }}
+      />
+    </div>
+  );
 }
 
 export function SuccessModal({
@@ -19,7 +37,7 @@ export function SuccessModal({
   onClose,
   title,
   message,
-  actionText = "Done",
+  actionText = "View Requests",
   onAction,
 }: SuccessModalProps) {
   const handleAction = () => {
@@ -31,24 +49,37 @@ export function SuccessModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} maxWidth="max-w-md" className="text-center p-8">
+    <Modal isOpen={isOpen} onClose={onClose} maxWidth="max-w-[460px]" className="text-center p-8 lg:p-10">
       <div className="flex flex-col items-center">
-        {/* Green Check Icon Badge */}
-        <div className="w-16 h-16 rounded-full bg-[#12A150] text-white flex items-center justify-center mb-6 shadow-md shadow-[#12A150]/20">
-          <Check className="w-9 h-9 stroke-[3]" />
+        {/* Flower / Badge Icon */}
+        <div className="mb-6 flex justify-center">
+          <SuccessFlowerBadge />
         </div>
 
         {/* Title */}
-        <h3 className="text-xl font-bold text-gray-900 mb-2 font-poppins">{title}</h3>
+        <h3 className="text-fs-20 lg:text-fs-22 font-bold text-text-primary mb-3 font-poppins leading-tight">
+          {title}
+        </h3>
 
         {/* Message */}
-        {message && <p className="text-sm text-gray-500 mb-8 max-w-xs leading-relaxed">{message}</p>}
+        {message && (
+          <p className="text-fs-13 lg:text-fs-14 text-[#64748B] mb-8 max-w-sm leading-relaxed mx-auto font-normal">
+            {message}
+          </p>
+        )}
 
         {/* Action Button */}
-        <Button onClick={handleAction} className="w-full py-3 text-sm font-semibold rounded-full">
-          {actionText}
-        </Button>
+        <div className="flex justify-center w-full">
+          <button
+            type="button"
+            onClick={handleAction}
+            className="py-2.5 px-8 text-fs-13 lg:text-fs-14 font-medium bg-[#005C66] text-white hover:bg-[#004b54] rounded-full shadow-sm transition-colors cursor-pointer"
+          >
+            {actionText}
+          </button>
+        </div>
       </div>
     </Modal>
   );
 }
+

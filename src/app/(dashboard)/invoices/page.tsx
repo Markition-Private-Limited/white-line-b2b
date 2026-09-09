@@ -19,6 +19,29 @@ import invoicesService, { type Invoice } from "@/services/invoices.service";
 
 const LIMIT = 10;
 
+const formatDate = (d?: string) =>
+  d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
+
+const formatAmount = (v: number) => `SAR ${Number(v ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+
+const formatInvoiceBadge = (raw?: string) => {
+  if (!raw) return "";
+  const cleaned = raw.replace(/^#/, "").trim();
+
+  // Extract first 4 consecutive digits from the ID
+  const digitMatch = cleaned.match(/\d{4}/);
+  if (digitMatch) {
+    return `INV-${digitMatch[0]}`;
+  }
+
+  const anyDigits = cleaned.match(/\d+/);
+  if (anyDigits) {
+    return `INV-${anyDigits[0]}`;
+  }
+
+  return cleaned;
+};
+
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [total, setTotal] = useState(0);
@@ -31,21 +54,29 @@ export default function InvoicesPage() {
 
   useEffect(() => {
     setLoading(true);
-    invoicesService.list(page)
+    invoicesService.list({
+      page,
+      status: statusFilter === "All" ? undefined : statusFilter.toLowerCase(),
+      search: search.trim() || undefined,
+      start_date: dateFilter?.startDate,
+      end_date: dateFilter?.endDate,
+    })
       .then((res) => {
         setInvoices(res.data ?? []);
         setTotal(res.total ?? 0);
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false));
-  }, [page]);
+  }, [page, statusFilter, dateFilter, search]);
 
   const filtered = useMemo(() => {
     return invoices.filter((inv) => {
       const q = search.toLowerCase().trim();
+      const formattedBadge = formatInvoiceBadge(inv.invoice_number).toLowerCase();
       const matchSearch =
         !q ||
         inv.invoice_number?.toLowerCase().includes(q) ||
+        formattedBadge.includes(q) ||
         inv.description?.toLowerCase().includes(q) ||
         String(inv.total_amount).includes(q);
       const matchStatus =
@@ -66,15 +97,10 @@ export default function InvoicesPage() {
 
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
-  const formatDate = (d?: string) =>
-    d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
-
-  const formatAmount = (v: number) => `SAR ${Number(v ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-
   const tableColumns = useMemo<ColumnDef<Invoice>[]>(() => [
     {
-      header: "INVOICE #",
-      cell: (row) => <span className="font-semibold text-text-primary text-fs-12">#{row.invoice_number}</span>,
+      header: "INVOICE",
+      cell: (row) => <span className="font-semibold text-text-primary text-fs-12">{formatInvoiceBadge(row.invoice_number)}</span>,
     },
     {
       header: "DATE",
@@ -86,7 +112,7 @@ export default function InvoicesPage() {
     },
     {
       header: "INVOICE DESCRIPTION",
-      cell: (row) => <span className="font-medium text-text-primary text-fs-12">{row.description ?? row.b2b_client?.company_name ?? "—"}</span>,
+      cell: (row) => <span className="font-semibold text-black text-fs-12">{row.description ?? row.b2b_client?.company_name ?? "—"}</span>,
     },
     {
       header: "AMOUNT",
@@ -118,47 +144,43 @@ export default function InvoicesPage() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="h1 font-bold text-text-primary">Billing &amp; Invoices</h1>
-      </div>
-
       <div className="flex flex-col lg:flex-row gap-4">
         {/* Left: Stats Cards */}
         <div className="bg-white p-3 lg:p-4 rounded-[32px] border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] w-full lg:w-[280px] shrink-0 h-fit">
           <div className="flex flex-col gap-3">
-            <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[145px] bg-[#E2F8FA] border border-[#CDEEF2] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
+            <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[155px] bg-[#E2F8FA] border border-[#CDEEF2] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
               <div className="flex items-start justify-between">
-                <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">Paid<br />Invoices</span>
+                <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins">Paid<br />Invoices</span>
                 <div className="w-8 h-8 rounded-full bg-[#005C66] text-white flex items-center justify-center shadow-xs">
                   <CheckCircle2 className="w-4 h-4" />
                 </div>
               </div>
               <div className="flex items-end justify-end mt-3">
-                <span className="text-[28px] font-bold font-poppins text-gray-900 leading-none">{loading ? "—" : paidCount}</span>
+                <span className="text-[34px] lg:text-[38px] font-semibold font-poppins text-gray-900 leading-none">{loading ? "—" : paidCount}</span>
               </div>
             </div>
 
-            <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[145px] bg-[#FEF9E2] border border-[#F5ECC4] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
+            <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[155px] bg-[#FEF9E2] border border-[#F5ECC4] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
               <div className="flex items-start justify-between">
-                <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">Due<br />Soon</span>
+                <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins">Due<br />Soon</span>
                 <div className="w-8 h-8 rounded-full bg-[#B2B042] text-white flex items-center justify-center shadow-xs">
                   <Clock className="w-4 h-4" />
                 </div>
               </div>
               <div className="flex items-end justify-end mt-3">
-                <span className="text-[28px] font-bold font-poppins text-gray-900 leading-none">{loading ? "—" : dueSoonCount}</span>
+                <span className="text-[34px] lg:text-[38px] font-semibold font-poppins text-gray-900 leading-none">{loading ? "—" : dueSoonCount}</span>
               </div>
             </div>
 
-            <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[145px] bg-[#E7F9E4] border border-[#D5F0D0] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
+            <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[155px] bg-[#E7F9E4] border border-[#D5F0D0] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
               <div className="flex items-start justify-between">
-                <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">Unpaid<br />Invoices</span>
+                <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins">Unpaid<br />Invoices</span>
                 <div className="w-8 h-8 rounded-full bg-[#62C25D] text-white flex items-center justify-center shadow-xs">
                   <AlertCircle className="w-4 h-4" />
                 </div>
               </div>
               <div className="flex items-end justify-end mt-3">
-                <span className="text-[28px] font-bold font-poppins text-gray-900 leading-none">{loading ? "—" : unpaidCount}</span>
+                <span className="text-[34px] lg:text-[38px] font-semibold font-poppins text-gray-900 leading-none">{loading ? "—" : unpaidCount}</span>
               </div>
             </div>
           </div>
@@ -189,75 +211,115 @@ export default function InvoicesPage() {
       </div>
 
       {/* Invoice Details Modal */}
-      <Modal isOpen={!!selectedInvoice} onClose={() => setSelectedInvoice(null)} showCloseButton={false} maxWidth="max-w-md" className="p-6 md:p-8">
+      <Modal isOpen={!!selectedInvoice} onClose={() => setSelectedInvoice(null)} showCloseButton={false} maxWidth="max-w-[480px] sm:max-w-[500px]" className="p-7 sm:p-8">
         {selectedInvoice && (
-          <div className="space-y-6">
-            <div className="flex items-center gap-3">
-              <h3 className="text-fs-17 font-bold font-poppins text-text-primary">Invoice Details</h3>
-              <span className="text-fs-11 font-bold text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-full">
-                #{selectedInvoice.invoice_number}
+          <div className="space-y-5">
+            {/* Modal Header */}
+            <div className="flex items-center gap-2.5">
+              <h3 className="text-[18px] sm:text-[19px] font-bold font-poppins text-gray-900">Invoice Details</h3>
+              <span className="text-[11px] font-bold text-white bg-[#8E95A5] px-3 py-0.5 rounded-full">
+                {formatInvoiceBadge(selectedInvoice.invoice_number)}
               </span>
-              <span className="text-fs-9 font-bold uppercase tracking-wider bg-[#FFF3E6] text-[#FF8A00] px-2.5 py-0.5 rounded-full ml-auto">
-                {selectedInvoice.status?.toUpperCase()}
+              <span className="text-[11px] font-bold uppercase tracking-wider bg-[#FDF3E7] text-[#D97706] px-3.5 py-1 rounded-full ml-auto">
+                {selectedInvoice.status || "DUE"}
               </span>
             </div>
 
-            <div className="flex items-center gap-3 p-3 bg-gray-50/80 rounded-2xl border border-gray-100">
-              <div className="w-11 h-11 rounded-xl bg-white border border-gray-200 flex items-center justify-center p-1 shadow-xs overflow-hidden">
-                <Image src="/company.png" alt="Company Logo" width={36} height={36} className="object-contain" onError={(e) => { (e.target as HTMLElement).style.display = "none"; }} />
-              </div>
-              <div>
-                <h4 className="text-fs-12 font-bold text-text-primary">{selectedInvoice.b2b_client?.company_name ?? "—"}</h4>
-                <p className="text-fs-10 text-gray-400">{selectedInvoice.description ?? "Corporate Invoice"}</p>
-              </div>
-            </div>
+            {/* Client / Company Info Row (Dynamic Logo or First Letter Avatar) */}
+            {(() => {
+              const clientName = selectedInvoice.b2b_client?.company_name ?? "Global Corp";
+              const logoUrl = selectedInvoice.b2b_client?.logo_url || selectedInvoice.b2b_client?.logo;
+              const firstLetter = clientName.trim().charAt(0).toUpperCase() || "G";
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 bg-gray-50/80 rounded-xl space-y-1">
-                <div className="flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                  <span className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider">INVOICE DATE</span>
+              return (
+                <div className="flex items-center gap-3.5 pt-1">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 border border-primary/15 flex items-center justify-center overflow-hidden shrink-0 text-primary font-bold text-[18px]">
+                    {logoUrl ? (
+                      <img
+                        src={logoUrl}
+                        alt={clientName}
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                          (e.target as HTMLElement).style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      <span>{firstLetter}</span>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="text-[16px] font-bold text-gray-900 leading-tight">{clientName}</h4>
+                    <p className="text-[12px] text-gray-400 mt-0.5 font-normal">{selectedInvoice.description ?? "Tier 1 Enterprise Account"}</p>
+                  </div>
                 </div>
-                <span className="text-fs-12 font-bold text-text-primary block pl-5">{formatDate(selectedInvoice.invoice_date)}</span>
-              </div>
-              <div className="p-3 bg-gray-50/80 rounded-xl space-y-1">
-                <div className="flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                  <span className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider">DUE DATE</span>
+              );
+            })()}
+
+            {/* Contract Period & Due Date Combined Card */}
+            <div className="bg-[#F8F9FA] rounded-[22px] p-4 flex items-center justify-between gap-3 border border-gray-100/60">
+              <div className="flex items-start gap-2.5">
+                <Calendar className="w-4 h-4 text-gray-500 mt-0.5 shrink-0" />
+                <div>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
+                    CONTRACT PERIOD
+                  </span>
+                  <span className="text-[13px] font-bold text-gray-900 block mt-0.5">
+                    {selectedInvoice.invoice_date ? formatDate(selectedInvoice.invoice_date) : "Jan 01, 2024"} — {selectedInvoice.due_date ? formatDate(selectedInvoice.due_date) : "Dec 31, 2024"}
+                  </span>
                 </div>
-                <span className="text-fs-12 font-bold text-text-primary block pl-5">{formatDate(selectedInvoice.due_date)}</span>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <Calendar className="w-4 h-4 text-gray-500 mt-0.5 shrink-0" />
+                <div>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
+                    DUE DATE
+                  </span>
+                  <span className="text-[13px] font-bold text-gray-900 block mt-0.5">
+                    {formatDate(selectedInvoice.due_date)}
+                  </span>
+                </div>
               </div>
             </div>
 
-            <div className="bg-gray-50/80 rounded-2xl p-4 border border-gray-100 space-y-2.5">
-              <span className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider block">BILLING BREAKDOWN</span>
-              <div className="flex items-center justify-between text-fs-12 border-b border-gray-200/60 pb-2">
-                <span className="text-text-secondary">Subtotal</span>
-                <span className="font-bold text-text-primary">{formatAmount(selectedInvoice.subtotal)}</span>
+            {/* Service Details Card */}
+            <div className="bg-[#EAF6F8] rounded-[24px] p-5 space-y-3 border border-[#D5EEF2]/50">
+              <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">SERVICE DETAILS</span>
+              <div className="flex items-center justify-between text-[13px]">
+                <span className="text-gray-600 font-normal">Number of Drivers Required</span>
+                <span className="font-bold text-gray-900">2</span>
               </div>
-              <div className="flex items-center justify-between text-fs-12">
-                <span className="text-text-secondary">VAT (15%)</span>
-                <span className="font-bold text-text-primary">{formatAmount(selectedInvoice.vat_amount)}</span>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-r from-[#00B4D8] to-[#00C4DF] text-white p-5 rounded-2xl shadow-sm flex items-center justify-between relative overflow-hidden">
-              <div>
-                <span className="text-fs-9 uppercase font-bold tracking-widest text-white/80 block">INVOICE AMOUNT</span>
-                <span className="text-fs-20 font-bold font-poppins text-white">{formatAmount(selectedInvoice.total_amount)}</span>
-              </div>
-              <div className="flex items-end gap-1 opacity-40">
-                <span className="w-1.5 h-4 bg-white rounded-full" />
-                <span className="w-1.5 h-6 bg-white rounded-full" />
-                <span className="w-1.5 h-8 bg-white rounded-full" />
-                <span className="w-1.5 h-5 bg-white rounded-full" />
+              <div className="border-b border-dashed border-gray-300/80 my-1" />
+              <div className="flex items-center justify-between text-[13px]">
+                <span className="text-gray-600 font-normal">Number of Vehicles Required</span>
+                <span className="font-bold text-gray-900">1</span>
               </div>
             </div>
 
-            <Button onClick={() => setSelectedInvoice(null)} className="w-full py-3 text-fs-12 font-semibold rounded-full bg-primary text-white hover:bg-primary-dark flex items-center justify-center gap-2">
-              <Download className="w-4 h-4" />
-              Download Invoice
-            </Button>
+            {/* Total Amount Banner */}
+            <div className="bg-[#00BCD4] rounded-[24px] p-5 text-white flex items-center justify-between shadow-xs overflow-hidden relative">
+              <div className="relative z-10">
+                <span className="text-[10px] uppercase font-bold tracking-widest text-white/90 block mb-1">INVOICE AMOUNT</span>
+                <span className="text-[24px] font-bold font-poppins text-white leading-none">{formatAmount(selectedInvoice.total_amount)}</span>
+              </div>
+              <div className="flex items-end gap-1.5 shrink-0">
+                <div className="w-4 h-5 bg-white/40 rounded-xs" />
+                <div className="w-4 h-8 bg-white/60 rounded-xs" />
+                <div className="w-4 h-7 bg-white/75 rounded-xs" />
+                <div className="w-4 h-11 bg-white rounded-xs" />
+                <div className="w-4 h-9 bg-white rounded-xs" />
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end pt-1">
+              <button
+                onClick={() => setSelectedInvoice(null)}
+                className="h-11 sm:h-12 px-6 rounded-full bg-[#00525C] hover:bg-[#00414A] text-white text-[13px] font-semibold flex items-center gap-2 shadow-sm transition-colors cursor-pointer"
+              >
+                <Download className="w-4 h-4 stroke-[2.2]" />
+                Download Invoice
+              </button>
+            </div>
           </div>
         )}
       </Modal>

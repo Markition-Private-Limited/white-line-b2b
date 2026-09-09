@@ -85,7 +85,7 @@ export function HeaderNav() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
         <div className="max-w-[1440px] mx-auto px-3.5 sm:px-5 lg:px-6 h-18 flex items-center justify-between gap-4">
           {/* Left: Brand Logo */}
           <Link href="/" className="flex items-center shrink-0">
@@ -125,7 +125,7 @@ export function HeaderNav() {
               </button>
 
               {serviceMenuOpen && (
-                <div className="absolute top-full mt-2 left-0 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95">
+                <div className="absolute top-full mt-2 left-0 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-[60] animate-in fade-in zoom-in-95">
                   <Link
                     href="/service-requests"
                     onClick={() => setServiceMenuOpen(false)}
@@ -170,7 +170,7 @@ export function HeaderNav() {
               </button>
 
               {complaintsMenuOpen && (
-                <div className="absolute top-full mt-2 left-0 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95">
+                <div className="absolute top-full mt-2 left-0 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-[60] animate-in fade-in zoom-in-95">
                   <Link
                     href="/complaints"
                     onClick={() => setComplaintsMenuOpen(false)}
@@ -217,7 +217,7 @@ export function HeaderNav() {
               </button>
 
               {notifMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 z-50 animate-in fade-in zoom-in-95">
+                <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 z-[60] animate-in fade-in zoom-in-95">
                   <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
                     <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">Notifications</span>
                     <span className="text-[10px] font-semibold text-[#005C66] bg-[#E6F6F8] px-2 py-0.5 rounded-full">2 New</span>
@@ -264,7 +264,7 @@ export function HeaderNav() {
               </button>
 
               {profileMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95">
+                <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-[60] animate-in fade-in zoom-in-95">
                   <div className="px-4 py-2.5 border-b border-gray-100">
                     <p className="text-xs font-bold text-gray-900">{spocUser?.full_name ?? "User"}</p>
                     <p className="text-[10px] text-gray-500">{b2bClient?.company_name ?? "WhiteLine B2B"} • {spocUser?.role ?? "Member"}</p>

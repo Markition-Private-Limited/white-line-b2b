@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import authService from "@/services/auth.service";
 import { FormInput } from "@/components/ui/FormInput";
+import { PasswordStrengthBar } from "@/components/ui/PasswordStrengthBar";
 import { cn } from "@/utils/cn";
 
 export default function SignUpPage() {
@@ -103,9 +104,9 @@ export default function SignUpPage() {
           alt="WhiteLine Fleet Background"
           fill
           priority
-          className="object-cover opacity-85"
+          className="object-cover opacity-100"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/60" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-black/35" />
 
         {/* Top Brand Logo */}
         <div className="relative z-10 flex items-center">
@@ -119,18 +120,18 @@ export default function SignUpPage() {
           />
         </div>
 
-        {/* Center/Bottom Content */}
-        <div className="relative z-10 my-auto text-center max-w-md mx-auto py-6">
+        {/* Bottom Content */}
+        <div className="relative z-10 text-center max-w-md mx-auto mt-auto mb-10 lg:mb-14 py-4">
           <h1 className="h1 font-medium mb-3 tracking-tight text-white">
             Precision in Motion
           </h1>
-          <p className="body-1 text-white/80 font-light leading-relaxed">
+          <p className="body-1 text-white/90 font-light leading-relaxed">
             The command center for the world&apos;s most elite chauffeur logistics operations.
           </p>
         </div>
 
         {/* Bottom Footer Links */}
-        <div className="relative z-10 flex items-center justify-between text-fs-10 text-gray-400 border-t border-white/10 pt-4">
+        <div className="relative z-10 flex items-center justify-between text-fs-10 text-gray-300 border-t border-white/15 pt-4">
           <span>© 2026 ELITE CHAUFFEUR LOGISTICS</span>
           <div className="flex items-center gap-4">
             <Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link>
@@ -152,22 +153,22 @@ export default function SignUpPage() {
           />
         </div>
 
-        <div className="w-full max-w-[440px] bg-white rounded-[27px] p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/80 relative z-10">
+        <div className="w-full max-w-[480px] sm:max-w-[500px] bg-white rounded-[32px] p-7 sm:p-9 lg:p-10 shadow-[0_12px_40px_rgba(0,0,0,0.04)] border border-gray-100/90 relative z-10">
           {/* Header */}
-          <div className="mb-4">
-            <h3 className="text-fs-18 font-bold font-poppins text-text-primary mb-0.5">
+          <div className="mb-5">
+            <h3 className="text-fs-20 sm:text-fs-22 font-bold font-poppins text-text-primary mb-1">
               Create Your Corporate Account
             </h3>
-            <p className="body-3 text-gray-text">
+            <p className="text-[13px] sm:text-[14px] text-gray-text leading-relaxed">
               Join WhiteLine for exclusive corporate mobility solutions.
             </p>
           </div>
 
           {/* Stepper Progress Indicator */}
-          <div className="flex items-center justify-between mb-4 relative px-4">
-            <div className="absolute top-3 left-8 right-8 h-[1.5px] bg-gray-100 -z-0" />
+          <div className="flex items-center justify-between mb-6 relative px-4">
+            <div className="absolute top-3.5 left-8 right-8 h-[1.5px] bg-gray-100 -z-0" />
             <div
-              className="absolute top-3 left-8 h-[1.5px] bg-primary -z-0 transition-all duration-300"
+              className="absolute top-3.5 left-8 h-[1.5px] bg-primary -z-0 transition-all duration-300"
               style={{ width: step === 1 ? "0%" : step === 2 ? "50%" : "88%" }}
             />
 
@@ -175,13 +176,13 @@ export default function SignUpPage() {
             <div className="flex flex-col items-center gap-1 z-10">
               <div
                 className={cn(
-                  "w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold transition-colors",
+                  "w-7 h-7 rounded-full flex items-center justify-center text-[10px] sm:text-[11px] font-bold transition-colors",
                   step >= 1 ? "bg-primary text-white ring-2 ring-primary/15" : "bg-gray-100 text-gray-400"
                 )}
               >
                 01
               </div>
-              <span className={cn("text-[9px] font-medium tracking-tight", step >= 1 ? "text-primary font-semibold" : "text-gray-400")}>
+              <span className={cn("text-[10px] sm:text-[11px] font-medium tracking-tight", step >= 1 ? "text-primary font-semibold" : "text-gray-400")}>
                 Personal
               </span>
             </div>
@@ -190,13 +191,13 @@ export default function SignUpPage() {
             <div className="flex flex-col items-center gap-1 z-10">
               <div
                 className={cn(
-                  "w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold transition-colors",
+                  "w-7 h-7 rounded-full flex items-center justify-center text-[10px] sm:text-[11px] font-bold transition-colors",
                   step >= 2 ? "bg-primary text-white ring-2 ring-primary/15" : "bg-gray-100 text-gray-400"
                 )}
               >
                 02
               </div>
-              <span className={cn("text-[9px] font-medium tracking-tight", step >= 2 ? "text-primary font-semibold" : "text-gray-400")}>
+              <span className={cn("text-[10px] sm:text-[11px] font-medium tracking-tight", step >= 2 ? "text-primary font-semibold" : "text-gray-400")}>
                 Company
               </span>
             </div>
@@ -205,23 +206,23 @@ export default function SignUpPage() {
             <div className="flex flex-col items-center gap-1 z-10">
               <div
                 className={cn(
-                  "w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold transition-colors",
+                  "w-7 h-7 rounded-full flex items-center justify-center text-[10px] sm:text-[11px] font-bold transition-colors",
                   step >= 3 ? "bg-primary text-white ring-2 ring-primary/15" : "bg-gray-100 text-gray-400"
                 )}
               >
                 03
               </div>
-              <span className={cn("text-[9px] font-medium tracking-tight", step >= 3 ? "text-primary font-semibold" : "text-gray-400")}>
+              <span className={cn("text-[10px] sm:text-[11px] font-medium tracking-tight", step >= 3 ? "text-primary font-semibold" : "text-gray-400")}>
                 Preferences
               </span>
             </div>
           </div>
 
-          <form onSubmit={handleNextStep} className="space-y-3.5">
+          <form onSubmit={handleNextStep} className="space-y-4.5 sm:space-y-5">
             {/* Step 1: Personal Profile */}
             {step === 1 && (
-              <div className="space-y-3 animate-in fade-in">
-                <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+              <div className="space-y-4 animate-in fade-in">
+                <h4 className="text-[13px] sm:text-[14px] font-bold text-text-primary uppercase tracking-wider mb-2">
                   Step#1 · Personal Profile
                 </h4>
 
@@ -231,15 +232,15 @@ export default function SignUpPage() {
                   value={formData.name}
                   onChange={(e) => handleChange("name", e.target.value)}
                   placeholder="Enter your full name"
-                  icon={<User className="w-4 h-4" />}
+                  icon={<User className="w-4.5 h-4.5" />}
                 />
 
                 <div>
-                  <label className="text-[10px] font-semibold text-gray-text uppercase tracking-wider ml-1 mb-1.5 block">
+                  <label className="text-[11px] font-semibold text-gray-text uppercase tracking-wider ml-1 mb-2 block">
                     PHONE NUMBER
                   </label>
                   <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1 bg-input-bg rounded-full px-3.5 h-10 text-[12px] font-semibold text-text-primary shrink-0">
+                    <div className="flex items-center gap-1.5 bg-input-bg rounded-full px-4 h-11 sm:h-12 text-[13px] font-semibold text-text-primary shrink-0">
                       <span>🇸🇦</span>
                       <span>+966</span>
                     </div>
@@ -249,7 +250,7 @@ export default function SignUpPage() {
                       value={formData.phone}
                       onChange={(e) => handleChange("phone", e.target.value)}
                       placeholder="000000000"
-                      className="w-full bg-input-bg border-none rounded-full h-10 px-4 text-[12px] font-normal text-text-primary placeholder:text-input-placeholder placeholder:font-light placeholder:text-[12px] focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all"
+                      className="w-full bg-input-bg border-none rounded-full h-11 sm:h-12 px-4 text-[13px] sm:text-[14px] font-normal text-text-primary placeholder:text-input-placeholder placeholder:font-light placeholder:text-[13px] focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all"
                     />
                   </div>
                 </div>
@@ -261,31 +262,33 @@ export default function SignUpPage() {
                   value={formData.password}
                   onChange={(e) => handleChange("password", e.target.value)}
                   placeholder="Create a password"
-                  icon={<Lock className="w-4 h-4" />}
-                  rightIcon={showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  icon={<Lock className="w-4.5 h-4.5" />}
+                  rightIcon={showPassword ? <EyeOff className="w-4.5 h-4.5" /> : <Eye className="w-4.5 h-4.5" />}
                   onRightIconClick={() => setShowPassword(!showPassword)}
                 />
 
+                <PasswordStrengthBar password={formData.password} />
+
                 {submitError && (
-                  <div className="p-2 rounded-xl bg-red-50 text-red-600 text-[11px]">
+                  <div className="p-2.5 rounded-xl bg-red-50 text-red-600 text-[12px]">
                     {submitError}
                   </div>
                 )}
 
                 <Button
                   type="submit"
-                  className="w-full h-10 text-[12px] font-medium rounded-full mt-2 bg-primary hover:bg-primary-dark text-white shadow-md shadow-primary/20 flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="w-full h-11 sm:h-12 text-[14px] sm:text-[15px] font-semibold rounded-full mt-2 bg-primary hover:bg-primary-dark text-white shadow-md shadow-primary/20 flex items-center justify-center gap-2 cursor-pointer"
                 >
                   Move to 2nd Step
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
             )}
 
             {/* Step 2: Company Details */}
             {step === 2 && (
-              <div className="space-y-3 animate-in fade-in">
-                <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+              <div className="space-y-4 animate-in fade-in">
+                <h4 className="text-[13px] sm:text-[14px] font-bold text-text-primary uppercase tracking-wider mb-2">
                   Step#2 · Company Details
                 </h4>
 
@@ -295,7 +298,7 @@ export default function SignUpPage() {
                   value={formData.companyName}
                   onChange={(e) => handleChange("companyName", e.target.value)}
                   placeholder="Enter company name"
-                  icon={<Briefcase className="w-4 h-4" />}
+                  icon={<Briefcase className="w-4.5 h-4.5" />}
                 />
 
                 <FormInput
@@ -305,11 +308,11 @@ export default function SignUpPage() {
                   value={formData.companyEmail}
                   onChange={(e) => handleChange("companyEmail", e.target.value)}
                   placeholder="Enter company email"
-                  icon={<Mail className="w-4 h-4" />}
+                  icon={<Mail className="w-4.5 h-4.5" />}
                 />
 
-                <div className="space-y-1">
-                  <label className="text-[10px] font-semibold text-gray-text uppercase tracking-wider ml-1 mb-1.5 block">
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-semibold text-gray-text uppercase tracking-wider ml-1 mb-1.5 block">
                     COMPANY ADDRESS
                   </label>
                   <textarea
@@ -318,31 +321,31 @@ export default function SignUpPage() {
                     value={formData.companyAddress}
                     onChange={(e) => handleChange("companyAddress", e.target.value)}
                     placeholder="Enter registered address"
-                    className="w-full bg-input-bg border-none rounded-2xl px-4 py-2.5 text-[12px] font-normal text-text-primary placeholder:text-input-placeholder placeholder:font-light placeholder:text-[12px] focus:outline-none focus:ring-1 focus:ring-primary/20 resize-none transition-all"
+                    className="w-full bg-input-bg border-none rounded-2xl px-4 py-3 text-[13px] sm:text-[14px] font-normal text-text-primary placeholder:text-input-placeholder placeholder:font-light placeholder:text-[13px] focus:outline-none focus:ring-1 focus:ring-primary/20 resize-none transition-all"
                   />
                 </div>
 
                 {submitError && (
-                  <div className="p-2 rounded-xl bg-red-50 text-red-600 text-[11px]">
+                  <div className="p-2.5 rounded-xl bg-red-50 text-red-600 text-[12px]">
                     {submitError}
                   </div>
                 )}
 
-                <div className="flex items-center gap-3 pt-1">
+                <div className="flex items-center gap-3 pt-2">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => setStep(1)}
-                    className="flex-1 h-10 text-[12px] font-medium rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50 cursor-pointer"
+                    className="flex-1 h-11 sm:h-12 text-[13px] sm:text-[14px] font-semibold rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50 cursor-pointer"
                   >
                     Back
                   </Button>
                   <Button
                     type="submit"
-                    className="flex-1 h-10 text-[12px] font-medium rounded-full bg-primary text-white hover:bg-primary-dark shadow-md shadow-primary/20 flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="flex-1 h-11 sm:h-12 text-[13px] sm:text-[14px] font-semibold rounded-full bg-primary text-white hover:bg-primary-dark shadow-md shadow-primary/20 flex items-center justify-center gap-2 cursor-pointer"
                   >
                     Move to Last Step
-                    <ArrowRight className="w-3.5 h-3.5" />
+                    <ArrowRight className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
@@ -350,8 +353,8 @@ export default function SignUpPage() {
 
             {/* Step 3: Company Contact & Preferences */}
             {step === 3 && (
-              <div className="space-y-3 animate-in fade-in">
-                <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+              <div className="space-y-4 animate-in fade-in">
+                <h4 className="text-[13px] sm:text-[14px] font-bold text-text-primary uppercase tracking-wider mb-2">
                   Step#3 · Company Contact
                 </h4>
 
@@ -361,7 +364,7 @@ export default function SignUpPage() {
                   value={formData.designation}
                   onChange={(e) => handleChange("designation", e.target.value)}
                   placeholder="e.g. Operations Director"
-                  icon={<Briefcase className="w-4 h-4" />}
+                  icon={<Briefcase className="w-4.5 h-4.5" />}
                 />
 
                 <FormInput
@@ -370,7 +373,7 @@ export default function SignUpPage() {
                   value={formData.travelBudget}
                   onChange={(e) => handleChange("travelBudget", e.target.value)}
                   placeholder="e.g. SAR 500,000"
-                  icon={<DollarSign className="w-4 h-4" />}
+                  icon={<DollarSign className="w-4.5 h-4.5" />}
                 />
 
                 <FormInput
@@ -379,42 +382,42 @@ export default function SignUpPage() {
                   value={formData.companySize}
                   onChange={(e) => handleChange("companySize", e.target.value)}
                   placeholder="e.g. 50-200 employees"
-                  icon={<Users className="w-4 h-4" />}
+                  icon={<Users className="w-4.5 h-4.5" />}
                 />
 
-                <div className="flex items-start gap-2 pt-0.5">
+                <div className="flex items-start gap-2.5 pt-1">
                   <input
                     type="checkbox"
                     id="terms"
                     required
                     checked={formData.termsAccepted}
                     onChange={(e) => handleChange("termsAccepted", e.target.checked)}
-                    className="w-4 h-4 mt-0.5 rounded text-primary focus:ring-primary border-gray-300 accent-primary cursor-pointer"
+                    className="w-4.5 h-4.5 mt-0.5 rounded text-primary focus:ring-primary border-gray-300 accent-primary cursor-pointer shrink-0"
                   />
-                  <label htmlFor="terms" className="text-fs-10 text-gray-500 leading-tight select-none cursor-pointer">
+                  <label htmlFor="terms" className="text-[12px] sm:text-[13px] text-gray-500 leading-tight select-none cursor-pointer">
                     I acknowledge the Terms &amp; Conditions and Privacy Policy of WhiteLine Global.
                   </label>
                 </div>
 
                 {submitError && (
-                  <div className="p-2 rounded-xl bg-red-50 text-red-600 text-[11px]">
+                  <div className="p-2.5 rounded-xl bg-red-50 text-red-600 text-[12px]">
                     {submitError}
                   </div>
                 )}
 
-                <div className="flex items-center gap-3 pt-1">
+                <div className="flex items-center gap-3 pt-2">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => setStep(2)}
-                    className="flex-1 h-10 text-[12px] font-medium rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50 cursor-pointer"
+                    className="flex-1 h-11 sm:h-12 text-[13px] sm:text-[14px] font-semibold rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50 cursor-pointer"
                   >
                     Back
                   </Button>
                   <Button
                     type="submit"
                     isLoading={isSubmitting}
-                    className="flex-1 h-10 text-[12px] font-medium rounded-full bg-primary text-white hover:bg-primary-dark shadow-md shadow-primary/20 cursor-pointer"
+                    className="flex-1 h-11 sm:h-12 text-[13px] sm:text-[14px] font-semibold rounded-full bg-primary text-white hover:bg-primary-dark shadow-md shadow-primary/20 cursor-pointer"
                   >
                     Submit Application
                   </Button>
@@ -424,8 +427,8 @@ export default function SignUpPage() {
           </form>
 
           {/* Bottom Login Link */}
-          <div className="text-center mt-4 pt-2.5 border-t border-gray-100">
-            <p className="text-fs-11 text-gray-500">
+          <div className="text-center mt-5 pt-3 border-t border-gray-100">
+            <p className="text-[12px] sm:text-[13px] text-gray-500">
               Already have an account?{" "}
               <Link href="/login" className="font-semibold text-primary hover:underline">
                 Login here

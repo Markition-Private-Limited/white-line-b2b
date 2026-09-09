@@ -31,9 +31,18 @@ export interface PaginatedResponse<T> {
   limit: number;
 }
 
+export interface ServiceRequestListParams {
+  page?: number;
+  status?: string;
+  search?: string;
+  start_date?: string;
+  end_date?: string;
+}
+
 const serviceRequestsService = {
-  async list(page = 1): Promise<PaginatedResponse<ServiceRequest>> {
-    const { data } = await apiClient.get('/b2b/service-requests', { params: { page } });
+  async list(params: ServiceRequestListParams | number = 1): Promise<PaginatedResponse<ServiceRequest>> {
+    const queryParams = typeof params === 'number' ? { page: params } : params;
+    const { data } = await apiClient.get('/b2b/service-requests', { params: queryParams });
     return data.data ?? data;
   },
 

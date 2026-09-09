@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import {
   Calendar,
@@ -10,6 +10,8 @@ import {
   ChevronDown,
 } from "lucide-react";
 import dashboardService, { type DashboardData } from "@/services/dashboard.service";
+import invoicesService, { type Invoice } from "@/services/invoices.service";
+import { cn } from "@/utils/cn";
 
 interface MonthlyDataItem {
   month: string;
@@ -17,30 +19,116 @@ interface MonthlyDataItem {
   unpaid: number;
 }
 
-const FALLBACK_MONTHLY: MonthlyDataItem[] = [
-  { month: "Jan", paid: 0, unpaid: 0 },
-  { month: "Feb", paid: 0, unpaid: 0 },
-  { month: "Mar", paid: 0, unpaid: 0 },
-  { month: "Apr", paid: 0, unpaid: 0 },
-  { month: "May", paid: 0, unpaid: 0 },
-  { month: "Jun", paid: 0, unpaid: 0 },
-  { month: "Jul", paid: 0, unpaid: 0 },
-  { month: "Aug", paid: 0, unpaid: 0 },
-];
+const ALL_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+const FALLBACK_MONTHLY: MonthlyDataItem[] = ALL_MONTHS.map((month) => ({
+  month,
+  paid: 0,
+  unpaid: 0,
+}));
 
 export default function DashboardPage() {
-  const [selectedYear] = useState(new Date().getFullYear().toString());
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+  const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
   const [stats, setStats] = useState<DashboardData | null>(null);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const YEAR_OPTIONS = useMemo(() => {
+    const current = new Date().getFullYear();
+    return [current.toString(), (current - 1).toString(), (current - 2).toString(), (current - 3).toString()];
+  }, []);
+
   useEffect(() => {
-    dashboardService.getDashboard()
-      .then(setStats)
+    setLoading(true);
+    Promise.allSettled([
+      dashboardService.getDashboard(),
+      invoicesService.list(1),
+    ])
+      .then(([dashRes, invRes]) => {
+        if (dashRes.status === "fulfilled") {
+          setStats(dashRes.value);
+        }
+        if (invRes.status === "fulfilled") {
+          setInvoices(invRes.value.data ?? []);
+        }
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
-  const monthlyData = stats?.monthly_data ?? FALLBACK_MONTHLY;
+  const monthlyData: MonthlyDataItem[] = useMemo(() => {
+    // 1. If backend stats already provides populated monthly_data with non-zero values, use it
+    if (stats?.monthly_data && stats.monthly_data.some((d) => d.paid > 0 || d.unpaid > 0)) {
+      const map = new Map(stats.monthly_data.map((d) => [d.month.toLowerCase(), d]));
+      return ALL_MONTHS.map((month) => {
+        const match = map.get(month.toLowerCase());
+        return {
+          month,
+          paid: match?.paid ?? 0,
+          unpaid: match?.unpaid ?? 0,
+        };
+      });
+    }
+
+    // 2. Otherwise calculate live monthly paid and unpaid totals directly from invoices
+    const map = new Map<string, { paid: number; unpaid: number }>();
+    ALL_MONTHS.forEach((m) => map.set(m.toLowerCase(), { paid: 0, unpaid: 0 }));
+
+    if (invoices.length > 0) {
+      invoices.forEach((inv) => {
+        if (!inv.invoice_date) return;
+        const d = new Date(inv.invoice_date);
+        if (isNaN(d.getTime())) return;
+        const currentYear = Number(selectedYear);
+        if (d.getFullYear() === currentYear) {
+          const monthKey = ALL_MONTHS[d.getMonth()]?.toLowerCase();
+          const bucket = map.get(monthKey);
+          if (bucket) {
+            const amt = Number(inv.total_amount || 0);
+            if (inv.status?.toLowerCase() === "paid") {
+              bucket.paid += amt;
+            } else {
+              bucket.unpaid += amt;
+            }
+          }
+        }
+      });
+    }
+
+    return ALL_MONTHS.map((month) => {
+      const bucket = map.get(month.toLowerCase()) || { paid: 0, unpaid: 0 };
+      return {
+        month,
+        paid: bucket.paid,
+        unpaid: bucket.unpaid,
+      };
+    });
+  }, [stats?.monthly_data, invoices, selectedYear]);
+
+  const maxVal = useMemo(() => {
+    const highest = Math.max(...monthlyData.map((d) => Math.max(d.paid, d.unpaid)), 0);
+    if (highest === 0) return 300000;
+    if (highest <= 10000) return Math.ceil(highest / 1000) * 1000 || 10000;
+    if (highest <= 50000) return Math.ceil(highest / 5000) * 5000 || 50000;
+    if (highest <= 100000) return Math.ceil(highest / 10000) * 10000 || 100000;
+    return Math.ceil(highest / 50000) * 50000 || 300000;
+  }, [monthlyData]);
+
+  const yAxisLabels = useMemo(() => {
+    const steps = 6;
+    const labels: string[] = [];
+    for (let i = steps; i >= 0; i--) {
+      const val = (maxVal / steps) * i;
+      if (val >= 1000) {
+        const k = val / 1000;
+        labels.push(Number.isInteger(k) ? `${k}k` : `${k.toFixed(1)}k`);
+      } else {
+        labels.push(`${Math.round(val)}`);
+      }
+    }
+    return labels;
+  }, [maxVal]);
 
   return (
     <div className="space-y-4">
@@ -50,7 +138,7 @@ export default function DashboardPage() {
         {/* Card 1: Active Requests */}
         <div className="rounded-[28px] p-5 lg:p-6 flex flex-col justify-between min-h-[165px] bg-[#E2F8FA] border border-[#CDEEF2] shadow-[0_4px_24px_rgba(0,0,0,0.02)] relative overflow-hidden transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
           <div className="flex items-start justify-between">
-            <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">
+            <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins">
               Active<br />Requests
             </span>
             <div className="w-8 h-8 rounded-full bg-[#005C66] text-white flex items-center justify-center shadow-xs">
@@ -76,7 +164,7 @@ export default function DashboardPage() {
                 <Image src="/driver.png" alt="Driver" width={24} height={24} className="object-cover" />
               </div>
             </div>
-            <span className="text-[32px] font-bold font-poppins text-gray-900 leading-none">
+            <span className="text-[34px] lg:text-[38px] font-semibold font-poppins text-gray-900 leading-none">
               {loading ? "—" : (stats?.active_requests ?? 0)}
             </span>
           </div>
@@ -85,7 +173,7 @@ export default function DashboardPage() {
         {/* Card 2: Pending Requests */}
         <div className="rounded-[28px] p-5 lg:p-6 flex flex-col justify-between min-h-[165px] bg-[#E7F9E4] border border-[#D5F0D0] shadow-[0_4px_24px_rgba(0,0,0,0.02)] relative overflow-hidden transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
           <div className="flex items-start justify-between">
-            <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">
+            <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins">
               Pending<br />Requests
             </span>
             <div className="w-8 h-8 rounded-full bg-[#62C25D] text-white flex items-center justify-center shadow-xs">
@@ -101,7 +189,7 @@ export default function DashboardPage() {
                 <Image src="/Avatar.png" alt="Passenger" width={24} height={24} className="object-cover" />
               </div>
             </div>
-            <span className="text-[32px] font-bold font-poppins text-gray-900 leading-none">
+            <span className="text-[34px] lg:text-[38px] font-semibold font-poppins text-gray-900 leading-none">
               {loading ? "—" : (stats?.pending_requests ?? 0)}
             </span>
           </div>
@@ -110,7 +198,7 @@ export default function DashboardPage() {
         {/* Card 3: Open Complaints */}
         <div className="rounded-[28px] p-5 lg:p-6 flex flex-col justify-between min-h-[165px] bg-[#FEF9E2] border border-[#F5ECC4] shadow-[0_4px_24px_rgba(0,0,0,0.02)] relative overflow-hidden transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
           <div className="flex items-start justify-between">
-            <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">
+            <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins">
               Open<br />Complaints
             </span>
             <div className="w-8 h-8 rounded-full bg-[#B2B042] text-white flex items-center justify-center shadow-xs">
@@ -118,7 +206,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="flex items-end justify-end mt-4">
-            <span className="text-[32px] font-bold font-poppins text-gray-900 leading-none">
+            <span className="text-[34px] lg:text-[38px] font-semibold font-poppins text-gray-900 leading-none">
               {loading ? "—" : (stats?.open_complaints ?? 0)}
             </span>
           </div>
@@ -127,7 +215,7 @@ export default function DashboardPage() {
         {/* Card 4: Resolved Complaints */}
         <div className="rounded-[28px] p-5 lg:p-6 flex flex-col justify-between min-h-[165px] bg-[#E4EEFD] border border-[#D0DFF8] shadow-[0_4px_24px_rgba(0,0,0,0.02)] relative overflow-hidden transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
           <div className="flex items-start justify-between">
-            <span className="text-sm font-bold text-gray-900 leading-tight font-poppins">
+            <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins">
               Resolved<br />Complaints
             </span>
             <div className="w-8 h-8 rounded-full bg-[#6888E0] text-white flex items-center justify-center shadow-xs">
@@ -135,7 +223,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="flex items-end justify-end mt-4">
-            <span className="text-[32px] font-bold font-poppins text-gray-900 leading-none">
+            <span className="text-[34px] lg:text-[38px] font-semibold font-poppins text-gray-900 leading-none">
               {loading ? "—" : (stats?.resolved_complaints ?? 0)}
             </span>
           </div>
@@ -144,7 +232,7 @@ export default function DashboardPage() {
         {/* Card 5: Due Invoices */}
         <div className="rounded-[28px] p-5 lg:p-6 flex flex-col justify-between min-h-[165px] bg-[#005C66] text-white shadow-[0_8px_30px_rgba(0,92,102,0.22)] relative overflow-hidden transition-all duration-200 hover:shadow-[0_12px_36px_rgba(0,92,102,0.3)]">
           <div className="flex items-start justify-between relative z-10">
-            <span className="text-sm font-bold leading-tight font-poppins text-white">
+            <span className="text-[16px] lg:text-[17px] font-semibold leading-snug font-poppins text-white">
               Due<br />Invoices
             </span>
             <div className="w-8 h-8 rounded-full bg-white text-[#005C66] flex items-center justify-center shadow-xs">
@@ -152,7 +240,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="flex items-end justify-end mt-4 relative z-10">
-            <span className="text-[32px] font-bold font-poppins leading-none text-white">
+            <span className="text-[34px] lg:text-[38px] font-semibold font-poppins leading-none text-white">
               {loading ? "—" : (stats?.due_invoices ?? 0)}
             </span>
           </div>
@@ -161,9 +249,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Bottom Section: Analytics & Invoice Summary */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div className="flex flex-col lg:flex-row gap-4">
         {/* Left: Invoice Analytics Chart */}
-        <div className="lg:col-span-8 rounded-[28px] p-6 lg:p-7 bg-white border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col justify-between">
+        <div className="flex-1 min-w-0 rounded-[28px] p-6 lg:p-7 bg-white border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col justify-between">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
             <div>
               <h3 className="text-base lg:text-lg font-bold text-gray-900 font-poppins">Invoice Analytics</h3>
@@ -181,66 +269,105 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div className="relative">
-                <button type="button" className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-gray-200 text-[11px] font-bold text-gray-700 hover:bg-gray-50 uppercase tracking-wider cursor-pointer transition-colors">
+                <button
+                  type="button"
+                  onClick={() => setYearDropdownOpen(!yearDropdownOpen)}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-gray-200 text-[11px] font-bold text-gray-700 hover:bg-gray-50 uppercase tracking-wider cursor-pointer transition-colors select-none"
+                >
                   YEARLY {selectedYear}
-                  <ChevronDown className="w-3 h-3 text-gray-400" />
+                  <ChevronDown className={cn("w-3 h-3 text-gray-400 transition-transform duration-200", yearDropdownOpen && "rotate-180")} />
                 </button>
+
+                {yearDropdownOpen && (
+                  <div className="absolute right-0 top-full mt-1 w-32 bg-white rounded-xl shadow-[0px_8px_30px_rgba(0,0,0,0.12)] border border-gray-100 py-1 z-40">
+                    {YEAR_OPTIONS.map((yr) => (
+                      <button
+                        key={yr}
+                        type="button"
+                        onClick={() => {
+                          setSelectedYear(yr);
+                          setYearDropdownOpen(false);
+                        }}
+                        className={cn(
+                          "w-full text-left px-3.5 py-1.5 text-xs transition-colors cursor-pointer flex items-center justify-between",
+                          selectedYear === yr
+                            ? "text-primary font-bold bg-primary/5"
+                            : "text-gray-700 hover:bg-gray-50"
+                        )}
+                      >
+                        <span>{yr}</span>
+                        {selectedYear === yr && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          <div className="pt-2">
-            <div className="flex gap-2">
-              <div className="w-9 h-52 flex flex-col justify-between text-right text-[11px] text-gray-400 font-medium select-none pr-1.5 shrink-0">
-                <span>300k</span><span>250k</span><span>200k</span><span>150k</span><span>100k</span><span>50k</span><span>0</span>
-              </div>
-              <div className="flex-1 relative h-52">
-                <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
-                  {[...Array(7)].map((_, i) => (
-                    <div key={i} className={`border-b ${i === 6 ? "border-gray-200" : "border-gray-100/80"} w-full h-0`} />
+          <div className="pt-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <div className="min-w-[540px]">
+              <div className="flex gap-2">
+                <div className="w-10 h-52 flex flex-col justify-between text-right text-[11px] text-gray-400 font-medium select-none pr-1.5 shrink-0">
+                  {yAxisLabels.map((lbl, i) => (
+                    <span key={i}>{lbl}</span>
                   ))}
                 </div>
-                <div className="relative h-full flex items-end justify-between px-3">
-                  {monthlyData.map((item, idx) => {
-                    const maxVal = 300;
-                    const paidH = (item.paid / maxVal) * 100;
-                    const unpaidH = (item.unpaid / maxVal) * 100;
-                    return (
-                      <div key={idx} className="flex flex-col items-center group z-10">
-                        <div className="flex items-end gap-1 h-52 pb-0.5">
-                          <div className="w-4 sm:w-5 bg-[#199CA8] rounded-t-full transition-all duration-300 group-hover:brightness-105 cursor-pointer shadow-xs" style={{ height: `${Math.min(100, paidH)}%` }} title={`${item.month} - Paid`} />
-                          <div className="w-4 sm:w-5 bg-[#9FE4EE] rounded-t-full transition-all duration-300 group-hover:brightness-105 cursor-pointer shadow-xs" style={{ height: `${Math.min(100, unpaidH)}%` }} title={`${item.month} - Unpaid`} />
+                <div className="flex-1 relative h-52">
+                  <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                    {[...Array(7)].map((_, i) => (
+                      <div key={i} className={`border-b ${i === 6 ? "border-gray-200" : "border-gray-100/80"} w-full h-0`} />
+                    ))}
+                  </div>
+                  <div className="relative h-full flex items-end justify-between px-2 sm:px-4">
+                    {monthlyData.map((item, idx) => {
+                      const paidH = (item.paid / maxVal) * 100;
+                      const unpaidH = (item.unpaid / maxVal) * 100;
+                      return (
+                        <div key={idx} className="flex flex-col items-center group z-10 flex-1 min-w-0">
+                          <div className="flex items-end justify-center gap-1 sm:gap-1.5 h-52 pb-0.5">
+                            <div
+                              className="w-2.5 sm:w-3 md:w-3.5 bg-[#199CA8] rounded-t-full transition-all duration-300 group-hover:brightness-105 cursor-pointer shadow-xs"
+                              style={{ height: `${item.paid > 0 ? Math.min(100, Math.max(6, paidH)) : 0}%` }}
+                              title={`${item.month} - Paid: SAR ${item.paid.toLocaleString()}`}
+                            />
+                            <div
+                              className="w-2.5 sm:w-3 md:w-3.5 bg-[#9FE4EE] rounded-t-full transition-all duration-300 group-hover:brightness-105 cursor-pointer shadow-xs"
+                              style={{ height: `${item.unpaid > 0 ? Math.min(100, Math.max(6, unpaidH)) : 0}%` }}
+                              title={`${item.month} - Unpaid: SAR ${item.unpaid.toLocaleString()}`}
+                            />
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="flex gap-2 mt-2.5">
-              <div className="w-9 shrink-0" />
-              <div className="flex-1 flex justify-between px-3">
-                {monthlyData.map((item, idx) => (
-                  <div key={idx} className="w-9 sm:w-10 md:w-11 text-center">
-                    <span className="text-xs text-gray-700 font-medium select-none">{item.month}</span>
-                  </div>
-                ))}
+              <div className="flex gap-2 mt-2.5">
+                <div className="w-10 shrink-0" />
+                <div className="flex-1 flex justify-between px-2 sm:px-4">
+                  {monthlyData.map((item, idx) => (
+                    <div key={idx} className="flex-1 text-center">
+                      <span className="text-[11px] sm:text-xs text-gray-700 font-medium select-none">{item.month}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Right: Paid & Unpaid Summary */}
-        <div className="lg:col-span-4 flex flex-col gap-4">
-          <div className="flex-1 rounded-[28px] p-6 lg:p-7 bg-white border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col justify-center">
-            <span className="text-sm font-medium text-gray-800 mb-3">Paid Invoices</span>
-            <span className="text-[28px] lg:text-[32px] font-bold font-poppins text-gray-900 leading-none">
+        <div className="w-full lg:w-[260px] xl:w-[280px] shrink-0 flex flex-col gap-4">
+          <div className="flex-1 rounded-[28px] p-5 lg:p-6 bg-white border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col justify-between min-h-[140px]">
+            <span className="text-[15px] lg:text-[16px] font-semibold text-gray-800">Paid Invoices</span>
+            <span className="text-[28px] lg:text-[32px] font-semibold font-poppins text-gray-900 leading-none">
               {loading ? "—" : `SAR ${(stats?.paid_invoices_amount ?? 0).toLocaleString()}`}
             </span>
           </div>
-          <div className="flex-1 rounded-[28px] p-6 lg:p-7 bg-white border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col justify-center">
-            <span className="text-sm font-medium text-gray-800 mb-3">Unpaid Invoices</span>
-            <span className="text-[28px] lg:text-[32px] font-bold font-poppins text-gray-900 leading-none">
+          <div className="flex-1 rounded-[28px] p-5 lg:p-6 bg-white border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col justify-between min-h-[140px]">
+            <span className="text-[15px] lg:text-[16px] font-semibold text-gray-800">Unpaid Invoices</span>
+            <span className="text-[28px] lg:text-[32px] font-semibold font-poppins text-gray-900 leading-none">
               {loading ? "—" : `SAR ${(stats?.unpaid_invoices_amount ?? 0).toLocaleString()}`}
             </span>
           </div>

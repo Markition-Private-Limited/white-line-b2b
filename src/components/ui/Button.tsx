@@ -29,9 +29,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
               variant === "danger",
           },
           {
-            "text-fs-10 px-3 py-1.5 gap-1.5": size === "sm",
-            "text-fs-12 px-4 py-2.5 gap-2": size === "md",
-            "text-fs-14 px-6 py-3 gap-2.5": size === "lg",
+            "text-fs-11 px-5 py-2 gap-1.5": size === "sm",
+            "text-fs-12 px-8 py-2.5 gap-2": size === "md",
+            "text-fs-14 px-10 py-3 gap-2.5": size === "lg",
           },
           className
         )}

@@ -69,15 +69,15 @@ function MobileFilterMenu({ filters }: { filters: FilterDef[] }) {
         type="button"
         onClick={handleOpen}
         className={cn(
-          "w-[39px] h-[39px] flex items-center justify-center transition-colors text-text-secondary border-none cursor-pointer",
+          "w-[42px] h-[42px] sm:w-[44px] sm:h-[44px] flex items-center justify-center transition-colors text-text-secondary border-none cursor-pointer",
           isOpen ? "rounded-t-xl bg-[#E6E6E6]" : "rounded-full bg-background-panel hover:bg-gray-100"
         )}
       >
-        <Filter className="w-[15px] h-[15px]" />
+        <Filter className="w-4 h-4" />
       </button>
 
       {isOpen && (
-        <div className="absolute top-full right-0 w-[200px] bg-white rounded-b-xl rounded-tl-xl shadow-[0px_4px_20px_0px_rgba(0,0,0,0.12)] z-50 max-h-[220px] overflow-y-auto flex flex-col border border-gray-100 border-t-0 scrollbar-thin">
+        <div className="absolute top-full right-0 w-[200px] bg-white rounded-b-xl rounded-tl-xl shadow-[0px_4px_20px_0px_rgba(0,0,0,0.12)] z-40 max-h-[220px] overflow-y-auto flex flex-col border border-gray-100 border-t-0 scrollbar-thin">
           {currentFilter === null ? (
             filters.map((filter, idx) => {
               const label = filter.defaultValue.includes(':')
@@ -153,17 +153,17 @@ export function PageToolbar({
   children
 }: PageToolbarProps) {
   return (
-    <div className={cn("flex items-center justify-between bg-white rounded-full p-1.5 mt-1 shadow-[0px_2px_10px_0px_rgba(0,0,0,0.02)] border border-gray-50 relative z-40", className)}>
+    <div className={cn("flex items-center justify-between bg-white rounded-full p-1.5 sm:p-2.0 mt-1 shadow-[0px_2px_12px_0px_rgba(0,0,0,0.03)] border border-gray-100/80 relative z-30", className)}>
       <div className="flex-1 min-w-[200px] max-w-[383px] relative shrink-0 sm:shrink">
-        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
-          <Search className="w-3.5 h-3.5" />
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+          <Search className="w-4 h-4" />
         </div>
         <input
           type="text"
           placeholder={searchPlaceholder}
           value={searchValue}
           onChange={(e) => onSearch?.(e.target.value)}
-          className="w-full h-[38px] bg-background-panel border-none rounded-full pl-8 pr-3.5 text-[11px] text-gray-800 placeholder:text-gray-400 placeholder:text-[11px] focus:outline-none focus:ring-1 focus:ring-primary/20 transition-colors"
+          className="w-full h-[42px] sm:h-[44px] bg-background-panel border-none rounded-full pl-10 pr-4 text-[12px] sm:text-[13px] text-gray-800 placeholder:text-gray-400 placeholder:text-[12px] sm:placeholder:text-[13px] focus:outline-none focus:ring-1 focus:ring-primary/20 transition-colors"
         />
       </div>
 
@@ -207,7 +207,7 @@ export function PageToolbar({
             type="button"
             onClick={action.onClick}
             className={cn(
-              "h-[39px] w-[39px] lg:w-auto lg:px-5 flex items-center justify-center gap-1.5 transition-colors rounded-full text-fs-12 font-medium shrink-0 whitespace-nowrap cursor-pointer",
+              "h-[42px] sm:h-[44px] w-[42px] sm:w-[44px] lg:w-auto lg:px-5 flex items-center justify-center gap-2 transition-colors rounded-full text-[12px] sm:text-[13px] font-medium shrink-0 whitespace-nowrap cursor-pointer",
               action.primary
                 ? "bg-primary text-white hover:bg-primary/90"
                 : "bg-white border border-gray-200 text-primary hover:bg-gray-50",

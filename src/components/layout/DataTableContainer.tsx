@@ -14,7 +14,7 @@ export interface PaginationProps {
 export interface ColumnDef<T> {
   header: string;
   accessorKey?: keyof T;
-  cell?: (row: T) => React.ReactNode;
+  cell?: (row: T, index?: number) => React.ReactNode;
   className?: string; // Optional custom styling for the td
 }
 
@@ -59,7 +59,7 @@ export function DataTable<T>({
     <div className={cn("card-base flex flex-col bg-white overflow-hidden shadow-sm border border-gray-100 flex-1 min-h-0", className)}>
       <div className="w-full overflow-auto flex-1 scrollbar-thin">
         <table className="w-full text-left border-collapse min-w-[900px]">
-          <thead className="sticky top-0 z-20">
+          <thead className="sticky top-0 z-10">
             <tr className={headerClassName}>
               {columns.map((col, idx) => (
                 <th 
@@ -116,14 +116,14 @@ export function DataTable<T>({
                     <td 
                       key={colIdx} 
                       className={cn(
-                        "py-2 lg:py-2.5 text-fs-12", 
+                        "py-3.5 lg:py-4 text-fs-12", 
                         paddingClass, 
                         colIdx === 0 && "pl-6 lg:pl-8",
                         col.className
                       )}
                     >
                       {col.cell ? (
-                        col.cell(row)
+                        col.cell(row, rowIdx)
                       ) : (
                         col.accessorKey ? String(row[col.accessorKey] ?? "") : null
                       )}

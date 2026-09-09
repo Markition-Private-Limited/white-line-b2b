@@ -37,17 +37,17 @@ export function Modal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+        className="fixed inset-0 bg-black/35 transition-opacity animate-in fade-in duration-200"
         onClick={onClose}
       />
 
       {/* Modal Dialog */}
       <div
         className={cn(
-          "relative bg-white rounded-[24px] shadow-2xl w-full z-10 p-6 md:p-8 animate-in zoom-in-95 duration-200 border border-gray-100 max-h-[90vh] overflow-y-auto",
+          "relative bg-white rounded-[28px] lg:rounded-[32px] shadow-2xl w-full z-[101] p-6 md:p-8 animate-in zoom-in-95 duration-200 border border-gray-100 max-h-[90vh] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
           maxWidth,
           className
         )}
@@ -55,9 +55,9 @@ export function Modal({
         {showCloseButton && (
           <button
             onClick={onClose}
-            className="absolute top-5 right-5 w-8 h-8 rounded-full bg-gray-100 text-gray-500 hover:text-gray-900 hover:bg-gray-200 flex items-center justify-center transition-colors cursor-pointer"
+            className="absolute top-5 right-5 text-gray-400 hover:text-gray-800 p-1.5 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4 stroke-[2.5]" />
           </button>
         )}
 

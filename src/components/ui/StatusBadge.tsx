@@ -73,7 +73,7 @@ export function StatusBadge({ status, className, customLabel }: StatusBadgeProps
   return (
     <div
       className={cn(
-        "inline-flex items-center justify-center px-2.5 py-1 rounded-full text-fs-9 font-bold tracking-wider leading-none uppercase whitespace-nowrap",
+        "inline-flex items-center justify-center px-4 py-1.5 rounded-full text-fs-10 font-semibold tracking-wider leading-none uppercase whitespace-nowrap",
         styleClass,
         className
       )}

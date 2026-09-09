@@ -95,11 +95,11 @@ export function FormDropdown({
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
-            "w-full border-none h-[42px] px-4 flex items-center justify-between text-fs-12 font-normal transition-all cursor-pointer",
+            "w-full border-none h-10 px-4 flex items-center justify-between text-[12px] font-normal transition-all cursor-pointer",
             isOpen
               ? isUp
-                ? "bg-white rounded-b-[21px] rounded-t-none shadow-[0px_2px_10px_0px_rgba(0,0,0,0.05)] ring-1 ring-gray-100 z-30 relative"
-                : "bg-white rounded-t-[21px] rounded-b-none shadow-[0px_-2px_10px_0px_rgba(0,0,0,0.05)] ring-1 ring-gray-100 z-30 relative"
+                ? "bg-white rounded-b-[20px] rounded-t-none shadow-[0px_2px_10px_0px_rgba(0,0,0,0.05)] ring-1 ring-gray-100 z-30 relative"
+                : "bg-white rounded-t-[20px] rounded-b-none shadow-[0px_-2px_10px_0px_rgba(0,0,0,0.05)] ring-1 ring-gray-100 z-30 relative"
               : "bg-input-bg rounded-full",
             !selected ? "text-input-placeholder font-light" : "text-text-primary",
             error && "ring-1 ring-error",
@@ -113,7 +113,7 @@ export function FormDropdown({
         {isOpen && (
           <div
             className={cn(
-              "absolute left-0 w-full bg-white z-50 overflow-hidden flex flex-col border border-gray-100 shadow-[0px_8px_24px_0px_rgba(0,0,0,0.12)]",
+              "absolute left-0 w-full bg-white z-30 overflow-hidden flex flex-col border border-gray-100 shadow-[0px_8px_24px_0px_rgba(0,0,0,0.12)]",
               isUp
                 ? "bottom-full rounded-t-[21px] border-b-0"
                 : "top-full rounded-b-[21px] border-t-0"

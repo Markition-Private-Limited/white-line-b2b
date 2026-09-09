@@ -26,7 +26,7 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
   ) {
     return (
       <div className={containerClassName}>
-        <label className="text-[10px] font-semibold text-gray-text uppercase tracking-wider ml-1 mb-1.5 block">
+        <label className="text-[11px] font-semibold text-gray-text uppercase tracking-wider ml-1 mb-2 block">
           {label}
         </label>
         <div className="relative">
@@ -38,9 +38,9 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
           <input
             ref={ref}
             className={cn(
-              "w-full bg-input-bg border-none rounded-full h-10 text-[12px] font-normal text-text-primary placeholder:text-input-placeholder placeholder:font-light placeholder:text-[12px] focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all",
-              icon ? "pl-11" : "pl-4",
-              rightIcon ? "pr-10" : "pr-4",
+              "w-full bg-input-bg border-none rounded-full h-11 sm:h-12 text-[13px] sm:text-[14px] font-normal text-text-primary placeholder:text-input-placeholder placeholder:font-light placeholder:text-[13px] focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all",
+              icon ? "pl-12" : "pl-4",
+              rightIcon ? "pr-11" : "pr-4",
               error && "ring-1 ring-error",
               className
             )}
@@ -59,7 +59,7 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
           )}
         </div>
         {error && (
-          <p className="text-[10px] text-error font-medium mt-1 ml-1">{error}</p>
+          <p className="text-[11px] text-error font-medium mt-1.5 ml-1">{error}</p>
         )}
       </div>
     );
