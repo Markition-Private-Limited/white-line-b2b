@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { Toggle } from "@/components/ui/Toggle";
 import { SuccessModal } from "@/components/ui/SuccessModal";
+import { Modal } from "@/components/ui/Modal";
 import { PasswordStrengthBar } from "@/components/ui/PasswordStrengthBar";
 import { DataTable, type ColumnDef } from "@/components/layout/DataTableContainer";
 import usersService, { type SpocUser } from "@/services/users.service";
@@ -38,6 +39,7 @@ export default function UsersPage() {
 
   // Action popup & Modals
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  const [menuPos, setMenuPos] = useState({ top: 0, right: 0 });
   const [changePasswordUser, setChangePasswordUser] = useState<SpocUser | null>(null);
   const [transferUser, setTransferUser] = useState<SpocUser | null>(null);
   const [selectedNewOwnerId, setSelectedNewOwnerId] = useState("");
@@ -54,6 +56,7 @@ export default function UsersPage() {
   const [transferSuccessModalOpen, setTransferSuccessModalOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState("");
+  const [toggleError, setToggleError] = useState("");
 
   const menuRef = useRef<HTMLDivElement>(null);
   const roleDropdownRef = useRef<HTMLDivElement>(null);
@@ -146,6 +149,15 @@ export default function UsersPage() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  // Close popup on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (activeMenuId) setActiveMenuId(null);
+    };
+    window.addEventListener("scroll", handleScroll, true);
+    return () => window.removeEventListener("scroll", handleScroll, true);
+  }, [activeMenuId]);
+
   const handleCreateUser = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!fullName.trim() || !email.trim()) {
@@ -179,11 +191,9 @@ export default function UsersPage() {
     try {
       const updated = await usersService.toggleStatus(id);
       setUsers((prev) => prev.map((u) => (u.id === id ? updated : u)));
-    } catch {
-      // Local optimistic toggle fallback
-      setUsers((prev) =>
-        prev.map((u) => (u.id === id ? { ...u, status: u.status === "active" ? "inactive" : "active" } : u))
-      );
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || "Failed to update user status.";
+      setToggleError(msg);
     }
   };
 
@@ -264,19 +274,9 @@ export default function UsersPage() {
 
   // Available transfer candidates
   const candidateUsers = useMemo(() => {
-    const realCandidates = users
+    return users
       .filter((u) => !transferUser || u.id !== transferUser.id)
       .map((u) => ({ id: u.id, full_name: u.full_name, role: u.role || "Team Member", email: u.email }));
-
-    if (realCandidates.length >= 2) return realCandidates;
-    // Blend with mock candidates if small list
-    const combined = [...realCandidates];
-    MOCK_TEAM_MEMBERS.forEach((m) => {
-      if (!combined.some((c) => c.full_name.toLowerCase() === m.full_name.toLowerCase())) {
-        combined.push(m);
-      }
-    });
-    return combined;
   }, [users, transferUser]);
 
   const filteredCandidates = useMemo(() => {
@@ -352,50 +352,21 @@ export default function UsersPage() {
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              setActiveMenuId(activeMenuId === row.id ? null : row.id);
+              if (activeMenuId === row.id) {
+                setActiveMenuId(null);
+              } else {
+                const rect = e.currentTarget.getBoundingClientRect();
+                setMenuPos({
+                  top: rect.bottom,
+                  right: window.innerWidth - rect.right,
+                });
+                setActiveMenuId(row.id);
+              }
             }}
             className="w-7 h-7 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-900 cursor-pointer transition-colors"
           >
             <MoreVertical className="w-4 h-4" />
           </button>
-
-          {activeMenuId === row.id && (
-            <div
-              ref={menuRef}
-              className="absolute right-0 top-full mt-1.5 w-52 bg-white rounded-2xl shadow-2xl border border-gray-100 p-1.5 z-50 animate-in fade-in zoom-in-95 text-left divide-y divide-gray-50"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                type="button"
-                onClick={() => {
-                  setChangePasswordUser(row);
-                  setNewPassword("");
-                  setConfirmPassword("");
-                  setActionError("");
-                  setActiveMenuId(null);
-                }}
-                className="w-full flex items-center gap-3 px-3.5 py-2.5 text-[13px] text-gray-800 hover:bg-gray-50 rounded-xl cursor-pointer transition-colors font-medium font-inter"
-              >
-                <RotateCcw className="w-4 h-4 text-gray-400 shrink-0" />
-                <span>Change Password</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setTransferUser(row);
-                  setSelectedNewOwnerId("");
-                  setSelectedNewOwnerName("");
-                  setTransferSearchQuery("");
-                  setActionError("");
-                  setActiveMenuId(null);
-                }}
-                className="w-full flex items-center gap-3 px-3.5 py-2.5 text-[13px] text-gray-800 hover:bg-gray-50 rounded-xl cursor-pointer transition-colors font-medium font-inter"
-              >
-                <ArrowRightLeft className="w-4 h-4 text-gray-400 shrink-0" />
-                <span>Transfer Account</span>
-              </button>
-            </div>
-          )}
         </div>
       ),
     },
@@ -759,6 +730,83 @@ export default function UsersPage() {
         actionText="Done"
         onAction={() => setTransferSuccessModalOpen(false)}
       />
+
+      {/* Toggle Error Modal */}
+      <Modal
+        isOpen={!!toggleError}
+        onClose={() => setToggleError("")}
+        maxWidth="max-w-[460px]"
+        className="text-center p-8 lg:p-10"
+      >
+        <div className="flex flex-col items-center">
+          <div className="mb-6 flex justify-center">
+            <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
+              <X className="w-8 h-8 text-red-600" />
+            </div>
+          </div>
+          <h3 className="text-fs-20 lg:text-fs-22 font-bold text-gray-900 mb-3 font-poppins leading-tight">
+            Action Failed
+          </h3>
+          <p className="text-fs-13 lg:text-fs-14 text-gray-500 mb-8 max-w-sm leading-relaxed mx-auto font-normal">
+            {toggleError}
+          </p>
+          <div className="flex justify-center w-full">
+            <button
+              type="button"
+              onClick={() => setToggleError("")}
+              className="py-2.5 px-8 text-fs-13 lg:text-fs-14 font-medium bg-red-600 text-white hover:bg-red-700 rounded-full shadow-sm transition-colors cursor-pointer"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Action Menu Popup (Rendered globally using fixed positioning) */}
+      {activeMenuId && (
+        <div
+          ref={menuRef}
+          className="fixed mt-1.5 w-52 bg-white rounded-2xl shadow-2xl border border-gray-100 p-1.5 z-[100] animate-in fade-in zoom-in-95 text-left divide-y divide-gray-50"
+          style={{ top: menuPos.top, right: menuPos.right }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            type="button"
+            onClick={() => {
+              const row = users.find(u => u.id === activeMenuId);
+              if (row) {
+                setChangePasswordUser(row);
+                setNewPassword("");
+                setConfirmPassword("");
+                setActionError("");
+              }
+              setActiveMenuId(null);
+            }}
+            className="w-full flex items-center gap-3 px-3.5 py-2.5 text-[13px] text-gray-800 hover:bg-gray-50 rounded-xl cursor-pointer transition-colors font-medium font-inter"
+          >
+            <RotateCcw className="w-4 h-4 text-gray-400 shrink-0" />
+            <span>Change Password</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              const row = users.find(u => u.id === activeMenuId);
+              if (row) {
+                setTransferUser(row);
+                setSelectedNewOwnerId("");
+                setSelectedNewOwnerName("");
+                setTransferSearchQuery("");
+                setActionError("");
+              }
+              setActiveMenuId(null);
+            }}
+            className="w-full flex items-center gap-3 px-3.5 py-2.5 text-[13px] text-gray-800 hover:bg-gray-50 rounded-xl cursor-pointer transition-colors font-medium font-inter"
+          >
+            <ArrowRightLeft className="w-4 h-4 text-gray-400 shrink-0" />
+            <span>Transfer Account</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -274,7 +274,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="bg-[#F4F5F7] rounded-full p-2 pl-6 pr-2.5 flex items-center justify-between gap-4 sm:gap-6 flex-1 max-w-[560px] shadow-xs">
+        <div className="bg-[#F4F5F7] rounded-xl py-5 pl-6 pr-2.5 flex items-center justify-between gap-4 sm:gap-6 flex-1 max-w-[560px] shadow-xs">
           <div className="flex-1 min-w-0">
             <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block leading-none mb-1 font-inter">
               CURRENT PASSWORD

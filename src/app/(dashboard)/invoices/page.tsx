@@ -69,6 +69,64 @@ export default function InvoicesPage() {
       .finally(() => setLoading(false));
   }, [page, statusFilter, dateFilter, search]);
 
+  const handleDownloadInvoice = async () => {
+    if (!selectedInvoice) return;
+    
+    try {
+      const { jsPDF } = await import("jspdf");
+      const autoTableModule = await import("jspdf-autotable");
+      const autoTable = autoTableModule.default;
+      
+      const doc = new jsPDF();
+      
+      // Title
+      doc.setFontSize(22);
+      doc.setTextColor(0, 92, 102); // Primary color
+      doc.text("INVOICE", 14, 20);
+
+      // Invoice info
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(10);
+      doc.text(`Invoice Number: ${selectedInvoice.invoice_number || "N/A"}`, 14, 35);
+      doc.text(`Status: ${selectedInvoice.status?.toUpperCase() || "DUE"}`, 14, 42);
+      doc.text(`Invoice Date: ${selectedInvoice.invoice_date ? formatDate(selectedInvoice.invoice_date) : "N/A"}`, 14, 49);
+      doc.text(`Due Date: ${selectedInvoice.due_date ? formatDate(selectedInvoice.due_date) : "N/A"}`, 14, 56);
+
+      // Client info
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text("Billed To:", 14, 70);
+      
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.text(selectedInvoice.b2b_client?.company_name || "Global Corp", 14, 77);
+      doc.text(selectedInvoice.description || "Services Rendered", 14, 84);
+
+      // Table
+      autoTable(doc, {
+        startY: 95,
+        head: [["Description", "Amount"]],
+        body: [
+          [selectedInvoice.description || "Services Rendered", formatAmount(selectedInvoice.total_amount)],
+        ],
+        theme: 'striped',
+        headStyles: { fillColor: [0, 92, 102] },
+      });
+
+      // Total Amount
+      const finalY = (doc as any).lastAutoTable?.finalY || 120;
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text(`Total Amount: ${formatAmount(selectedInvoice.total_amount)}`, 14, finalY + 15);
+
+      // Save PDF
+      doc.save(`${selectedInvoice.invoice_number || "Invoice"}.pdf`);
+    } catch (err) {
+      console.error("Failed to generate PDF:", err);
+      alert("Failed to download invoice PDF.");
+    }
+  };
+
   const filtered = useMemo(() => {
     return invoices.filter((inv) => {
       const q = search.toLowerCase().trim();
@@ -313,7 +371,7 @@ export default function InvoicesPage() {
             {/* Actions */}
             <div className="flex justify-end pt-1">
               <button
-                onClick={() => setSelectedInvoice(null)}
+                onClick={handleDownloadInvoice}
                 className="h-11 sm:h-12 px-6 rounded-full bg-[#00525C] hover:bg-[#00414A] text-white text-[13px] font-semibold flex items-center gap-2 shadow-sm transition-colors cursor-pointer"
               >
                 <Download className="w-4 h-4 stroke-[2.2]" />
