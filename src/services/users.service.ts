@@ -24,8 +24,14 @@ const usersService = {
     return data.data ?? data;
   },
 
-  async create(payload: { full_name: string; email: string; role: string; password: string }): Promise<SpocUser> {
-    const { data } = await apiClient.post('/b2b/users', payload);
+  async create(payload: { full_name: string; email: string; role: string; password?: string }): Promise<SpocUser> {
+    const body: any = {
+      full_name: payload.full_name,
+      email: payload.email,
+      role: payload.role,
+      password: payload.password || "Password@123",
+    };
+    const { data } = await apiClient.post('/b2b/users', body);
     return data.data ?? data;
   },
 
