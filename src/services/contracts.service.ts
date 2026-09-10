@@ -15,9 +15,21 @@ export interface Contract {
   b2b_client?: { company_name: string };
 }
 
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 const contractsService = {
-  async getActive(): Promise<Contract | null> {
-    const { data } = await apiClient.get('/b2b/contracts');
+  async list(page = 1): Promise<PaginatedResponse<Contract>> {
+    const { data } = await apiClient.get('/b2b/contracts', { params: { page } });
+    return data.data ?? data;
+  },
+
+  async get(id: string): Promise<Contract> {
+    const { data } = await apiClient.get(`/b2b/contracts/${id}`);
     return data.data ?? data;
   },
 };
