@@ -41,6 +41,35 @@ export function HeaderNav() {
   const profileRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
+  const serviceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const complaintsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleServiceMouseEnter = () => {
+    if (serviceTimeoutRef.current) clearTimeout(serviceTimeoutRef.current);
+    if (!serviceClicked) setServiceMenuOpen(true);
+  };
+
+  const handleServiceMouseLeave = () => {
+    if (!serviceClicked) {
+      serviceTimeoutRef.current = setTimeout(() => {
+        setServiceMenuOpen(false);
+      }, 150);
+    }
+  };
+
+  const handleComplaintsMouseEnter = () => {
+    if (complaintsTimeoutRef.current) clearTimeout(complaintsTimeoutRef.current);
+    if (!complaintsClicked) setComplaintsMenuOpen(true);
+  };
+
+  const handleComplaintsMouseLeave = () => {
+    if (!complaintsClicked) {
+      complaintsTimeoutRef.current = setTimeout(() => {
+        setComplaintsMenuOpen(false);
+      }, 150);
+    }
+  };
+
   // Close dropdowns on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -60,7 +89,11 @@ export function HeaderNav() {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      if (serviceTimeoutRef.current) clearTimeout(serviceTimeoutRef.current);
+      if (complaintsTimeoutRef.current) clearTimeout(complaintsTimeoutRef.current);
+    };
   }, []);
 
   const isActive = (path: string) => {
@@ -109,8 +142,8 @@ export function HeaderNav() {
             <div 
               className="relative group" 
               ref={serviceRef}
-              onMouseEnter={() => { if (!serviceClicked) setServiceMenuOpen(true); }}
-              onMouseLeave={() => { if (!serviceClicked) setServiceMenuOpen(false); }}
+              onMouseEnter={handleServiceMouseEnter}
+              onMouseLeave={handleServiceMouseLeave}
             >
               <button
                 type="button"
@@ -125,23 +158,31 @@ export function HeaderNav() {
               </button>
 
               {serviceMenuOpen && (
-                <div className="absolute top-full mt-2 left-0 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-[60] animate-in fade-in zoom-in-95">
-                  <Link
-                    href="/service-requests"
-                    onClick={() => setServiceMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-medium text-gray-700 hover:bg-gray-50 hover:text-[#005C66]"
-                  >
-                    <FileText className="w-4 h-4 text-gray-400" />
-                    All Requests
-                  </Link>
-                  <Link
-                    href="/service-requests/create"
-                    onClick={() => setServiceMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-medium text-gray-700 hover:bg-gray-50 hover:text-[#005C66]"
-                  >
-                    <PlusCircle className="w-4 h-4 text-gray-400" />
-                    Create New Request
-                  </Link>
+                <div className="absolute top-full pt-2 left-0 w-52 z-[60]">
+                  <div className="bg-white rounded-2xl shadow-xl border border-gray-100 py-2 animate-in fade-in zoom-in-95">
+                    <Link
+                      href="/service-requests"
+                      onClick={() => {
+                        setServiceMenuOpen(false);
+                        setServiceClicked(false);
+                      }}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-medium text-gray-700 hover:bg-gray-50 hover:text-[#005C66]"
+                    >
+                      <FileText className="w-4 h-4 text-gray-400" />
+                      All Requests
+                    </Link>
+                    <Link
+                      href="/service-requests/create"
+                      onClick={() => {
+                        setServiceMenuOpen(false);
+                        setServiceClicked(false);
+                      }}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-medium text-gray-700 hover:bg-gray-50 hover:text-[#005C66]"
+                    >
+                      <PlusCircle className="w-4 h-4 text-gray-400" />
+                      Create New Request
+                    </Link>
+                  </div>
                 </div>
               )}
             </div>
@@ -154,8 +195,8 @@ export function HeaderNav() {
             <div 
               className="relative group" 
               ref={complaintsRef}
-              onMouseEnter={() => { if (!complaintsClicked) setComplaintsMenuOpen(true); }}
-              onMouseLeave={() => { if (!complaintsClicked) setComplaintsMenuOpen(false); }}
+              onMouseEnter={handleComplaintsMouseEnter}
+              onMouseLeave={handleComplaintsMouseLeave}
             >
               <button
                 type="button"
@@ -170,23 +211,31 @@ export function HeaderNav() {
               </button>
 
               {complaintsMenuOpen && (
-                <div className="absolute top-full mt-2 left-0 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-[60] animate-in fade-in zoom-in-95">
-                  <Link
-                    href="/complaints"
-                    onClick={() => setComplaintsMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-medium text-gray-700 hover:bg-gray-50 hover:text-[#005C66]"
-                  >
-                    <AlertCircle className="w-4 h-4 text-gray-400" />
-                    All Complaints
-                  </Link>
-                  <Link
-                    href="/complaints/create"
-                    onClick={() => setComplaintsMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-medium text-gray-700 hover:bg-gray-50 hover:text-[#005C66]"
-                  >
-                    <PlusCircle className="w-4 h-4 text-gray-400" />
-                    Create New Complaint
-                  </Link>
+                <div className="absolute top-full pt-2 left-0 w-52 z-[60]">
+                  <div className="bg-white rounded-2xl shadow-xl border border-gray-100 py-2 animate-in fade-in zoom-in-95">
+                    <Link
+                      href="/complaints"
+                      onClick={() => {
+                        setComplaintsMenuOpen(false);
+                        setComplaintsClicked(false);
+                      }}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-medium text-gray-700 hover:bg-gray-50 hover:text-[#005C66]"
+                    >
+                      <AlertCircle className="w-4 h-4 text-gray-400" />
+                      All Complaints
+                    </Link>
+                    <Link
+                      href="/complaints/create"
+                      onClick={() => {
+                        setComplaintsMenuOpen(false);
+                        setComplaintsClicked(false);
+                      }}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-medium text-gray-700 hover:bg-gray-50 hover:text-[#005C66]"
+                    >
+                      <PlusCircle className="w-4 h-4 text-gray-400" />
+                      Create New Complaint
+                    </Link>
+                  </div>
                 </div>
               )}
             </div>
