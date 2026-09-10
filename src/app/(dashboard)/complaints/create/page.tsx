@@ -8,6 +8,8 @@ import complaintsService from "@/services/complaints.service";
 import authService from "@/services/auth.service";
 import { SuccessFlowerBadge } from "@/components/ui/SuccessModal";
 
+type BookingOption = { id: string; booking_number: string; scheduled_datetime: string; status: string };
+
 export default function CreateComplaintPage() {
   const router = useRouter();
 
@@ -15,6 +17,8 @@ export default function CreateComplaintPage() {
   const [contactNumber, setContactNumber] = useState("");
   const [subject, setSubject] = useState("");
   const [description, setDescription] = useState("");
+  const [bookingId, setBookingId] = useState("");
+  const [bookingOptions, setBookingOptions] = useState<BookingOption[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [error, setError] = useState("");
@@ -27,6 +31,15 @@ export default function CreateComplaintPage() {
     if (user?.full_name) {
       setSubmitterName(user.full_name);
     }
+  }, []);
+
+  useEffect(() => {
+    complaintsService.listBookings()
+      .then((bookings) => setBookingOptions(bookings))
+      .catch((err) => {
+        console.error("Failed to load bookings for complaint form:", err);
+        setBookingOptions([]);
+      });
   }, []);
 
   const validate = (): boolean => {
@@ -83,6 +96,7 @@ export default function CreateComplaintPage() {
         subject: subject.trim(),
         description: description.trim(),
         ...(contactNumber.trim() ? { contact_number: contactNumber.trim() } : {}),
+        ...(bookingId ? { booking_id: bookingId } : {}),
       });
       setIsSuccessModalOpen(true);
     } catch (err: any) {
@@ -141,6 +155,28 @@ export default function CreateComplaintPage() {
                   {fieldErrors.contactNumber}
                 </p>
               )}
+            </div>
+          </div>
+
+          {/* Row 1.5: Related Booking (Optional) */}
+          <div>
+            <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
+              RELATED BOOKING (OPTIONAL)
+            </label>
+            <div className="relative">
+              <select
+                value={bookingId}
+                onChange={(e) => setBookingId(e.target.value)}
+                className="w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full pl-6 pr-12 text-[13px] sm:text-[14px] text-gray-800 border-none focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-xs appearance-none cursor-pointer"
+              >
+                <option value="">None selected</option>
+                {bookingOptions.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.booking_number} — {new Date(b.scheduled_datetime).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="w-4 h-4 text-gray-400 absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
           </div>
 

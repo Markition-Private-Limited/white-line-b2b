@@ -10,19 +10,17 @@ import { Modal } from "@/components/ui/Modal";
 import { PasswordStrengthBar } from "@/components/ui/PasswordStrengthBar";
 import { DataTable, type ColumnDef } from "@/components/layout/DataTableContainer";
 import usersService, { type SpocUser } from "@/services/users.service";
+import authService from "@/services/auth.service";
 
 const LIMIT = 10;
 
 const ROLE_OPTIONS = ["Admin", "Operations", "Finance"] as const;
 
-// Fallback sample team members matching Figma
-const MOCK_TEAM_MEMBERS = [
-  { id: "mock-1", full_name: "Elena Rodriguez", role: "Fleet Manager", email: "elena.r@whiteline.com" },
-  { id: "mock-2", full_name: "Julian Thorne", role: "Operations Lead", email: "julian.t@whiteline.com" },
-  { id: "mock-3", full_name: "Sarah Chen", role: "Concierge Admin", email: "sarah.c@whiteline.com" },
-];
-
 export default function UsersPage() {
+  // Current logged-in user (from cookie) — used to gate owner-only actions
+  const currentUser = authService.getStoredUser();
+  const isOwner = currentUser?.is_account_owner === true;
+
   const [users, setUsers] = useState<SpocUser[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -31,6 +29,8 @@ export default function UsersPage() {
   // Create user form
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showCreatePassword, setShowCreatePassword] = useState(false);
   const [role, setRole] = useState<string>("Admin");
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -41,7 +41,7 @@ export default function UsersPage() {
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const [menuPos, setMenuPos] = useState({ top: 0, right: 0 });
   const [changePasswordUser, setChangePasswordUser] = useState<SpocUser | null>(null);
-  const [transferUser, setTransferUser] = useState<SpocUser | null>(null);
+  const [transferOpen, setTransferOpen] = useState(false);
   const [selectedNewOwnerId, setSelectedNewOwnerId] = useState("");
   const [selectedNewOwnerName, setSelectedNewOwnerName] = useState("");
   const [transferDropdownOpen, setTransferDropdownOpen] = useState(false);
@@ -70,67 +70,13 @@ export default function UsersPage() {
         setTotal(res.total ?? (res.data?.length || 0));
       })
       .catch(() => {
-        // Mock fallback if offline/no users
-        setUsers([
-          {
-            id: "user-1",
-            full_name: "Alexander Miller",
-            email: "alex.m@whiteline.com",
-            role: "Admin",
-            status: "active",
-            is_account_owner: true,
-            last_login: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-            created_at: "2023-02-07T10:00:00Z",
-          },
-          {
-            id: "user-2",
-            full_name: "Sarah Connor",
-            email: "alex.m@whiteline.com",
-            role: "Operations",
-            status: "active",
-            is_account_owner: false,
-            last_login: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-            created_at: "2023-02-07T10:00:00Z",
-          },
-          {
-            id: "user-3",
-            full_name: "David Beckham",
-            email: "s.connor@whiteline.com",
-            role: "Finance",
-            status: "inactive",
-            is_account_owner: false,
-            last_login: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-            created_at: "2023-02-07T10:00:00Z",
-          },
-          {
-            id: "user-4",
-            full_name: "Sarah Connor",
-            email: "alex.m@whiteline.com",
-            role: "Operations",
-            status: "active",
-            is_account_owner: false,
-            last_login: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-            created_at: "2023-02-07T10:00:00Z",
-          },
-          {
-            id: "user-5",
-            full_name: "David Beckham",
-            email: "s.connor@whiteline.com",
-            role: "Finance",
-            status: "inactive",
-            is_account_owner: false,
-            last_login: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-            created_at: "2023-02-07T10:00:00Z",
-          },
-        ]);
-        setTotal(5);
+        setUsers([]);
+        setTotal(0);
       })
       .finally(() => setLoading(false));
   }, [page]);
 
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+  useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
   // Click outside listener for all dropdowns
   useEffect(() => {
@@ -149,19 +95,23 @@ export default function UsersPage() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // Close popup on scroll
+  // Close action menu on scroll
   useEffect(() => {
-    const handleScroll = () => {
-      if (activeMenuId) setActiveMenuId(null);
-    };
+    const handleScroll = () => { if (activeMenuId) setActiveMenuId(null); };
     window.addEventListener("scroll", handleScroll, true);
     return () => window.removeEventListener("scroll", handleScroll, true);
   }, [activeMenuId]);
 
+  // ── Handlers ──────────────────────────────────────────────────────────────
+
   const handleCreateUser = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!fullName.trim() || !email.trim()) {
-      setCreateError("Please provide both full name and email address.");
+      setCreateError("Please provide full name and email address.");
+      return;
+    }
+    if (!password || password.length < 8) {
+      setCreateError("Password must be at least 8 characters.");
       return;
     }
     setCreateError("");
@@ -170,12 +120,14 @@ export default function UsersPage() {
       const newUser = await usersService.create({
         full_name: fullName.trim(),
         email: email.trim(),
+        password,
         role,
       });
       setUsers((prev) => [newUser, ...prev]);
       setTotal((t) => t + 1);
       setFullName("");
       setEmail("");
+      setPassword("");
       setRole("Admin");
       setCreateSuccess(true);
       setTimeout(() => setCreateSuccess(false), 2500);
@@ -213,9 +165,9 @@ export default function UsersPage() {
     try {
       await usersService.changePassword(changePasswordUser.id, newPassword);
       setChangePasswordUser(null);
-      setPasswordSuccessModalOpen(true);
       setNewPassword("");
       setConfirmPassword("");
+      setPasswordSuccessModalOpen(true);
     } catch (err: any) {
       const msg = err?.response?.data?.message;
       setActionError(typeof msg === "string" ? msg : "Failed to update password.");
@@ -225,245 +177,270 @@ export default function UsersPage() {
   };
 
   const handleTransferOwnership = async () => {
-    if (!transferUser || !selectedNewOwnerId) return;
+    if (!selectedNewOwnerId || !currentUser?.id) return;
     setActionLoading(true);
     setActionError("");
     try {
-      await usersService.transfer(transferUser.id, selectedNewOwnerId);
-      setTransferUser(null);
+      // fromId = current owner's spoc id; toId = new owner
+      await usersService.transfer(currentUser.id, selectedNewOwnerId);
+      setTransferOpen(false);
       setTransferSuccessModalOpen(true);
       fetchUsers();
     } catch (err: any) {
-      // If mock/API fails, still show success for preview if user selected
       const msg = err?.response?.data?.message;
-      if (typeof msg === "string" && !msg.toLowerCase().includes("not found")) {
-        setActionError(msg);
-      } else {
-        setTransferUser(null);
-        setTransferSuccessModalOpen(true);
-      }
+      setActionError(typeof msg === "string" ? msg : "Failed to transfer ownership.");
     } finally {
       setActionLoading(false);
     }
   };
 
+  // ── Formatting helpers ─────────────────────────────────────────────────────
+
   const formatDate = (d?: string) => {
-    if (!d) return "Feb 07, 2023";
+    if (!d) return "—";
     try {
-      const date = new Date(d);
-      return date.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
-    } catch {
-      return d;
-    }
+      return new Date(d).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+    } catch { return d; }
   };
 
   const formatLastLogin = (d?: string) => {
-    if (!d) return "Yesterday";
+    if (!d) return "Never";
     try {
       const diffMs = Date.now() - new Date(d).getTime();
       const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-      if (diffHours < 24 && diffHours >= 0) return `${Math.max(1, diffHours)} hours ago`;
+      if (diffHours < 1) return "Just now";
+      if (diffHours < 24) return `${diffHours}h ago`;
       if (diffHours < 48) return "Yesterday";
       const diffDays = Math.floor(diffHours / 24);
       if (diffDays < 14) return `${diffDays} days ago`;
-      return "1 week ago";
-    } catch {
-      return "Yesterday";
-    }
+      return `${Math.floor(diffDays / 7)}w ago`;
+    } catch { return "—"; }
   };
 
-  // Available transfer candidates
-  const candidateUsers = useMemo(() => {
-    return users
-      .filter((u) => !transferUser || u.id !== transferUser.id)
-      .map((u) => ({ id: u.id, full_name: u.full_name, role: u.role || "Team Member", email: u.email }));
-  }, [users, transferUser]);
+  // Transfer candidates = all users except the current logged-in owner
+  const candidateUsers = useMemo(() =>
+    users.filter((u) => u.id !== currentUser?.id),
+    [users, currentUser?.id]
+  );
 
   const filteredCandidates = useMemo(() => {
     if (!transferSearchQuery.trim()) return candidateUsers;
     const q = transferSearchQuery.toLowerCase();
     return candidateUsers.filter(
-      (c) => c.full_name.toLowerCase().includes(q) || c.role.toLowerCase().includes(q)
+      (c) => c.full_name.toLowerCase().includes(q) || (c.role || "").toLowerCase().includes(q)
     );
   }, [candidateUsers, transferSearchQuery]);
 
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
+  // ── Table columns ──────────────────────────────────────────────────────────
+
   const tableColumns = useMemo<ColumnDef<SpocUser>[]>(() => [
     {
       header: "USER NAME",
       cell: (row) => (
-        <span className="font-semibold text-gray-900 text-[13px] font-inter">
-          {row.full_name}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="font-semibold text-gray-900 text-[13px] font-inter">{row.full_name}</span>
+          {row.is_account_owner && (
+            <span className="px-2 py-0.5 rounded-full bg-[#005C66]/10 text-[#005C66] text-[10px] font-bold uppercase tracking-wide">
+              Owner
+            </span>
+          )}
+        </div>
       ),
     },
     {
-      header: "EMAIL ADRESS",
-      cell: (row) => (
-        <span className="text-gray-600 text-[13px] font-inter">
-          {row.email}
-        </span>
-      ),
+      header: "EMAIL ADDRESS",
+      cell: (row) => <span className="text-gray-600 text-[13px] font-inter">{row.email}</span>,
     },
     {
-      header: "DUE DATE",
-      cell: (row) => (
-        <span className="text-gray-600 text-[13px] font-inter">
-          {formatDate(row.created_at)}
-        </span>
-      ),
+      header: "JOINED",
+      cell: (row) => <span className="text-gray-600 text-[13px] font-inter">{formatDate(row.created_at)}</span>,
     },
     {
       header: "ROLE",
-      cell: (row) => (
-        <span className="font-bold text-gray-900 text-[13px] font-inter">
-          {row.role}
-        </span>
-      ),
+      cell: (row) => <span className="font-bold text-gray-900 text-[13px] font-inter">{row.role}</span>,
     },
     {
-      header: "SUBMITTED BY",
-      className: "text-left",
+      header: "STATUS",
       cell: (row) => (
-        <div className="flex items-center gap-2">
-          <Toggle
-            checked={row.status === "active"}
-            onChange={() => handleToggleActive(row.id)}
-            label={row.status === "active" ? "Active" : "Inactive"}
-          />
-        </div>
+        <Toggle
+          checked={row.status === "active"}
+          onChange={() => !row.is_account_owner && handleToggleActive(row.id)}
+          label={row.status === "active" ? "Active" : "Inactive"}
+        />
       ),
     },
     {
       header: "LAST LOGIN",
-      cell: (row) => (
-        <span className="text-gray-600 text-[13px] font-inter">
-          {formatLastLogin(row.last_login)}
-        </span>
-      ),
+      cell: (row) => <span className="text-gray-600 text-[13px] font-inter">{formatLastLogin(row.last_login)}</span>,
     },
     {
       header: "ACTION",
       className: "text-center",
-      cell: (row) => (
-        <div className="flex justify-center relative">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (activeMenuId === row.id) {
-                setActiveMenuId(null);
-              } else {
-                const rect = e.currentTarget.getBoundingClientRect();
-                setMenuPos({
-                  top: rect.bottom,
-                  right: window.innerWidth - rect.right,
-                });
-                setActiveMenuId(row.id);
-              }
-            }}
-            className="w-7 h-7 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-900 cursor-pointer transition-colors"
-          >
-            <MoreVertical className="w-4 h-4" />
-          </button>
-        </div>
-      ),
+      cell: (row) => {
+        // Only the account owner can perform actions; also can't act on themselves here
+        if (!isOwner || row.is_account_owner) return null;
+        return (
+          <div className="flex justify-center">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (activeMenuId === row.id) {
+                  setActiveMenuId(null);
+                } else {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  setMenuPos({ top: rect.bottom + 4, right: window.innerWidth - rect.right });
+                  setActiveMenuId(row.id);
+                }
+              }}
+              className="w-7 h-7 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-900 cursor-pointer transition-colors"
+            >
+              <MoreVertical className="w-4 h-4" />
+            </button>
+          </div>
+        );
+      },
     },
-  ], [activeMenuId, users]);
+  ], [activeMenuId, isOwner]);
+
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <div className="space-y-6 pb-10 max-w-[1280px]">
-      {/* Create New User Card */}
-      <div className="bg-white rounded-[32px] p-6 sm:p-8 lg:p-9 border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] space-y-6 relative z-20">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-[18px] sm:text-[20px] font-bold font-poppins text-gray-900">
-              Create New User
-            </h2>
-            <p className="text-[12px] sm:text-[13px] text-gray-500 font-inter mt-0.5">
-              Assign roles and grant access to team members.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => handleCreateUser()}
-            disabled={creating}
-            className="h-[44px] px-8 rounded-full bg-[#005C66] text-white hover:bg-[#004d55] text-[13px] font-medium transition-colors shadow-xs flex items-center justify-center shrink-0 cursor-pointer disabled:opacity-50"
-          >
-            {creating ? "Creating..." : createSuccess ? "User Created!" : "Create User"}
-          </button>
-        </div>
 
-        <form onSubmit={handleCreateUser} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* FULL NAME */}
-          <div>
-            <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
-              FULL NAME
-            </label>
-            <input
-              type="text"
-              required
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="Enter Full Name"
-              className="w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full px-6 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-xs font-inter"
-            />
-          </div>
-
-          {/* EMAIL ADDRESS */}
-          <div>
-            <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
-              EMAIL ADDRESS
-            </label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter Email Address"
-              className="w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full px-6 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-xs font-inter"
-            />
+      {/* Create New User — only owners can create */}
+      {isOwner && (
+        <div className="bg-white rounded-[32px] p-6 sm:p-8 lg:p-9 border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] space-y-6 relative z-20">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-[18px] sm:text-[20px] font-bold font-poppins text-gray-900">
+                Create New User
+              </h2>
+              <p className="text-[12px] sm:text-[13px] text-gray-500 font-inter mt-0.5">
+                Assign roles and grant access to team members. New users are never account owners.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              {isOwner && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTransferOpen(true);
+                    setSelectedNewOwnerId("");
+                    setSelectedNewOwnerName("");
+                    setTransferSearchQuery("");
+                    setActionError("");
+                  }}
+                  className="h-[44px] px-6 rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50 text-[13px] font-medium transition-colors flex items-center gap-2 shrink-0 cursor-pointer"
+                >
+                  <ArrowRightLeft className="w-4 h-4" />
+                  Transfer Ownership
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => handleCreateUser()}
+                disabled={creating}
+                className="h-[44px] px-8 rounded-full bg-[#005C66] text-white hover:bg-[#004d55] text-[13px] font-medium transition-colors shadow-xs flex items-center justify-center shrink-0 cursor-pointer disabled:opacity-50"
+              >
+                {creating ? "Creating..." : createSuccess ? "User Created!" : "Create User"}
+              </button>
+            </div>
           </div>
 
-          {/* ROLE SELECTION */}
-          <div className="relative" ref={roleDropdownRef}>
-            <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
-              ROLE SELECTION
-            </label>
-            <button
-              type="button"
-              onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
-              className="w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full px-6 text-[13px] sm:text-[14px] text-gray-800 flex items-center justify-between border-none focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-xs cursor-pointer font-inter"
-            >
-              <span className="font-medium text-gray-800">{role}</span>
-              <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${roleDropdownOpen ? 'rotate-180' : ''}`} />
-            </button>
+          <form onSubmit={handleCreateUser} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* FULL NAME */}
+            <div>
+              <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
+                FULL NAME
+              </label>
+              <input
+                type="text"
+                required
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Enter Full Name"
+                className="w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full px-6 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-xs font-inter"
+              />
+            </div>
 
-            {roleDropdownOpen && (
-              <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 py-1.5 z-50 animate-in fade-in zoom-in-95 overflow-hidden">
-                {ROLE_OPTIONS.map((r) => (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => {
-                      setRole(r);
-                      setRoleDropdownOpen(false);
-                    }}
-                    className={`w-full text-left px-5 py-3 text-[13px] transition-colors cursor-pointer flex items-center justify-between font-inter ${
-                      role === r ? "bg-[#005C66]/5 text-[#005C66] font-semibold" : "text-gray-700 hover:bg-gray-50"
-                    }`}
-                  >
-                    <span>{r}</span>
-                    {role === r && <Check className="w-4 h-4 text-[#005C66]" />}
-                  </button>
-                ))}
+            {/* EMAIL ADDRESS */}
+            <div>
+              <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
+                EMAIL ADDRESS
+              </label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter Email Address"
+                className="w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full px-6 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-xs font-inter"
+              />
+            </div>
+
+            {/* PASSWORD */}
+            <div>
+              <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
+                PASSWORD
+              </label>
+              <div className="relative">
+                <input
+                  type={showCreatePassword ? "text" : "password"}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Set a password"
+                  className="w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full px-6 pr-12 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-xs font-inter"
+                />
+                <div
+                  className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer transition-colors"
+                  onClick={() => setShowCreatePassword(!showCreatePassword)}
+                >
+                  {showCreatePassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </div>
               </div>
-            )}
-          </div>
-        </form>
-        {createError && <p className="text-xs text-red-600 font-medium">{createError}</p>}
-      </div>
+            </div>
+
+            {/* ROLE SELECTION */}
+            <div className="relative" ref={roleDropdownRef}>
+              <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
+                ROLE SELECTION
+              </label>
+              <button
+                type="button"
+                onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
+                className="w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full px-6 text-[13px] sm:text-[14px] text-gray-800 flex items-center justify-between border-none focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-xs cursor-pointer font-inter"
+              >
+                <span className="font-medium text-gray-800">{role}</span>
+                <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${roleDropdownOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {roleDropdownOpen && (
+                <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 py-1.5 z-50 animate-in fade-in zoom-in-95 overflow-hidden">
+                  {ROLE_OPTIONS.map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => { setRole(r); setRoleDropdownOpen(false); }}
+                      className={`w-full text-left px-5 py-3 text-[13px] transition-colors cursor-pointer flex items-center justify-between font-inter ${
+                        role === r ? "bg-[#005C66]/5 text-[#005C66] font-semibold" : "text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      <span>{r}</span>
+                      {role === r && <Check className="w-4 h-4 text-[#005C66]" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </form>
+
+          {createError && <p className="text-xs text-red-600 font-medium">{createError}</p>}
+        </div>
+      )}
 
       {/* Users Table */}
       <DataTable
@@ -477,6 +454,12 @@ export default function UsersPage() {
           itemsPerPage: LIMIT,
           onPageChange: setPage,
         }}
+        emptyState={
+          <div className="flex flex-col items-center gap-2 py-16 text-center">
+            <p className="text-[14px] font-semibold text-gray-500">No team members yet</p>
+            <p className="text-[12px] text-gray-400">Use the form above to invite your first team member.</p>
+          </div>
+        }
       />
 
       {/* Change Password Modal */}
@@ -559,9 +542,7 @@ export default function UsersPage() {
                 </div>
               </div>
 
-              {actionError && (
-                <p className="text-xs text-red-600 font-medium">{actionError}</p>
-              )}
+              {actionError && <p className="text-xs text-red-600 font-medium">{actionError}</p>}
 
               <div className="flex items-center justify-center gap-3.5 pt-3">
                 <button
@@ -584,11 +565,11 @@ export default function UsersPage() {
         </div>
       )}
 
-      {/* Transfer Account Responsibilities Modal (Figma Screenshot 2) */}
-      {transferUser && (
+      {/* Transfer Ownership Modal */}
+      {transferOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35 animate-in fade-in duration-200"
-          onClick={() => { setTransferUser(null); setActionError(""); }}
+          onClick={() => { setTransferOpen(false); setActionError(""); }}
         >
           <div
             className="bg-white rounded-[36px] p-7 sm:p-9 max-w-[480px] w-full relative shadow-2xl space-y-6 animate-in zoom-in-95 duration-200"
@@ -596,7 +577,7 @@ export default function UsersPage() {
           >
             <button
               type="button"
-              onClick={() => { setTransferUser(null); setActionError(""); }}
+              onClick={() => { setTransferOpen(false); setActionError(""); }}
               className="absolute right-6 top-6 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 flex items-center justify-center transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
@@ -604,10 +585,10 @@ export default function UsersPage() {
 
             <div>
               <h3 className="text-[20px] sm:text-[22px] font-bold font-poppins text-gray-900 mb-1.5">
-                Transfer Account Responsibilities
+                Transfer Account Ownership
               </h3>
               <p className="text-[12px] sm:text-[13px] text-gray-500 font-inter leading-relaxed">
-                Reassign all active requests and ownership from {transferUser.full_name} to another user. This action will transfer full administrative control.
+                Transfer full administrative control to another team member. You will lose owner privileges after this action.
               </p>
             </div>
 
@@ -627,7 +608,7 @@ export default function UsersPage() {
                     {selectedNewOwnerName || "Search team members..."}
                   </span>
                 </div>
-                <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200 ${transferDropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200 ${transferDropdownOpen ? "rotate-180" : ""}`} />
               </button>
 
               {transferDropdownOpen && (
@@ -650,7 +631,7 @@ export default function UsersPage() {
                   <div className="max-h-56 overflow-y-auto divide-y divide-gray-50 [scrollbar-width:thin]">
                     {filteredCandidates.length === 0 ? (
                       <div className="p-4 text-center text-xs text-gray-400 font-inter">
-                        No matching team members found
+                        No other team members found
                       </div>
                     ) : (
                       filteredCandidates.map((candidate) => {
@@ -668,16 +649,10 @@ export default function UsersPage() {
                             }`}
                           >
                             <div>
-                              <p className="text-[13px] font-semibold text-gray-900 leading-tight">
-                                {candidate.full_name}
-                              </p>
-                              <p className="text-[11px] text-gray-500 mt-0.5">
-                                {candidate.role}
-                              </p>
+                              <p className="text-[13px] font-semibold text-gray-900 leading-tight">{candidate.full_name}</p>
+                              <p className="text-[11px] text-gray-500 mt-0.5">{candidate.role}</p>
                             </div>
-                            {isSelected && (
-                              <Check className="w-4 h-4 text-gray-900 shrink-0" />
-                            )}
+                            {isSelected && <Check className="w-4 h-4 text-gray-900 shrink-0" />}
                           </div>
                         );
                       })
@@ -687,14 +662,12 @@ export default function UsersPage() {
               )}
             </div>
 
-            {actionError && (
-              <p className="text-xs text-red-600 font-medium">{actionError}</p>
-            )}
+            {actionError && <p className="text-xs text-red-600 font-medium">{actionError}</p>}
 
             <div className="flex items-center justify-center gap-3.5 pt-3">
               <button
                 type="button"
-                onClick={() => { setTransferUser(null); setActionError(""); }}
+                onClick={() => { setTransferOpen(false); setActionError(""); }}
                 className="h-[44px] px-8 rounded-full border border-gray-300 text-[#D9383A] hover:bg-red-50/50 text-[13px] font-medium cursor-pointer transition-colors flex items-center justify-center font-inter"
               >
                 Cancel
@@ -712,11 +685,11 @@ export default function UsersPage() {
         </div>
       )}
 
-      {/* Success Modals (with tick_flower.png) */}
+      {/* Success Modals */}
       <SuccessModal
         isOpen={passwordSuccessModalOpen}
         onClose={() => setPasswordSuccessModalOpen(false)}
-        title="Password Reset Successfully"
+        title="Password Updated"
         message="The user can now log in with the new password."
         actionText="Done"
         onAction={() => setPasswordSuccessModalOpen(false)}
@@ -725,8 +698,8 @@ export default function UsersPage() {
       <SuccessModal
         isOpen={transferSuccessModalOpen}
         onClose={() => setTransferSuccessModalOpen(false)}
-        title="Account Ownership Transferred"
-        message="Administrative responsibilities and active requests have been successfully transferred."
+        title="Ownership Transferred"
+        message="Full administrative control has been transferred to the selected team member."
         actionText="Done"
         onAction={() => setTransferSuccessModalOpen(false)}
       />
@@ -762,7 +735,7 @@ export default function UsersPage() {
         </div>
       </Modal>
 
-      {/* Action Menu Popup (Rendered globally using fixed positioning) */}
+      {/* Action Menu (fixed-positioned, outside table stacking context) */}
       {activeMenuId && (
         <div
           ref={menuRef}
@@ -773,7 +746,7 @@ export default function UsersPage() {
           <button
             type="button"
             onClick={() => {
-              const row = users.find(u => u.id === activeMenuId);
+              const row = users.find((u) => u.id === activeMenuId);
               if (row) {
                 setChangePasswordUser(row);
                 setNewPassword("");
@@ -786,24 +759,6 @@ export default function UsersPage() {
           >
             <RotateCcw className="w-4 h-4 text-gray-400 shrink-0" />
             <span>Change Password</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              const row = users.find(u => u.id === activeMenuId);
-              if (row) {
-                setTransferUser(row);
-                setSelectedNewOwnerId("");
-                setSelectedNewOwnerName("");
-                setTransferSearchQuery("");
-                setActionError("");
-              }
-              setActiveMenuId(null);
-            }}
-            className="w-full flex items-center gap-3 px-3.5 py-2.5 text-[13px] text-gray-800 hover:bg-gray-50 rounded-xl cursor-pointer transition-colors font-medium font-inter"
-          >
-            <ArrowRightLeft className="w-4 h-4 text-gray-400 shrink-0" />
-            <span>Transfer Account</span>
           </button>
         </div>
       )}

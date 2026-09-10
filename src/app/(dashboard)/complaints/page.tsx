@@ -80,6 +80,9 @@ const renderSmallStatusBadge = (status?: string) => {
   if (s === "resolved") {
     bg = "bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]";
     label = "RESOLVED";
+  } else if (s === "cancelled") {
+    bg = "bg-gray-100 text-gray-500 border-gray-300";
+    label = "CANCELLED";
   } else if (s === "in review") {
     bg = "bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]";
     label = "IN REVIEW";
@@ -151,6 +154,9 @@ export default function ComplaintsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [successModalOpen, setSuccessModalOpen] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [cancelSuccessModalOpen, setCancelSuccessModalOpen] = useState(false);
 
   const fetchComplaints = () => {
     setLoading(true);
@@ -220,6 +226,33 @@ export default function ComplaintsPage() {
     } finally {
       setIsDeleting(false);
     }
+  };
+
+  const handleCancel = () => {
+    setCancelModalOpen(true);
+  };
+
+  const handleConfirmCancel = async () => {
+    if (!selectedComplaint) return;
+    setIsCancelling(true);
+    try {
+      await complaintsService.cancel(selectedComplaint.id);
+      setSelectedComplaint(null);
+      setCancelModalOpen(false);
+      setCancelSuccessModalOpen(true);
+      fetchComplaints();
+      setTimeout(() => setCancelSuccessModalOpen(false), 2000);
+    } catch {
+      // Error handling
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
+  const isComplaintCancellable = (c: Complaint | null) => {
+    if (!c) return false;
+    const s = c.status?.toLowerCase();
+    return s !== "cancelled" && s !== "resolved";
   };
 
   const tableColumns = useMemo<ColumnDef<Complaint>[]>(() => [
@@ -403,7 +436,17 @@ export default function ComplaintsPage() {
             </div>
 
             {/* Bottom Actions */}
-            <div className="flex items-center justify-end pt-3">
+            <div className="flex items-center justify-end gap-3 pt-3">
+              {isComplaintCancellable(selectedComplaint) && (
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  disabled={isCancelling}
+                  className="h-[42px] sm:h-[44px] px-7 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-50 text-[12px] sm:text-[13px] font-semibold transition-colors cursor-pointer disabled:opacity-50 shadow-xs flex items-center justify-center"
+                >
+                  {isCancelling ? "Cancelling..." : "Cancel Complaint"}
+                </button>
+              )}
               <button
                 type="button"
                 onClick={handleDelete}
@@ -457,6 +500,50 @@ export default function ComplaintsPage() {
           </div>
           <h3 className="text-lg font-bold font-poppins text-text-primary">
             Complaint Deleted Successfully
+          </h3>
+        </div>
+      </Modal>
+
+      {/* Cancel Confirmation Modal */}
+      <Modal isOpen={cancelModalOpen} onClose={() => setCancelModalOpen(false)} maxWidth="max-w-[460px]" className="text-center p-8 lg:p-10">
+        <div className="flex flex-col items-center">
+          <div className="mb-6 flex justify-center">
+            <SuccessFlowerBadge />
+          </div>
+          <h3 className="text-fs-20 lg:text-fs-22 font-bold font-poppins text-text-primary mb-3 leading-tight">
+            Are you sure you want to cancel this complaint?
+          </h3>
+          <p className="text-fs-13 lg:text-fs-14 text-[#64748B] mb-8 max-w-sm leading-relaxed mx-auto font-normal">
+            This will mark the complaint as cancelled. You can still delete it afterwards if needed.
+          </p>
+          <div className="flex items-center justify-center gap-3 w-full">
+            <button
+              type="button"
+              onClick={() => setCancelModalOpen(false)}
+              className="py-2.5 px-7 text-fs-13 lg:text-fs-14 font-medium bg-[#005C66] text-white hover:bg-[#004b54] rounded-full shadow-sm transition-colors cursor-pointer"
+            >
+              Go Back
+            </button>
+            <button
+              type="button"
+              onClick={handleConfirmCancel}
+              disabled={isCancelling}
+              className="py-2.5 px-7 text-fs-13 lg:text-fs-14 font-medium rounded-full border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50"
+            >
+              {isCancelling ? "Cancelling..." : "Yes, Cancel"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Cancel Success Modal */}
+      <Modal isOpen={cancelSuccessModalOpen} onClose={() => setCancelSuccessModalOpen(false)} maxWidth="max-w-[400px]" className="text-center p-8">
+        <div className="flex flex-col items-center">
+          <div className="mb-4 flex justify-center">
+            <CheckCircle2 className="w-12 h-12 text-green-500" />
+          </div>
+          <h3 className="text-lg font-bold font-poppins text-text-primary">
+            Complaint Cancelled Successfully
           </h3>
         </div>
       </Modal>

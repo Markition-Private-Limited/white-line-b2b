@@ -24,14 +24,13 @@ const usersService = {
     return data.data ?? data;
   },
 
-  async create(payload: { full_name: string; email: string; role: string; password?: string }): Promise<SpocUser> {
-    const body: any = {
+  async create(payload: { full_name: string; email: string; password: string; role: string }): Promise<SpocUser> {
+    const { data } = await apiClient.post('/b2b/users', {
       full_name: payload.full_name,
       email: payload.email,
+      password: payload.password,
       role: payload.role,
-      password: payload.password || "Password@123",
-    };
-    const { data } = await apiClient.post('/b2b/users', body);
+    });
     return data.data ?? data;
   },
 
@@ -45,6 +44,8 @@ const usersService = {
     return data.data ?? data;
   },
 
+  // fromId = current owner's spoc id (the one giving up ownership)
+  // toId   = the spoc user receiving ownership
   async transfer(fromId: string, toId: string): Promise<{ message: string }> {
     const { data } = await apiClient.patch(`/b2b/users/${fromId}/transfer`, { to_user_id: toId });
     return data.data ?? data;

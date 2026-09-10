@@ -54,9 +54,19 @@ const complaintsService = {
     description: string;
     contact_number?: string;
     contract_number?: string;
-    booking_ref?: string;
+    booking_id?: string;
   }): Promise<Complaint> {
     const { data } = await apiClient.post('/b2b/complaints', payload);
+    return data.data ?? data;
+  },
+
+  async listBookings(): Promise<{ id: string; booking_number: string; scheduled_datetime: string; status: string }[]> {
+    const { data } = await apiClient.get('/b2b/bookings');
+    return data.data ?? data;
+  },
+
+  async cancel(id: string): Promise<Complaint> {
+    const { data } = await apiClient.patch(`/b2b/complaints/${id}/cancel`);
     return data.data ?? data;
   },
 
