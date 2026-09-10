@@ -230,7 +230,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Card 5: Due Invoices */}
-        <div className="rounded-[28px] p-5 lg:p-6 flex flex-col justify-between min-h-[165px] bg-[#005C66] bg-[url('/due_invoices_bg.png')] bg-no-repeat bg-[position:85%_bottom] bg-contain text-white shadow-[0_8px_30px_rgba(0,92,102,0.22)] relative overflow-hidden transition-all duration-200 hover:shadow-[0_12px_36px_rgba(0,92,102,0.3)]">
+        <div className="rounded-[28px] p-5 lg:p-6 flex flex-col justify-between min-h-[165px] bg-[#005C66] bg-[url('/due_invoices_bg.png')] bg-no-repeat bg-[position:65%_bottom] bg-[length:130px] text-white shadow-[0_8px_30px_rgba(0,92,102,0.22)] relative overflow-hidden transition-all duration-200 hover:shadow-[0_12px_36px_rgba(0,92,102,0.3)]">
           <div className="flex items-start justify-between relative z-10">
             <span className="text-[16px] lg:text-[17px] font-semibold leading-snug font-poppins text-white">
               Due<br />Invoices
