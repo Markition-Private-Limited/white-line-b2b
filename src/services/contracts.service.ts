@@ -17,7 +17,7 @@ export interface Contract {
 
 const contractsService = {
   async getActive(): Promise<Contract | null> {
-    const { data } = await apiClient.get('/b2b/contract');
+    const { data } = await apiClient.get('/b2b/contracts');
     return data.data ?? data;
   },
 };

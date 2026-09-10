@@ -10,6 +10,8 @@ import {
   X,
 } from "lucide-react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { Modal } from "@/components/ui/Modal";
+import { SuccessFlowerBadge } from "@/components/ui/SuccessModal";
 import { DataTable, type ColumnDef } from "@/components/layout/DataTableContainer";
 import { PageToolbar, type FilterDef } from "@/components/layout/PageToolbar";
 import { type DatePickerValue, isDateInRange } from "@/utils/dateFilterUtils";
@@ -35,18 +37,18 @@ const formatComplaintId = (raw?: string) => {
   // Extract first 4 consecutive digits from the ID
   const digitMatch = cleaned.match(/\d{4}/);
   if (digitMatch) {
-    return `#CP-${digitMatch[0]}`;
+    return `CP-${digitMatch[0]}`;
   }
 
   const anyDigits = cleaned.match(/\d+/);
   if (anyDigits) {
-    return `#CP-${anyDigits[0]}`;
+    return `CP-${anyDigits[0]}`;
   }
 
   if (cleaned.startsWith("CP-") || cleaned.startsWith("C-")) {
-    return `#${cleaned}`;
+    return cleaned;
   }
-  return `#CP-${cleaned}`;
+  return `CP-${cleaned}`;
 };
 
 const formatComplaintIdNoHash = (raw?: string) => {
@@ -126,20 +128,23 @@ const formatBookingOrContract = (row: any, index?: number) => {
     row.b2b_client?.main_contact_phone;
 
   if (val && String(val).trim() && String(val).trim() !== "null" && String(val).trim() !== "undefined") {
-    const str = String(val).trim();
-    if (str.startsWith("#") || str.startsWith("+")) return str;
+    let str = String(val).trim();
+    if (str.startsWith("#")) {
+      str = str.substring(1);
+    }
+    if (str.startsWith("+")) return str;
     if (/^\d{9,15}$/.test(str)) return `+${str}`;
     if (str.startsWith("BK-") || str.startsWith("CT-") || str.startsWith("SR-") || str.startsWith("CON-")) {
-      return `#${str}`;
+      return str;
     }
     if (str.length >= 20 && /^[0-9a-fA-F-]+$/.test(str)) {
-      return `#BK-${str.slice(0, 6).toUpperCase()}`;
+      return `BK-${str.slice(0, 6).toUpperCase()}`;
     }
-    return `#${str}`;
+    return str;
   }
 
   const idx = typeof index === "number" ? index : 0;
-  return idx % 2 === 1 ? "+966 50 123 4567" : "#BK-7721";
+  return idx % 2 === 1 ? "+966 50 123 4567" : "BK-7721";
 };
 
 const formatSubmittedBy = (row: Complaint) => {
@@ -163,6 +168,8 @@ export default function ComplaintsPage() {
   const [dateFilter, setDateFilter] = useState<DatePickerValue | null>(null);
   const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
 
   const fetchComplaints = () => {
     setLoading(true);
@@ -213,15 +220,22 @@ export default function ComplaintsPage() {
   const pendingCount = complaints.filter((c) => ["open", "pending", "in review"].includes(c.status?.toLowerCase())).length;
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
     if (!selectedComplaint) return;
     setIsDeleting(true);
     try {
       await complaintsService.delete(selectedComplaint.id);
       setSelectedComplaint(null);
+      setDeleteModalOpen(false);
+      setSuccessModalOpen(true);
       fetchComplaints();
+      setTimeout(() => setSuccessModalOpen(false), 2000);
     } catch {
-      setSelectedComplaint(null);
+      // Error handling
     } finally {
       setIsDeleting(false);
     }
@@ -250,11 +264,9 @@ export default function ComplaintsPage() {
     },
     {
       header: "STATUS",
-      className: "text-center",
+      className: "text-left",
       cell: (row) => (
-        <div className="flex justify-center">
-          <StatusBadge status={row.status} />
-        </div>
+        <StatusBadge status={row.status} />
       ),
     },
   ], []);
@@ -423,6 +435,50 @@ export default function ComplaintsPage() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} maxWidth="max-w-[460px]" className="text-center p-8 lg:p-10">
+        <div className="flex flex-col items-center">
+          <div className="mb-6 flex justify-center">
+            <SuccessFlowerBadge />
+          </div>
+          <h3 className="text-fs-20 lg:text-fs-22 font-bold font-poppins text-text-primary mb-3 leading-tight">
+            Are you sure you want to delete this complaint?
+          </h3>
+          <p className="text-fs-13 lg:text-fs-14 text-[#64748B] mb-8 max-w-sm leading-relaxed mx-auto font-normal">
+            This action cannot be undone. Once deleted, it will be removed permanently.
+          </p>
+          <div className="flex items-center justify-center gap-3 w-full">
+            <button
+              type="button"
+              onClick={() => setDeleteModalOpen(false)}
+              className="py-2.5 px-7 text-fs-13 lg:text-fs-14 font-medium bg-[#005C66] text-white hover:bg-[#004b54] rounded-full shadow-sm transition-colors cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleConfirmDelete}
+              disabled={isDeleting}
+              className="py-2.5 px-7 text-fs-13 lg:text-fs-14 font-medium rounded-full border border-[#D9383A] text-[#D9383A] hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-50"
+            >
+              {isDeleting ? "Deleting..." : "Yes, Delete"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Success Modal */}
+      <Modal isOpen={successModalOpen} onClose={() => setSuccessModalOpen(false)} maxWidth="max-w-[400px]" className="text-center p-8">
+        <div className="flex flex-col items-center">
+          <div className="mb-4 flex justify-center">
+            <CheckCircle2 className="w-12 h-12 text-green-500" />
+          </div>
+          <h3 className="text-lg font-bold font-poppins text-text-primary">
+            Complaint Deleted Successfully
+          </h3>
+        </div>
+      </Modal>
     </div>
   );
 }

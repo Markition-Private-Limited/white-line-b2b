@@ -59,7 +59,7 @@ export default function ServiceDetailPage() {
       {/* Top Header - Plain text title on left, status badge on right (no white box, no back button) */}
       <div className="flex items-center justify-between">
         <h1 className="text-fs-22 font-semibold font-poppins text-text-primary">Service Detail: {requestId}</h1>
-        <StatusBadge status={status} />
+        <StatusBadge status={status} className="text-[9px] px-3 py-1" />
       </div>
 
       {/* Main Content Grid */}
@@ -182,7 +182,7 @@ export default function ServiceDetailPage() {
               type="button"
               onClick={handleConfirmCancel}
               disabled={cancelling}
-              className="py-2.5 px-7 text-fs-13 lg:text-fs-14 font-medium rounded-full border border-[#EA5B5B] text-[#EA5B5B] hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-50"
+              className="py-2.5 px-7 text-fs-13 lg:text-fs-14 font-medium rounded-full border border-[#D9383A] text-[#D9383A] hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-50"
             >
               {cancelling ? "Cancelling..." : "Yes, Cancel"}
             </button>

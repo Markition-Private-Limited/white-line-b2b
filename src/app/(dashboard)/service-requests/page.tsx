@@ -121,7 +121,7 @@ export default function ServiceRequestsPage() {
       ),
     },
     {
-      header: "SERVICE NAME",
+      header: "VEHICLE CATEGORY",
       cell: (r) => (
         <span className="font-medium text-text-primary text-fs-12">
           {r.vehicle_class?.name ?? "Corporate Mobility"}

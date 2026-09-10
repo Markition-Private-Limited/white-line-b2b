@@ -65,7 +65,7 @@ export function DataTable<T>({
                 <th 
                   key={idx} 
                   className={cn(
-                    "py-3.5 lg:py-5 text-fs-10 font-semibold tracking-wider uppercase whitespace-nowrap", 
+                    "py-3.5 lg:py-5 text-fs-12 font-semibold tracking-wider uppercase whitespace-nowrap", 
                     paddingClass,
                     idx === 0 && "pl-6 lg:pl-8"
                   )}

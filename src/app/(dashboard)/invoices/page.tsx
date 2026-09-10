@@ -178,11 +178,9 @@ export default function InvoicesPage() {
     },
     {
       header: "STATUS",
-      className: "text-center",
+      className: "text-left",
       cell: (row) => (
-        <div className="flex justify-center">
-          <StatusBadge status={row.status} />
-        </div>
+        <StatusBadge status={row.status} />
       ),
     },
   ], []);
