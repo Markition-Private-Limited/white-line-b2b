@@ -154,7 +154,7 @@ function ContractDetailPanel({
             <p className="text-fs-17 font-bold text-text-primary font-poppins font-mono">{contract.contract_number}</p>
           </div>
           <div className="flex items-center gap-3">
-            <StatusBadge status={contract.status} />
+            <StatusBadge status={contract.status} className="text-[9px] px-2.5 py-1" />
             <button
               type="button"
               onClick={onClose}

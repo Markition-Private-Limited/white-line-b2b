@@ -52,7 +52,7 @@ const complaintsService = {
   async create(payload: {
     subject: string;
     description: string;
-    booking_id?: string;
+    contact_number?: string;
     contract_number?: string;
     booking_ref?: string;
   }): Promise<Complaint> {

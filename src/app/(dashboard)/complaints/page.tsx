@@ -98,34 +98,16 @@ const renderSmallStatusBadge = (status?: string) => {
   );
 };
 
-const formatBookingOrContract = (row: any, index?: number) => {
-  if (!row) return "#BK-7721";
+const formatBookingOrContract = (row: any) => {
+  if (!row) return "—";
 
   const val =
-    row.contract_number ??
-    row.contract_no ??
-    row.contract_ref ??
-    row.booking_reference ??
-    row.booking_ref ??
-    row.booking_number ??
-    row.booking_id ??
-    row.bookingId ??
-    row.contractId ??
-    row.contract_id ??
-    row.service_request?.request_number ??
-    row.service_request_id ??
-    row.booking?.booking_number ??
-    row.booking?.reference_number ??
-    row.booking?.booking_ref ??
-    row.contract?.contract_number ??
-    row.contract?.reference_number ??
-    row.b2b_contract?.contract_number ??
-    row.phone ??
-    row.contact_phone ??
     row.contact_number ??
-    row.main_contact_phone ??
-    row.b2b_client?.phone ??
-    row.b2b_client?.main_contact_phone;
+    row.phone ??
+    row.booking_id ??
+    row.contract_number ??
+    row.booking_ref ??
+    row.service_request_id;
 
   if (val && String(val).trim() && String(val).trim() !== "null" && String(val).trim() !== "undefined") {
     let str = String(val).trim();
@@ -143,8 +125,7 @@ const formatBookingOrContract = (row: any, index?: number) => {
     return str;
   }
 
-  const idx = typeof index === "number" ? index : 0;
-  return idx % 2 === 1 ? "+966 50 123 4567" : "BK-7721";
+  return "—";
 };
 
 const formatSubmittedBy = (row: Complaint) => {
@@ -154,7 +135,7 @@ const formatSubmittedBy = (row: Complaint) => {
     row.created_by?.name ??
     row.spoc_user?.full_name ??
     row.user?.full_name ??
-    "Jame Wilson"
+    "—"
   );
 };
 
@@ -247,8 +228,8 @@ export default function ComplaintsPage() {
       cell: (row) => <span className="font-semibold text-text-primary text-fs-12">{formatComplaintId(row.complaint_number)}</span>,
     },
     {
-      header: "BOOKING REF",
-      cell: (row, index) => <span className="text-text-secondary text-fs-12">{formatBookingOrContract(row, index)}</span>,
+      header: "CONTACT / BOOKING REF",
+      cell: (row) => <span className="text-text-secondary text-fs-12">{formatBookingOrContract(row)}</span>,
     },
     {
       header: "DATE",

@@ -5,17 +5,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Info, X, ChevronDown } from "lucide-react";
 import complaintsService from "@/services/complaints.service";
-import serviceRequestsService, { type ServiceRequest } from "@/services/serviceRequests.service";
 import authService from "@/services/auth.service";
 import { SuccessFlowerBadge } from "@/components/ui/SuccessModal";
-import { FormDropdown, type FormDropdownOption } from "@/components/ui/FormDropdown";
 
 export default function CreateComplaintPage() {
   const router = useRouter();
 
   const [submitterName, setSubmitterName] = useState("Admin User");
-  const [bookings, setBookings] = useState<ServiceRequest[]>([]);
-  const [selectedBookingId, setSelectedBookingId] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
   const [subject, setSubject] = useState("");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -30,34 +27,17 @@ export default function CreateComplaintPage() {
     if (user?.full_name) {
       setSubmitterName(user.full_name);
     }
-
-    // Fetch existing service requests/bookings for the dropdown
-    serviceRequestsService.list(1)
-      .then((res) => {
-        const items = res.data ?? [];
-        setBookings(items);
-        if (items.length > 0) {
-          setSelectedBookingId(items[0].id);
-        }
-      })
-      .catch(() => {});
   }, []);
 
-  const bookingOptions: FormDropdownOption[] = bookings.length > 0
-    ? bookings.map((b) => ({
-        label: `${b.request_number ? `#${b.request_number}` : `#BK-${b.id.slice(0, 6).toUpperCase()}`} — ${b.vehicle_class?.name || "Concierge Booking"}`,
-        value: b.id,
-      }))
-    : [
-        { label: "#BK-7721 — Executive Chauffeur Service", value: "3fa85f64-5717-4562-b3fc-2c963f66afa6" },
-        { label: "#BK-8291 — Premium VIP Transfer", value: "a1b2c3d4-e5f6-7890-abcd-ef1234567890" },
-      ];
-
   const validate = (): boolean => {
-    // 1. Booking selection validation
-    if (!selectedBookingId && bookingOptions.length > 0) {
-      setFieldErrors({ bookingId: "Please select a booking reference." });
-      return false;
+    // 1. Contact number validation (optional)
+    if (contactNumber.trim()) {
+      const saudiPhoneRegex = /^(05|5|\+9665)[0-9]{8}$/;
+      const cleaned = contactNumber.replace(/\s+/g, '');
+      if (!saudiPhoneRegex.test(cleaned)) {
+        setFieldErrors({ contactNumber: "Please enter a valid Saudi phone number (e.g. +9665... or 05...)." });
+        return false;
+      }
     }
 
     // 2. Subject validation (one at a time)
@@ -102,7 +82,7 @@ export default function CreateComplaintPage() {
       await complaintsService.create({
         subject: subject.trim(),
         description: description.trim(),
-        ...(selectedBookingId ? { booking_id: selectedBookingId } : {}),
+        ...(contactNumber.trim() ? { contact_number: contactNumber.trim() } : {}),
       });
       setIsSuccessModalOpen(true);
     } catch (err: any) {
@@ -122,7 +102,7 @@ export default function CreateComplaintPage() {
         </h1>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-6">
-          {/* Row 1: Submitter Name & Booking Reference Dropdown */}
+          {/* Row 1: Submitter Name & Contact Number */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
@@ -137,20 +117,30 @@ export default function CreateComplaintPage() {
             </div>
 
             <div>
-              <FormDropdown
-                label="BOOKING REF / SERVICE REQUEST"
-                placeholder="Select booking reference"
-                options={bookingOptions}
-                value={selectedBookingId}
-                error={fieldErrors.bookingId}
-                onSelect={(val) => {
-                  setSelectedBookingId(val);
-                  if (fieldErrors.bookingId) {
-                    setFieldErrors((prev) => ({ ...prev, bookingId: "" }));
+              <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
+                CONTACT NUMBER (OPTIONAL)
+              </label>
+              <input
+                type="text"
+                value={contactNumber}
+                onChange={(e) => {
+                  setContactNumber(e.target.value);
+                  if (fieldErrors.contactNumber) {
+                    setFieldErrors((prev) => ({ ...prev, contactNumber: "" }));
                   }
                 }}
-                className="h-[48px] sm:h-[50px] px-6 text-[13px] sm:text-[14px] bg-[#F4F5F7] shadow-xs rounded-full border-none"
+                placeholder="e.g. 05XXXXXXXX"
+                className={`w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full px-6 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none transition-all shadow-xs ${
+                  fieldErrors.contactNumber
+                    ? "ring-1 ring-red-500 focus:ring-1 focus:ring-red-500"
+                    : "focus:ring-1 focus:ring-primary/20"
+                }`}
               />
+              {fieldErrors.contactNumber && (
+                <p className="text-[11px] text-red-500 font-medium mt-1.5 ml-2">
+                  {fieldErrors.contactNumber}
+                </p>
+              )}
             </div>
           </div>
 
