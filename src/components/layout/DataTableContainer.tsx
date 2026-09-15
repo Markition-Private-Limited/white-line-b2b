@@ -67,7 +67,8 @@ export function DataTable<T>({
                   className={cn(
                     "py-3.5 lg:py-5 text-fs-12 font-semibold tracking-wider uppercase whitespace-nowrap", 
                     paddingClass,
-                    idx === 0 && "pl-6 lg:pl-8"
+                    idx === 0 && "pl-6 lg:pl-8",
+                    col.className
                   )}
                 >
                   {col.header}

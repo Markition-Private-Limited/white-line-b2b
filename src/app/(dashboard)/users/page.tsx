@@ -280,12 +280,14 @@ export default function UsersPage() {
       className: "text-center",
       cell: (row) => {
         // Only the account owner can perform actions; also can't act on themselves here
-        if (!isOwner || row.is_account_owner) return null;
+        const isDisabled = !isOwner || row.is_account_owner;
         return (
           <div className="flex justify-center">
             <button
               type="button"
+              disabled={isDisabled}
               onClick={(e) => {
+                if (isDisabled) return;
                 e.stopPropagation();
                 if (activeMenuId === row.id) {
                   setActiveMenuId(null);
@@ -295,7 +297,11 @@ export default function UsersPage() {
                   setActiveMenuId(row.id);
                 }
               }}
-              className="w-7 h-7 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-900 cursor-pointer transition-colors"
+              className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
+                isDisabled 
+                  ? "text-gray-300 cursor-not-allowed" 
+                  : "hover:bg-gray-100 text-gray-500 hover:text-gray-900 cursor-pointer"
+              }`}
             >
               <MoreVertical className="w-4 h-4" />
             </button>
@@ -308,7 +314,7 @@ export default function UsersPage() {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-6 pb-10 max-w-[1280px]">
+    <div className="space-y-6 pb-10">
 
       {/* Create New User — only owners can create */}
       {isOwner && (

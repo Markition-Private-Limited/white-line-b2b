@@ -108,7 +108,7 @@ export default function CreateComplaintPage() {
   };
 
   return (
-    <div className="space-y-6 pb-12 lg:pb-16 max-w-[1280px]">
+    <div className="space-y-6 pb-12 lg:pb-16">
       {/* Main Form Card with Heading inside matching Service Request */}
       <div className="bg-white rounded-[32px] p-6 sm:p-8 lg:p-10 border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
         <h1 className="text-[24px] lg:text-[27px] font-bold font-poppins text-gray-900 mb-7 tracking-tight">
