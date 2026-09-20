@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import authService from "@/services/auth.service";
+import apiClient from "@/lib/axios";
+import { getFcmToken } from "@/lib/firebase";
 
 type ValidationState = "idle" | "error" | "success";
 
@@ -138,6 +140,21 @@ export default function LoginPage() {
         localStorage.setItem("rememberedEmail", email);
       } else {
         localStorage.removeItem("rememberedEmail");
+      }
+
+      try {
+        // Race against a timeout so a slow/hung permission prompt can never
+        // meaningfully delay login — this is best-effort registration, not
+        // a login requirement.
+        const token = await Promise.race([
+          getFcmToken(),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000)),
+        ]);
+        if (token) {
+          await apiClient.patch('/b2b/profile', { fcm_token: token });
+        }
+      } catch (err) {
+        console.error("Failed to register push token:", err);
       }
 
       setStatus("success");

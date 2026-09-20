@@ -15,11 +15,32 @@ import {
   PlusCircle,
   Clock,
   CheckCircle2,
+  Info,
 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/utils/cn";
 import authService from "@/services/auth.service";
+import notificationsService, { type Notification } from "@/services/notifications.service";
+import { onForegroundMessage } from "@/lib/firebase";
+
+const NOTIFICATION_ICONS: Record<string, React.ElementType> = {
+  service_request_approved: CheckCircle2,
+  service_request_rejected: AlertCircle,
+  complaint_status_changed: AlertCircle,
+  invoice_created: Clock,
+};
+
+function formatRelativeTime(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes} min${minutes === 1 ? "" : "s"} ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  const days = Math.floor(hours / 24);
+  return `${days} day${days === 1 ? "" : "s"} ago`;
+}
 
 export function HeaderNav() {
   const pathname = usePathname();
@@ -36,13 +57,76 @@ export function HeaderNav() {
   const [notifMenuOpen, setNotifMenuOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 
+  const [unreadNotifications, setUnreadNotifications] = useState<Notification[]>([]);
+  const [readNotifications, setReadNotifications] = useState<Notification[]>([]);
+  const [readPage, setReadPage] = useState(1);
+  const [hasMoreRead, setHasMoreRead] = useState(false);
+  const [loadingMoreRead, setLoadingMoreRead] = useState(false);
+  const [notificationsLoaded, setNotificationsLoaded] = useState(false);
+
   const serviceRef = useRef<HTMLDivElement>(null);
   const complaintsRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
+  const notifListRef = useRef<HTMLDivElement>(null);
 
   const serviceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const complaintsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const loadNotifications = (page = 1) => {
+    notificationsService.list(page)
+      .then((res) => {
+        setUnreadNotifications(res.unread);
+        if (page === 1) {
+          setReadNotifications(res.read);
+        } else {
+          setReadNotifications((prev) => [...prev, ...res.read]);
+        }
+        setReadPage(res.read_page);
+        setHasMoreRead(res.has_more_read);
+        setNotificationsLoaded(true);
+      })
+      .catch((err) => {
+        console.error("Failed to load notifications:", err);
+      });
+  };
+
+  const handleNotifListScroll = () => {
+    const el = notifListRef.current;
+    if (!el || loadingMoreRead || !hasMoreRead) return;
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+    if (!nearBottom) return;
+
+    setLoadingMoreRead(true);
+    notificationsService.list(readPage + 1)
+      .then((res) => {
+        setReadNotifications((prev) => [...prev, ...res.read]);
+        setReadPage(res.read_page);
+        setHasMoreRead(res.has_more_read);
+      })
+      .catch((err) => {
+        console.error("Failed to load more notifications:", err);
+      })
+      .finally(() => setLoadingMoreRead(false));
+  };
+
+  const handleNotificationClick = (n: Notification) => {
+    if (n.is_read) return;
+    notificationsService.markRead(n.id).catch((err) => {
+      console.error("Failed to mark notification read:", err);
+    });
+    setUnreadNotifications((prev) => prev.filter((item) => item.id !== n.id));
+    setReadNotifications((prev) => [{ ...n, is_read: true }, ...prev]);
+  };
+
+  const handleMarkAllRead = () => {
+    if (unreadNotifications.length === 0) return;
+    notificationsService.markAllRead().catch((err) => {
+      console.error("Failed to mark all notifications read:", err);
+    });
+    setReadNotifications((prev) => [...unreadNotifications.map((n) => ({ ...n, is_read: true })), ...prev]);
+    setUnreadNotifications([]);
+  };
 
   const handleServiceMouseEnter = () => {
     if (serviceTimeoutRef.current) clearTimeout(serviceTimeoutRef.current);
@@ -94,6 +178,19 @@ export function HeaderNav() {
       if (serviceTimeoutRef.current) clearTimeout(serviceTimeoutRef.current);
       if (complaintsTimeoutRef.current) clearTimeout(complaintsTimeoutRef.current);
     };
+  }, []);
+
+  useEffect(() => {
+    if (notifMenuOpen && !notificationsLoaded) {
+      loadNotifications(1);
+    }
+  }, [notifMenuOpen, notificationsLoaded]);
+
+  useEffect(() => {
+    const unsubscribe = onForegroundMessage(() => {
+      loadNotifications(1);
+    });
+    return unsubscribe;
   }, []);
 
   const isActive = (path: string) => {
@@ -262,30 +359,69 @@ export function HeaderNav() {
                 className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors relative cursor-pointer"
               >
                 <Bell className="w-4 h-4" />
-                <span className="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-[#00B4D8]" />
+                {unreadNotifications.length > 0 && (
+                  <span className="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-[#00B4D8]" />
+                )}
               </button>
 
               {notifMenuOpen && (
                 <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 z-[60] animate-in fade-in zoom-in-95">
                   <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
                     <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">Notifications</span>
-                    <span className="text-[10px] font-semibold text-[#005C66] bg-[#E6F6F8] px-2 py-0.5 rounded-full">2 New</span>
+                    {unreadNotifications.length > 0 ? (
+                      <button
+                        type="button"
+                        onClick={handleMarkAllRead}
+                        className="text-[10px] font-semibold text-[#005C66] bg-[#E6F6F8] px-2 py-0.5 rounded-full cursor-pointer hover:bg-[#d5eef1]"
+                      >
+                        Mark all read
+                      </button>
+                    ) : null}
                   </div>
-                  <div className="space-y-2.5">
-                    <div className="flex gap-2.5 p-2 rounded-xl bg-gray-50/60 hover:bg-gray-50 text-xs text-gray-700 cursor-pointer">
-                      <CheckCircle2 className="w-4 h-4 text-[#12A150] shrink-0 mt-0.5" />
-                      <div>
-                        <p className="font-semibold text-gray-900">Service Request #SR-84920 Approved</p>
-                        <p className="text-[10px] text-gray-400 mt-0.5">10 mins ago</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-2.5 p-2 rounded-xl bg-gray-50/60 hover:bg-gray-50 text-xs text-gray-700 cursor-pointer">
-                      <Clock className="w-4 h-4 text-[#FF8A00] shrink-0 mt-0.5" />
-                      <div>
-                        <p className="font-semibold text-gray-900">Invoice #INV-9283 Due in 3 days</p>
-                        <p className="text-[10px] text-gray-400 mt-0.5">1 hour ago</p>
-                      </div>
-                    </div>
+                  <div
+                    ref={notifListRef}
+                    onScroll={handleNotifListScroll}
+                    className="space-y-2.5 max-h-80 overflow-y-auto"
+                  >
+                    {unreadNotifications.length === 0 && readNotifications.length === 0 && (
+                      <p className="text-xs text-gray-400 text-center py-4">No notifications yet</p>
+                    )}
+                    {unreadNotifications.map((n) => {
+                      const Icon = NOTIFICATION_ICONS[n.notification_type] ?? Info;
+                      return (
+                        <div
+                          key={n.id}
+                          onClick={() => handleNotificationClick(n)}
+                          className="flex gap-2.5 p-2 rounded-xl bg-[#E6F6F8] hover:bg-[#d5eef1] text-xs text-gray-700 cursor-pointer"
+                        >
+                          <Icon className="w-4 h-4 text-[#005C66] shrink-0 mt-0.5" />
+                          <div>
+                            <p className="font-semibold text-gray-900">{n.title}</p>
+                            <p className="text-[10px] text-gray-500 mt-0.5">{n.body}</p>
+                            <p className="text-[10px] text-gray-400 mt-0.5">{formatRelativeTime(n.created_at)}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {readNotifications.map((n) => {
+                      const Icon = NOTIFICATION_ICONS[n.notification_type] ?? Info;
+                      return (
+                        <div
+                          key={n.id}
+                          className="flex gap-2.5 p-2 rounded-xl bg-gray-50/60 hover:bg-gray-50 text-xs text-gray-700"
+                        >
+                          <Icon className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
+                          <div>
+                            <p className="font-semibold text-gray-900">{n.title}</p>
+                            <p className="text-[10px] text-gray-500 mt-0.5">{n.body}</p>
+                            <p className="text-[10px] text-gray-400 mt-0.5">{formatRelativeTime(n.created_at)}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {loadingMoreRead && (
+                      <p className="text-[10px] text-gray-400 text-center py-2">Loading more...</p>
+                    )}
                   </div>
                 </div>
               )}
