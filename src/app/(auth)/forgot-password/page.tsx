@@ -197,7 +197,7 @@ export default function ForgotPasswordPage() {
               href="/signup"
               className="flex-1 pb-3.5 text-[15px] sm:text-[16px] font-medium text-gray-400 hover:text-gray-600 text-center transition-colors"
             >
-              Sign UP
+              Sign Up
             </Link>
           </div>
 
