@@ -136,7 +136,7 @@ body {
 
   /* Page Wrappers */
   .page-wrapper {
-    @apply flex flex-col gap-3 max-w-[1440px] mx-auto w-full pb-2 flex-1 min-h-full;
+    @apply flex flex-col gap-3 sm:gap-4 max-w-[1440px] mx-auto w-full pb-6 sm:pb-6 lg:pb-6;
   }
 
   /* Cards */

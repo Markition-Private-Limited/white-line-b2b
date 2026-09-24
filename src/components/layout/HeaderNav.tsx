@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Bell,
   ChevronDown,
@@ -16,6 +17,12 @@ import {
   Clock,
   CheckCircle2,
   Info,
+  Menu,
+  X,
+  LayoutDashboard,
+  Receipt,
+  FileCheck,
+  Users,
 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
@@ -49,6 +56,10 @@ export function HeaderNav() {
   const spocUser = authService.getStoredUser();
   const b2bClient = authService.getStoredClient();
 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileServiceOpen, setMobileServiceOpen] = useState(false);
+  const [mobileComplaintsOpen, setMobileComplaintsOpen] = useState(false);
+
   const [serviceMenuOpen, setServiceMenuOpen] = useState(false);
   const [serviceClicked, setServiceClicked] = useState(false);
   const [complaintsMenuOpen, setComplaintsMenuOpen] = useState(false);
@@ -72,6 +83,25 @@ export function HeaderNav() {
 
   const serviceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const complaintsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Close mobile drawer on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setMobileServiceOpen(false);
+    setMobileComplaintsOpen(false);
+  }, [pathname]);
+
+  // Prevent background scroll when mobile drawer is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [mobileMenuOpen]);
 
   const loadNotifications = (page = 1) => {
     notificationsService.list(page)
@@ -201,7 +231,7 @@ export function HeaderNav() {
 
   const navLinkStyles = (path: string) =>
     cn(
-      "px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer select-none flex items-center gap-1.5",
+      "px-3 xl:px-4 py-2 rounded-full text-xs xl:text-sm font-medium transition-all duration-200 cursor-pointer select-none flex items-center gap-1 xl:gap-1.5",
       isActive(path)
         ? "bg-[#005C66] text-white shadow-sm font-semibold"
         : "text-gray-600 hover:text-gray-900 hover:bg-gray-100/80"
@@ -210,7 +240,13 @@ export function HeaderNav() {
   const handleLogout = () => {
     authService.logout();
     setLogoutModalOpen(false);
+    setMobileMenuOpen(false);
     router.push("/login");
+  };
+
+  const getInitials = (name?: string) => {
+    if (!name) return "U";
+    return name.charAt(0).toUpperCase();
   };
 
   return (
@@ -224,13 +260,13 @@ export function HeaderNav() {
               alt="WhiteLine B2B Portal Logo"
               width={170}
               height={45}
-              className="h-10 w-auto object-contain"
+              className="h-9 sm:h-10 w-auto object-contain"
               priority
             />
           </Link>
 
-          {/* Center: Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1.5 bg-gray-50/90 p-1.5 rounded-full border border-gray-100">
+          {/* Center: Navigation Links (Desktop only, lg+) */}
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5 bg-gray-50/90 p-1.5 rounded-full border border-gray-100">
             <Link href="/" className={navLinkStyles("/")}>
               Dashboard
             </Link>
@@ -350,13 +386,14 @@ export function HeaderNav() {
             </Link>
           </nav>
 
-          {/* Right: Notification & Profile */}
-          <div className="flex items-center gap-3 shrink-0">
+          {/* Right: Notification, Profile, & Mobile/Tablet Hamburger */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Notification Bell */}
             <div className="relative" ref={notifRef}>
               <button
                 onClick={() => setNotifMenuOpen(!notifMenuOpen)}
-                className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors relative cursor-pointer"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors relative cursor-pointer"
+                aria-label="Notifications"
               >
                 <Bell className="w-4 h-4" />
                 {unreadNotifications.length > 0 && (
@@ -365,7 +402,7 @@ export function HeaderNav() {
               </button>
 
               {notifMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 z-[60] animate-in fade-in zoom-in-95">
+                <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 z-[60] animate-in fade-in zoom-in-95">
                   <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
                     <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">Notifications</span>
                     {unreadNotifications.length > 0 ? (
@@ -431,21 +468,26 @@ export function HeaderNav() {
             <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                className="flex items-center gap-2 p-1 pl-1.5 pr-2 rounded-full border border-gray-200 hover:border-gray-300 transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 p-1 pl-1 pr-1.5 sm:pl-1.5 sm:pr-2 rounded-full border border-gray-200 hover:border-gray-300 transition-colors cursor-pointer"
+                aria-label="User profile"
               >
-                <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
-                  <Image
-                    src="/Avatar.png"
-                    alt="User Avatar"
-                    width={32}
-                    height={32}
-                    className="object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLElement).style.display = "none";
-                    }}
-                  />
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden bg-[#005C66] text-white flex items-center justify-center shrink-0">
+                  {(spocUser as any)?.profile_image ? (
+                    <Image
+                      src={(spocUser as any).profile_image}
+                      alt="User Avatar"
+                      width={32}
+                      height={32}
+                      className="object-cover w-full h-full"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <span className="text-xs font-semibold">{getInitials(spocUser?.full_name)}</span>
+                  )}
                 </div>
-                <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
+                <ChevronDown className="w-3.5 h-3.5 text-gray-500 hidden sm:block" />
               </button>
 
               {profileMenuOpen && (
@@ -477,9 +519,320 @@ export function HeaderNav() {
                 </div>
               )}
             </div>
+
+            {/* Mobile / Tablet Hamburger Toggle Button (lg:hidden) */}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors cursor-pointer"
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
       </header>
+
+      {/* Mobile & Tablet Navigation Drawer with Framer Motion Smooth Sliding */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <div className="fixed inset-0 z-[100] lg:hidden">
+            {/* Backdrop overlay with smooth fade */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="fixed inset-0 bg-black/45 backdrop-blur-xs"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+
+            {/* Drawer Panel with smooth spring slide */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 300, mass: 0.8 }}
+              className="fixed inset-y-0 right-0 w-[85%] sm:w-80 max-w-sm bg-white shadow-2xl flex flex-col z-10"
+            >
+              {/* Drawer Header */}
+              <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+                <Link
+                  href="/"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center"
+                >
+                  <Image
+                    src="/dashboard_logo.png"
+                    alt="WhiteLine B2B Portal Logo"
+                    width={130}
+                    height={34}
+                    className="h-7 w-auto object-contain"
+                  />
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-colors cursor-pointer"
+                  aria-label="Close menu"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* User Profile Banner inside Drawer */}
+              <div className="p-4 bg-gradient-to-r from-[#ECF3F4] to-[#E6F6F8] border-b border-gray-100 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full overflow-hidden bg-[#005C66] text-white shadow-xs border border-gray-200 flex items-center justify-center shrink-0">
+                  {(spocUser as any)?.profile_image ? (
+                    <Image
+                      src={(spocUser as any).profile_image}
+                      alt="User Avatar"
+                      width={40}
+                      height={40}
+                      className="object-cover w-full h-full"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <span className="text-sm font-bold">{getInitials(spocUser?.full_name)}</span>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-gray-900 truncate">{spocUser?.full_name ?? "User"}</p>
+                  <p className="text-[11px] text-gray-600 truncate">{b2bClient?.company_name ?? "WhiteLine B2B"}</p>
+                  <span className="inline-block px-2 py-0.5 mt-0.5 bg-white/80 rounded-full text-[10px] font-medium text-[#005C66] border border-[#005C66]/20">
+                    {spocUser?.role ?? "SPOC"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Nav Links Scroll Area */}
+              <div className="flex-1 overflow-y-auto p-3 space-y-1">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-3 py-1">Navigation Menu</p>
+
+                {/* Dashboard */}
+                <Link
+                  href="/"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all duration-200",
+                    isActive("/")
+                      ? "bg-[#005C66] text-white shadow-sm font-semibold"
+                      : "text-gray-700 hover:bg-gray-100/80"
+                  )}
+                >
+                  <LayoutDashboard className="w-4 h-4 shrink-0" />
+                  <span>Dashboard</span>
+                </Link>
+
+                {/* Service Requests Submenu */}
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setMobileServiceOpen(!mobileServiceOpen)}
+                    className={cn(
+                      "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all duration-200 text-left cursor-pointer",
+                      isActive("/service-requests")
+                        ? "bg-[#005C66]/10 text-[#005C66] font-semibold"
+                        : "text-gray-700 hover:bg-gray-100/80"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <FileText className="w-4 h-4 shrink-0" />
+                      <span>Service Requests</span>
+                    </div>
+                    <ChevronDown
+                      className={cn(
+                        "w-3.5 h-3.5 transition-transform duration-200",
+                        mobileServiceOpen && "rotate-180"
+                      )}
+                    />
+                  </button>
+
+                  <AnimatePresence initial={false}>
+                    {mobileServiceOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2, ease: "easeInOut" }}
+                        className="overflow-hidden pl-6 pr-2 py-1 space-y-1 mt-1 border-l-2 border-[#005C66]/20 ml-4"
+                      >
+                        <Link
+                          href="/service-requests"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={cn(
+                            "flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors",
+                            pathname === "/service-requests"
+                              ? "bg-[#005C66] text-white font-semibold"
+                              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                          )}
+                        >
+                          <FileText className="w-3.5 h-3.5" />
+                          All Requests
+                        </Link>
+                        <Link
+                          href="/service-requests/create"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={cn(
+                            "flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors",
+                            pathname === "/service-requests/create"
+                              ? "bg-[#005C66] text-white font-semibold"
+                              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                          )}
+                        >
+                          <PlusCircle className="w-3.5 h-3.5" />
+                          Create New Request
+                        </Link>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Invoices */}
+                <Link
+                  href="/invoices"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all duration-200",
+                    isActive("/invoices")
+                      ? "bg-[#005C66] text-white shadow-sm font-semibold"
+                      : "text-gray-700 hover:bg-gray-100/80"
+                  )}
+                >
+                  <Receipt className="w-4 h-4 shrink-0" />
+                  <span>Invoices</span>
+                </Link>
+
+                {/* Complaints Submenu */}
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setMobileComplaintsOpen(!mobileComplaintsOpen)}
+                    className={cn(
+                      "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all duration-200 text-left cursor-pointer",
+                      isActive("/complaints")
+                        ? "bg-[#005C66]/10 text-[#005C66] font-semibold"
+                        : "text-gray-700 hover:bg-gray-100/80"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>Complaints</span>
+                    </div>
+                    <ChevronDown
+                      className={cn(
+                        "w-3.5 h-3.5 transition-transform duration-200",
+                        mobileComplaintsOpen && "rotate-180"
+                      )}
+                    />
+                  </button>
+
+                  <AnimatePresence initial={false}>
+                    {mobileComplaintsOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2, ease: "easeInOut" }}
+                        className="overflow-hidden pl-6 pr-2 py-1 space-y-1 mt-1 border-l-2 border-[#005C66]/20 ml-4"
+                      >
+                        <Link
+                          href="/complaints"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={cn(
+                            "flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors",
+                            pathname === "/complaints"
+                              ? "bg-[#005C66] text-white font-semibold"
+                              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                          )}
+                        >
+                          <AlertCircle className="w-3.5 h-3.5" />
+                          All Complaints
+                        </Link>
+                        <Link
+                          href="/complaints/create"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={cn(
+                            "flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors",
+                            pathname === "/complaints/create"
+                              ? "bg-[#005C66] text-white font-semibold"
+                              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                          )}
+                        >
+                          <PlusCircle className="w-3.5 h-3.5" />
+                          Create New Complaint
+                        </Link>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Contracts */}
+                <Link
+                  href="/contracts"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all duration-200",
+                    isActive("/contracts")
+                      ? "bg-[#005C66] text-white shadow-sm font-semibold"
+                      : "text-gray-700 hover:bg-gray-100/80"
+                  )}
+                >
+                  <FileCheck className="w-4 h-4 shrink-0" />
+                  <span>Contracts</span>
+                </Link>
+
+                {/* Users */}
+                <Link
+                  href="/users"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all duration-200",
+                    isActive("/users")
+                      ? "bg-[#005C66] text-white shadow-sm font-semibold"
+                      : "text-gray-700 hover:bg-gray-100/80"
+                  )}
+                >
+                  <Users className="w-4 h-4 shrink-0" />
+                  <span>Users</span>
+                </Link>
+
+                {/* Settings */}
+                <Link
+                  href="/settings"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all duration-200",
+                    isActive("/settings")
+                      ? "bg-[#005C66] text-white shadow-sm font-semibold"
+                      : "text-gray-700 hover:bg-gray-100/80"
+                  )}
+                >
+                  <SettingsIcon className="w-4 h-4 shrink-0" />
+                  <span>Settings</span>
+                </Link>
+              </div>
+
+              {/* Drawer Footer Actions */}
+              <div className="p-3 border-t border-gray-100 bg-gray-50/70">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setLogoutModalOpen(true);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-colors cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Logout Confirmation Modal */}
       <Modal
@@ -514,3 +867,5 @@ export function HeaderNav() {
     </>
   );
 }
+
+

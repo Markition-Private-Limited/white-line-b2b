@@ -56,7 +56,7 @@ export function DataTable<T>({
   const paddingClass = getPaddingClass(columns.length);
 
   return (
-    <div className={cn("card-base flex flex-col bg-white overflow-hidden shadow-sm border border-gray-100 flex-1 min-h-0", className)}>
+    <div className={cn("card-base flex flex-col bg-white overflow-hidden shadow-sm border border-gray-100", className)}>
       <div className="w-full overflow-auto flex-1 scrollbar-thin">
         <table className="w-full text-left border-collapse min-w-[900px]">
           <thead className="sticky top-0 z-10">

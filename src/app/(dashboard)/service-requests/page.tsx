@@ -68,39 +68,6 @@ export default function ServiceRequestsPage() {
   const pendingCount = requests.filter((r) => r.status?.toLowerCase() === "pending").length;
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
-  // Dynamic avatars from requests data
-  const totalAvatars = useMemo(() => {
-    const unique = Array.from(new Set(requests.map((r) => r.requested_by?.trim()).filter(Boolean))) as string[];
-    if (unique.length === 0) return [{ name: "David Sterling" }, { name: "Julianne Moore" }];
-    return unique.slice(0, 3).map((name) => ({ name }));
-  }, [requests]);
-
-  const approvedAvatars = useMemo(() => {
-    const unique = Array.from(
-      new Set(
-        requests
-          .filter((r) => ["active", "approved", "assigned"].includes(r.status?.toLowerCase()))
-          .map((r) => r.requested_by?.trim())
-          .filter(Boolean)
-      )
-    ) as string[];
-    if (unique.length === 0) return totalAvatars.slice(0, 2);
-    return unique.slice(0, 3).map((name) => ({ name }));
-  }, [requests, totalAvatars]);
-
-  const pendingAvatars = useMemo(() => {
-    const unique = Array.from(
-      new Set(
-        requests
-          .filter((r) => r.status?.toLowerCase() === "pending")
-          .map((r) => r.requested_by?.trim())
-          .filter(Boolean)
-      )
-    ) as string[];
-    if (unique.length === 0) return totalAvatars.slice(0, 2);
-    return unique.slice(0, 3).map((name) => ({ name }));
-  }, [requests, totalAvatars]);
-
   const columns = useMemo<ColumnDef<ServiceRequest>[]>(() => [
     {
       header: "REQUEST ID",
@@ -158,24 +125,20 @@ export default function ServiceRequestsPage() {
     },
   ], [statusFilter, dateFilter]);
 
-  const avatarColors = [
-    "bg-[#005C66]/15 text-[#005C66]",
-    "bg-[#B2B042]/20 text-[#84821c]",
-    "bg-[#62C25D]/20 text-[#2b7e28]",
-    "bg-[#0284C7]/20 text-[#0284C7]",
-  ];
-
   return (
     <div className="space-y-4">
       {/* Top Header Card */}
-      <div className="bg-white rounded-full p-2 pl-6 pr-2.5 flex items-center justify-between border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
-        <h1 className="text-fs-20 lg:text-fs-22 font-bold font-poppins text-text-primary">Service Requests</h1>
+      <div className="bg-white rounded-full p-2 pl-4 sm:pl-6 pr-2.5 flex items-center justify-between border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+        <h1 className="text-fs-16 sm:text-fs-20 lg:text-fs-22 font-bold font-poppins text-text-primary truncate mr-2">
+          <span className="sm:hidden">Services</span>
+          <span className="hidden sm:inline">Service Requests</span>
+        </h1>
         <Link
           href="/service-requests/create"
-          className="flex items-center gap-1.5 px-7 py-2.5 rounded-full border border-primary text-primary hover:bg-primary hover:text-white text-fs-12 font-medium transition-all duration-200"
+          className="flex items-center gap-1.5 px-3.5 sm:px-7 py-2 sm:py-2.5 rounded-full border border-primary text-primary hover:bg-primary hover:text-white text-xs sm:text-fs-12 font-medium transition-all duration-200 shrink-0"
         >
           <Plus className="w-3.5 h-3.5" />
-          Create New Request
+          <span>Create<span className="hidden sm:inline"> New Request</span></span>
         </Link>
       </div>
 
@@ -188,19 +151,19 @@ export default function ServiceRequestsPage() {
                 label: "Total", label2: "Service Request", value: total, icon: FileText,
                 cardBg: "bg-[#E2F8FA] border-[#CDEEF2]", 
                 iconBg: "bg-[#005C66] text-white",
-                avatars: totalAvatars,
+                avatarCount: 2,
               },
               { 
                 label: "Active", label2: "Service Request", value: activeCount, icon: CheckCircle2,
                 cardBg: "bg-[#FEF9E2] border-[#F5ECC4]", 
                 iconBg: "bg-[#B2B042] text-white",
-                avatars: approvedAvatars,
+                avatarCount: 2,
               },
               { 
                 label: "Pending", label2: "Service Request", value: pendingCount, icon: Clock,
                 cardBg: "bg-[#E7F9E4] border-[#D5F0D0]", 
                 iconBg: "bg-[#62C25D] text-white",
-                avatars: pendingAvatars,
+                avatarCount: 1,
               },
             ].map((card) => (
               <div key={card.label} className={`rounded-[24px] p-5 flex flex-col justify-between min-h-[155px] border shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] ${card.cardBg}`}>
@@ -211,21 +174,23 @@ export default function ServiceRequestsPage() {
                   </div>
                 </div>
                 <div className="flex items-end justify-between mt-3">
-                  {/* Dynamic Avatars Stack */}
+                  {/* Image Avatars Stack matching Dashboard */}
                   <div className="flex -space-x-2 overflow-hidden items-center">
-                    {card.avatars.map((av, idx) => {
-                      const colorClass = avatarColors[idx % avatarColors.length];
-                      const initial = av.name?.trim().charAt(0).toUpperCase() || "U";
-                      return (
-                        <div
-                          key={idx}
-                          className={`inline-flex items-center justify-center h-6 w-6 rounded-full ring-2 ring-white overflow-hidden text-[10px] font-bold ${colorClass}`}
-                          title={av.name}
-                        >
-                          <span>{initial}</span>
-                        </div>
-                      );
-                    })}
+                    {card.avatarCount >= 1 && (
+                      <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white overflow-hidden bg-gray-200 shrink-0">
+                        <Image src="/driver.png" alt="Driver" width={24} height={24} className="object-cover" />
+                      </div>
+                    )}
+                    {card.avatarCount >= 2 && (
+                      <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white overflow-hidden bg-gray-300 shrink-0">
+                        <Image src="/Avatar.png" alt="Passenger" width={24} height={24} className="object-cover" />
+                      </div>
+                    )}
+                    {card.avatarCount >= 3 && (
+                      <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white overflow-hidden bg-gray-400 shrink-0">
+                        <Image src="/driver.png" alt="Driver" width={24} height={24} className="object-cover" />
+                      </div>
+                    )}
                   </div>
                   <span className="text-[34px] lg:text-[38px] font-semibold font-poppins text-gray-900 leading-none">{loading ? "—" : card.value}</span>
                 </div>

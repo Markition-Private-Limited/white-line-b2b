@@ -301,14 +301,17 @@ export default function ComplaintsPage() {
   return (
     <div className="space-y-4">
       {/* Top Header Card matching Service Requests Page */}
-      <div className="bg-white rounded-full p-2 pl-6 pr-2.5 flex items-center justify-between border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
-        <h1 className="text-fs-20 lg:text-fs-22 font-bold font-poppins text-text-primary">Complaints Management</h1>
+      <div className="bg-white rounded-full p-2 pl-4 sm:pl-6 pr-2.5 flex items-center justify-between border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+        <h1 className="text-fs-16 sm:text-fs-20 lg:text-fs-22 font-bold font-poppins text-text-primary truncate mr-2">
+          <span className="sm:hidden">Complaints</span>
+          <span className="hidden sm:inline">Complaints Management</span>
+        </h1>
         <Link
           href="/complaints/create"
-          className="flex items-center gap-1.5 px-7 py-2.5 rounded-full border border-primary text-primary hover:bg-primary hover:text-white text-fs-12 font-medium transition-all duration-200"
+          className="flex items-center gap-1.5 px-3.5 sm:px-7 py-2 sm:py-2.5 rounded-full border border-primary text-primary hover:bg-primary hover:text-white text-xs sm:text-fs-12 font-medium transition-all duration-200 shrink-0"
         >
           <Plus className="w-3.5 h-3.5" />
-          Create New Complaint
+          <span>Create<span className="hidden sm:inline"> New Complaint</span></span>
         </Link>
       </div>
 
