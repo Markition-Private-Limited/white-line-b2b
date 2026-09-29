@@ -81,7 +81,7 @@ export default function ServiceRequestsPage() {
       header: "REQUEST DATE",
       cell: (r) => (
         <span className="text-text-secondary text-fs-12">
-          {r.request_date
+          {r.request_date && !isNaN(new Date(r.request_date).getTime())
             ? new Date(r.request_date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
             : "—"}
         </span>

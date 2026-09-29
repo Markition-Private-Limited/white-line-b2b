@@ -22,12 +22,13 @@ export default function SettingsPage() {
   const [phone, setPhone] = useState("+1 (555) 000-0000");
   const [address, setAddress] = useState("123 Luxury Ave, Suite 400, Manhattan, New York, NY 10001");
   const [userName, setUserName] = useState("Alexander Miller");
+  const [initialData, setInitialData] = useState({ companyName: "", phone: "", address: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  const [language, setLanguage] = useState<"en" | "ar">("en");
+  const [language, setLanguage] = useState<"en">("en");
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [changePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -46,26 +47,64 @@ export default function SettingsPage() {
 
     profileService.get()
       .then((data) => {
-        if (data.client?.company_name) setCompanyName(data.client.company_name);
-        if (data.client?.company_email) setCompanyEmail(data.client.company_email);
-        if (data.client?.company_phone) setPhone(data.client.company_phone);
-        if (data.client?.company_address) setAddress(data.client.company_address);
+        const cName = data.client?.company_name || "";
+        const cEmail = data.client?.company_email || "";
+        const cPhone = data.client?.company_phone || "";
+        const cAddr = data.client?.company_address || "";
+        if (cName) setCompanyName(cName);
+        if (cEmail) setCompanyEmail(cEmail);
+        if (cPhone) setPhone(cPhone);
+        if (cAddr) setAddress(cAddr);
+        setInitialData({ companyName: cName, phone: cPhone, address: cAddr });
       })
       .catch(() => {
         const client = authService.getStoredClient();
-        if (client?.company_name) setCompanyName(client.company_name);
+        const cName = client?.company_name || "";
+        if (cName) setCompanyName(cName);
+        setInitialData({ companyName: cName, phone: phone, address: address });
       })
       .finally(() => setLoading(false));
   }, []);
 
   const handleSaveSettings = async () => {
-    setSaving(true);
     setSaveError("");
+
+    if (!companyName.trim()) {
+      setSaveError("Company name is required and cannot be empty.");
+      return;
+    }
+
+    if (!phone.trim()) {
+      setSaveError("Phone number is required.");
+      return;
+    }
+
+    if (!address.trim()) {
+      setSaveError("Registered address is required.");
+      return;
+    }
+
+    const hasChanges =
+      companyName.trim() !== initialData.companyName.trim() ||
+      phone.trim() !== initialData.phone.trim() ||
+      address.trim() !== initialData.address.trim();
+
+    if (!hasChanges) {
+      setSaveError("No changes were made to save.");
+      return;
+    }
+
+    setSaving(true);
     try {
       await profileService.update({
-        company_name: companyName,
-        company_phone: phone,
-        company_address: address,
+        company_name: companyName.trim(),
+        company_phone: phone.trim(),
+        company_address: address.trim(),
+      });
+      setInitialData({
+        companyName: companyName.trim(),
+        phone: phone.trim(),
+        address: address.trim(),
       });
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 2500);
@@ -136,7 +175,10 @@ export default function SettingsPage() {
               <input
                 type="text"
                 value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
+                onChange={(e) => {
+                  setCompanyName(e.target.value);
+                  setSaveError("");
+                }}
                 placeholder="Enter company name"
                 className="w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full px-6 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-xs"
               />
@@ -171,7 +213,10 @@ export default function SettingsPage() {
                   <input
                     type="text"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    onChange={(e) => {
+                      setPhone(e.target.value);
+                      setSaveError("");
+                    }}
                     placeholder="Enter phone number"
                     className="w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full pl-12 pr-6 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-xs"
                   />
@@ -186,7 +231,10 @@ export default function SettingsPage() {
               <input
                 type="text"
                 value={address}
-                onChange={(e) => setAddress(e.target.value)}
+                onChange={(e) => {
+                  setAddress(e.target.value);
+                  setSaveError("");
+                }}
                 placeholder="Enter address"
                 className="w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full px-6 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-xs"
               />
@@ -219,27 +267,9 @@ export default function SettingsPage() {
                   <span className="text-base">🇺🇸</span>
                   <span className="text-[13px] sm:text-[14px] font-medium text-gray-800">English</span>
                 </div>
-                {language === "en" && (
-                  <div className="w-5 h-5 rounded-full bg-[#005C66] text-white flex items-center justify-center shadow-xs">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                  </div>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setLanguage("ar")}
-                className="w-full h-[48px] px-5 rounded-2xl flex items-center justify-between cursor-pointer transition-colors bg-[#F4F5F7] hover:bg-gray-100 text-gray-700"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-base">🇸🇦</span>
-                  <span className="text-[13px] sm:text-[14px] font-medium text-gray-800">Arabic</span>
+                <div className="w-5 h-5 rounded-full bg-[#005C66] text-white flex items-center justify-center shadow-xs">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
                 </div>
-                {language === "ar" && (
-                  <div className="w-5 h-5 rounded-full bg-[#005C66] text-white flex items-center justify-center shadow-xs">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                  </div>
-                )}
               </button>
             </div>
           </div>

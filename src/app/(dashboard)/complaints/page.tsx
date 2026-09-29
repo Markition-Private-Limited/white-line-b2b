@@ -19,12 +19,18 @@ import complaintsService, { type Complaint } from "@/services/complaints.service
 
 const LIMIT = 10;
 
-const formatDate = (d?: string) =>
-  d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
+const formatDate = (d?: string) => {
+  if (!d) return "—";
+  const dt = new Date(d);
+  return isNaN(dt.getTime())
+    ? "—"
+    : dt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+};
 
 const formatDateWithTime = (d?: string) => {
   if (!d) return "—";
   const date = new Date(d);
+  if (isNaN(date.getTime())) return "—";
   const formattedDate = date.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
   const formattedTime = date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
   return `Reported on ${formattedDate} - ${formattedTime}`;

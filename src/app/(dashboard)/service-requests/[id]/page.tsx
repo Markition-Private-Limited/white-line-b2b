@@ -43,8 +43,13 @@ export default function ServiceDetailPage() {
   const requestId = request?.request_number ? `#${request.request_number}` : `#SR-${id}`;
   const status = request?.status ?? "pending";
 
-  const formatDate = (d?: string) =>
-    d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
+  const formatDate = (d?: string) => {
+    if (!d) return "—";
+    const dt = new Date(d);
+    return isNaN(dt.getTime())
+      ? "—"
+      : dt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+  };
 
   if (loading) {
     return (

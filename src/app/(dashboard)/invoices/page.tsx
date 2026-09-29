@@ -19,8 +19,13 @@ import invoicesService, { type Invoice } from "@/services/invoices.service";
 
 const LIMIT = 10;
 
-const formatDate = (d?: string) =>
-  d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
+const formatDate = (d?: string) => {
+  if (!d) return "—";
+  const dt = new Date(d);
+  return isNaN(dt.getTime())
+    ? "—"
+    : dt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+};
 
 const formatAmount = (v: number) => `SAR ${Number(v ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
@@ -119,8 +124,10 @@ export default function InvoicesPage() {
       doc.setFont("helvetica", "bold");
       doc.text(`Total Amount: ${formatAmount(selectedInvoice.total_amount)}`, 14, finalY + 15);
 
-      // Save PDF
-      doc.save(`${selectedInvoice.invoice_number || "Invoice"}.pdf`);
+      // Open PDF in new tab
+      const pdfBlob = doc.output("blob");
+      const blobUrl = URL.createObjectURL(pdfBlob);
+      window.open(blobUrl, "_blank");
     } catch (err) {
       console.error("Failed to generate PDF:", err);
       alert("Failed to download invoice PDF.");

@@ -61,8 +61,13 @@ const complaintsService = {
   },
 
   async listBookings(): Promise<{ id: string; booking_number: string; scheduled_datetime: string; status: string }[]> {
-    const { data } = await apiClient.get('/b2b/bookings');
-    return data.data ?? data;
+    try {
+      const { data } = await apiClient.get('/b2b/bookings');
+      const list = Array.isArray(data) ? data : (data?.data ?? data?.bookings ?? []);
+      return Array.isArray(list) ? list : [];
+    } catch {
+      return [];
+    }
   },
 
   async cancel(id: string): Promise<Complaint> {

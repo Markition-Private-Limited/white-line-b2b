@@ -199,8 +199,10 @@ export default function UsersPage() {
   const formatDate = (d?: string) => {
     if (!d) return "—";
     try {
-      return new Date(d).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
-    } catch { return d; }
+      const dt = new Date(d);
+      if (isNaN(dt.getTime())) return "—";
+      return dt.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+    } catch { return "—"; }
   };
 
   const formatLastLogin = (d?: string) => {

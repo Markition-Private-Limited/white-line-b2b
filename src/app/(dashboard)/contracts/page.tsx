@@ -41,8 +41,13 @@ export default function ContractsPage() {
     }
   };
 
-  const formatDate = (d?: string | Date) =>
-    d ? new Date(d as string).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
+  const formatDate = (d?: string | Date) => {
+    if (!d) return "—";
+    const dt = new Date(d as string);
+    return isNaN(dt.getTime())
+      ? "—"
+      : dt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+  };
 
   const formatAmount = (v?: number) =>
     `SAR ${Number(v ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;

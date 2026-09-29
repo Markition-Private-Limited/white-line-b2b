@@ -135,10 +135,11 @@ export default function CreateComplaintPage() {
                 CONTACT NUMBER (OPTIONAL)
               </label>
               <input
-                type="text"
+                type="tel"
                 value={contactNumber}
                 onChange={(e) => {
-                  setContactNumber(e.target.value);
+                  const cleaned = e.target.value.replace(/[^\d+]/g, "").replace(/(?!^)\+/g, "");
+                  setContactNumber(cleaned);
                   if (fieldErrors.contactNumber) {
                     setFieldErrors((prev) => ({ ...prev, contactNumber: "" }));
                   }
@@ -170,11 +171,20 @@ export default function CreateComplaintPage() {
                 className="w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full pl-6 pr-12 text-[13px] sm:text-[14px] text-gray-800 border-none focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-xs appearance-none cursor-pointer"
               >
                 <option value="">None selected</option>
-                {bookingOptions.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.booking_number} — {new Date(b.scheduled_datetime).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
-                  </option>
-                ))}
+                {bookingOptions.map((b) => {
+                  let formattedDate = "";
+                  if (b.scheduled_datetime) {
+                    const dt = new Date(b.scheduled_datetime);
+                    if (!isNaN(dt.getTime())) {
+                      formattedDate = ` — ${dt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}`;
+                    }
+                  }
+                  return (
+                    <option key={b.id} value={b.id}>
+                      {b.booking_number || "Booking"}{formattedDate}
+                    </option>
+                  );
+                })}
               </select>
               <ChevronDown className="w-4 h-4 text-gray-400 absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>

@@ -53,8 +53,13 @@ export function HeaderNav() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const spocUser = authService.getStoredUser();
-  const b2bClient = authService.getStoredClient();
+  const [spocUser, setSpocUser] = useState<any>(null);
+  const [b2bClient, setB2bClient] = useState<any>(null);
+
+  useEffect(() => {
+    setSpocUser(authService.getStoredUser());
+    setB2bClient(authService.getStoredClient());
+  }, []);
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileServiceOpen, setMobileServiceOpen] = useState(false);
@@ -208,6 +213,10 @@ export function HeaderNav() {
       if (serviceTimeoutRef.current) clearTimeout(serviceTimeoutRef.current);
       if (complaintsTimeoutRef.current) clearTimeout(complaintsTimeoutRef.current);
     };
+  }, []);
+
+  useEffect(() => {
+    loadNotifications(1);
   }, []);
 
   useEffect(() => {
