@@ -29,6 +29,8 @@ import { Button } from "@/components/ui/Button";
 import { cn } from "@/utils/cn";
 import authService from "@/services/auth.service";
 import notificationsService, { type Notification } from "@/services/notifications.service";
+import profileService from "@/services/profile.service";
+import Cookies from "js-cookie";
 import { onForegroundMessage } from "@/lib/firebase";
 
 const NOTIFICATION_ICONS: Record<string, React.ElementType> = {
@@ -59,6 +61,17 @@ export function HeaderNav() {
   useEffect(() => {
     setSpocUser(authService.getStoredUser());
     setB2bClient(authService.getStoredClient());
+
+    profileService.get().then((data) => {
+      if (data.spoc) {
+        setSpocUser(data.spoc);
+        Cookies.set('spoc_user', JSON.stringify(data.spoc));
+      }
+      if (data.client) {
+        setB2bClient(data.client);
+        Cookies.set('b2b_client', JSON.stringify(data.client));
+      }
+    }).catch(console.error);
   }, []);
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

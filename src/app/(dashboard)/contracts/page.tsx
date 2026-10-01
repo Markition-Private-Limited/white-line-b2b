@@ -144,6 +144,15 @@ function ContractDetailPanel({
     ? (contract.vehicle_types_allowed as string[])
     : [];
 
+  const formatVehicleType = (type: string) => {
+    const map: Record<string, string> = {
+      "Suv": "SUV",
+      "Suv_vip": "SUV VIP",
+      "Pick_up": "Pick-Up",
+    };
+    return map[type] || type.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+  };
+
   return (
     <>
       {/* Backdrop */}
@@ -224,7 +233,7 @@ function ContractDetailPanel({
               <div className="flex flex-wrap gap-2">
                 {vehicleTypes.map((v, i) => (
                   <span key={i} className="px-3 py-1 bg-primary/8 text-primary text-fs-11 font-semibold rounded-full">
-                    {String(v)}
+                    {formatVehicleType(String(v))}
                   </span>
                 ))}
               </div>

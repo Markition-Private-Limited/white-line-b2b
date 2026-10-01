@@ -13,8 +13,9 @@ import { PasswordStrengthBar } from "@/components/ui/PasswordStrengthBar";
 import { cn } from "@/utils/cn";
 import profileService from "@/services/profile.service";
 import authService from "@/services/auth.service";
-import { isPossiblePhoneNumber } from "react-phone-number-input";
+import { isValidPhoneNumber } from "react-phone-number-input";
 import { CountryPhoneInput } from "@/components/ui/CountryPhoneInput";
+import Cookies from "js-cookie";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -42,7 +43,7 @@ export default function SettingsPage() {
   const [passwordSuccessModalOpen, setPasswordSuccessModalOpen] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
-  const invalidSavedPhone = !loading && !!phone.trim() && !isPossiblePhoneNumber(phone);
+  const invalidSavedPhone = !loading && !!phone.trim() && !isValidPhoneNumber(phone);
   const hasSettingsChanges =
     companyName.trim() !== initialData.companyName.trim() ||
     phone.trim() !== initialData.phone.trim() ||
@@ -93,7 +94,7 @@ export default function SettingsPage() {
 
     if (!hasSettingsChanges) return;
 
-    if (!isPossiblePhoneNumber(phone)) {
+    if (!isValidPhoneNumber(phone)) {
       setSaveError("Check the phone number length for the selected country.");
       return;
     }
@@ -111,6 +112,13 @@ export default function SettingsPage() {
         address: address.trim(),
       });
       setSaveSuccess(true);
+      
+      const currentClient = authService.getStoredClient() || {};
+      const updatedClient = {
+        ...currentClient,
+        company_name: companyName.trim(),
+      };
+      Cookies.set('b2b_client', JSON.stringify(updatedClient));
       setTimeout(() => setSaveSuccess(false), 2500);
     } catch (err: any) {
       const msg = err?.response?.data?.message;

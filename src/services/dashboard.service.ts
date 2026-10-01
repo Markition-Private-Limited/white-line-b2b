@@ -12,8 +12,9 @@ export interface DashboardData {
 }
 
 const dashboardService = {
-  async getDashboard(): Promise<DashboardData> {
-    const { data } = await apiClient.get('/b2b/dashboard');
+  async getDashboard(year?: string): Promise<DashboardData> {
+    const params = year ? { year } : undefined;
+    const { data } = await apiClient.get('/b2b/dashboard', { params });
     return data.data ?? data;
   },
 };

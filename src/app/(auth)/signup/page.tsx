@@ -11,7 +11,7 @@ import authService from "@/services/auth.service";
 import { FormInput } from "@/components/ui/FormInput";
 import { PasswordStrengthBar } from "@/components/ui/PasswordStrengthBar";
 import { cn } from "@/utils/cn";
-import { isPossiblePhoneNumber } from "react-phone-number-input";
+import { isValidPhoneNumber } from "react-phone-number-input";
 import { CountryPhoneInput } from "@/components/ui/CountryPhoneInput";
 
 export default function SignUpPage() {
@@ -51,7 +51,7 @@ export default function SignUpPage() {
     setSubmitError("");
     
     if (step === 1) {
-      if (!formData.phone || !isPossiblePhoneNumber(formData.phone)) {
+      if (!formData.phone || !isValidPhoneNumber(formData.phone)) {
         setSubmitError("Check the phone number length for the selected country.");
         return;
       }

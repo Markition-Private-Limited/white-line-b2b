@@ -7,7 +7,7 @@ import { Info, X, ChevronDown } from "lucide-react";
 import complaintsService from "@/services/complaints.service";
 import authService from "@/services/auth.service";
 import { SuccessFlowerBadge } from "@/components/ui/SuccessModal";
-import { isPossiblePhoneNumber } from "react-phone-number-input";
+import { isValidPhoneNumber } from "react-phone-number-input";
 import { CountryPhoneInput } from "@/components/ui/CountryPhoneInput";
 
 type BookingOption = { id: string; booking_number: string; scheduled_datetime: string; status: string };
@@ -46,7 +46,7 @@ export default function CreateComplaintPage() {
 
   const validate = (): boolean => {
     // 1. Contact number validation (optional)
-    if (contactNumber && !isPossiblePhoneNumber(contactNumber)) {
+    if (contactNumber && !isValidPhoneNumber(contactNumber)) {
       setFieldErrors({ contactNumber: "Check the phone number length for the selected country." });
       return false;
     }

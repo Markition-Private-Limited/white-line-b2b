@@ -32,6 +32,13 @@ export default function PageLoader() {
   const prefersReducedMotion = useReducedMotion()
 
   useEffect(() => {
+    const hasSeenLoader = sessionStorage.getItem('hasSeenLoader')
+    if (hasSeenLoader) {
+      setVisible(false)
+      return
+    }
+    sessionStorage.setItem('hasSeenLoader', 'true')
+
     const startedAt = performance.now()
     let hideTimer: ReturnType<typeof setTimeout> | undefined
 

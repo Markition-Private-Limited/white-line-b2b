@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import {
   Calendar,
@@ -42,7 +42,7 @@ export default function DashboardPage() {
   useEffect(() => {
     setLoading(true);
     Promise.allSettled([
-      dashboardService.getDashboard(),
+      dashboardService.getDashboard(selectedYear),
       invoicesService.list(1),
     ])
       .then(([dashRes, invRes]) => {
@@ -55,7 +55,7 @@ export default function DashboardPage() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [selectedYear]);
 
   const monthlyData: MonthlyDataItem[] = useMemo(() => {
     // 1. If backend stats already provides populated monthly_data with non-zero values, use it
@@ -106,13 +106,20 @@ export default function DashboardPage() {
     });
   }, [stats?.monthly_data, invoices, selectedYear]);
 
+  const lastMaxRef = useRef(6000);
+
   const maxVal = useMemo(() => {
     const highest = Math.max(...monthlyData.map((d) => Math.max(d.paid, d.unpaid)), 0);
-    if (highest === 0) return 300000;
-    if (highest <= 10000) return Math.ceil(highest / 1000) * 1000 || 10000;
-    if (highest <= 50000) return Math.ceil(highest / 5000) * 5000 || 50000;
-    if (highest <= 100000) return Math.ceil(highest / 10000) * 10000 || 100000;
-    return Math.ceil(highest / 50000) * 50000 || 300000;
+    if (highest === 0) return lastMaxRef.current;
+    
+    let calcMax = 6000;
+    if (highest <= 10000) calcMax = Math.ceil(highest / 1000) * 1000 || 10000;
+    else if (highest <= 50000) calcMax = Math.ceil(highest / 5000) * 5000 || 50000;
+    else if (highest <= 100000) calcMax = Math.ceil(highest / 10000) * 10000 || 100000;
+    else calcMax = Math.ceil(highest / 50000) * 50000 || 300000;
+    
+    lastMaxRef.current = calcMax;
+    return calcMax;
   }, [monthlyData]);
 
   const yAxisLabels = useMemo(() => {
