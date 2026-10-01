@@ -11,6 +11,8 @@ import authService from "@/services/auth.service";
 import { FormInput } from "@/components/ui/FormInput";
 import { PasswordStrengthBar } from "@/components/ui/PasswordStrengthBar";
 import { cn } from "@/utils/cn";
+import { isPossiblePhoneNumber } from "react-phone-number-input";
+import { CountryPhoneInput } from "@/components/ui/CountryPhoneInput";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -21,29 +23,10 @@ export default function SignUpPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
-  // Countries list with flags and codes
-  const COUNTRIES = [
-    { code: "+966", flag: "🇸🇦", name: "Saudi Arabia", min: 9, max: 9 },
-    { code: "+971", flag: "🇦🇪", name: "United Arab Emirates", min: 9, max: 9 },
-    { code: "+974", flag: "🇶🇦", name: "Qatar", min: 8, max: 8 },
-    { code: "+965", flag: "🇰🇼", name: "Kuwait", min: 8, max: 8 },
-    { code: "+973", flag: "🇧🇭", name: "Bahrain", min: 8, max: 8 },
-    { code: "+968", flag: "🇴🇲", name: "Oman", min: 8, max: 8 },
-    { code: "+20", flag: "🇪🇬", name: "Egypt", min: 10, max: 11 },
-    { code: "+90", flag: "🇹🇷", name: "Turkey", min: 10, max: 10 },
-    { code: "+92", flag: "🇵🇰", name: "Pakistan", min: 10, max: 10 },
-    { code: "+91", flag: "🇮🇳", name: "India", min: 10, max: 10 },
-    { code: "+1", flag: "🇺🇸", name: "United States", min: 10, max: 10 },
-    { code: "+44", flag: "🇬🇧", name: "United Kingdom", min: 10, max: 10 },
-    { code: "+49", flag: "🇩🇪", name: "Germany", min: 10, max: 11 },
-    { code: "+33", flag: "🇫🇷", name: "France", min: 9, max: 9 },
-  ];
-
   // Form State
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
-    countryCode: "+966",
     password: "",
     companyName: "",
     companyEmail: "",
@@ -54,12 +37,9 @@ export default function SignUpPage() {
     termsAccepted: false,
   });
 
-  const selectedCountry = COUNTRIES.find((c) => c.code === formData.countryCode) || COUNTRIES[0];
-
   const handleChange = (field: string, value: any) => {
-    if (field === "phone" || field === "travelBudget" || field === "companySize") {
+    if (field === "travelBudget" || field === "companySize") {
       const numericValue = value.replace(/[^0-9]/g, "");
-      if (field === "phone" && numericValue.length > 15) return;
       setFormData((prev) => ({ ...prev, [field]: numericValue }));
       return;
     }
@@ -71,8 +51,8 @@ export default function SignUpPage() {
     setSubmitError("");
     
     if (step === 1) {
-      if (formData.phone.length < 7 || formData.phone.length > 15) {
-        setSubmitError("Please enter a valid phone number (digits only).");
+      if (!formData.phone || !isPossiblePhoneNumber(formData.phone)) {
+        setSubmitError("Check the phone number length for the selected country.");
         return;
       }
       const pwd = formData.password;
@@ -95,7 +75,7 @@ export default function SignUpPage() {
       try {
         await authService.register({
           full_name: formData.name,
-          phone: `${formData.countryCode}${formData.phone}`,
+          phone: formData.phone,
           password: formData.password,
           company_name: formData.companyName,
           company_email: formData.companyEmail,
@@ -259,30 +239,13 @@ export default function SignUpPage() {
                   <label className="text-[11px] font-semibold text-gray-text uppercase tracking-wider ml-1 mb-2 block">
                     PHONE NUMBER
                   </label>
-                  <div className="flex items-center gap-2">
-                    <div className="relative shrink-0">
-                      <select
-                        value={formData.countryCode}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, countryCode: e.target.value }))}
-                        className="appearance-none bg-input-bg rounded-full pl-3.5 pr-7 h-11 sm:h-12 text-[13px] font-semibold text-text-primary border-none focus:outline-none focus:ring-1 focus:ring-primary/20 cursor-pointer shadow-xs"
-                      >
-                        {COUNTRIES.map((c) => (
-                          <option key={c.code} value={c.code}>
-                            {c.flag} {c.code}
-                          </option>
-                        ))}
-                      </select>
-                      <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[10px]">▼</span>
-                    </div>
-                    <input
-                      type="tel"
-                      required
-                      value={formData.phone}
-                      onChange={(e) => handleChange("phone", e.target.value)}
-                      placeholder="Phone number"
-                      className="w-full bg-input-bg border-none rounded-full h-11 sm:h-12 px-4 text-[13px] sm:text-[14px] font-normal text-text-primary placeholder:text-input-placeholder placeholder:font-light placeholder:text-[13px] focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all"
-                    />
-                  </div>
+                  <CountryPhoneInput
+                    value={formData.phone}
+                    onChange={(phone) => setFormData((prev) => ({ ...prev, phone }))}
+                    required
+                    compact
+                    autoComplete="tel"
+                  />
                 </div>
 
                 <FormInput

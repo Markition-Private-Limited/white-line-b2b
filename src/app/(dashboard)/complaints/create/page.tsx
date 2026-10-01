@@ -7,6 +7,8 @@ import { Info, X, ChevronDown } from "lucide-react";
 import complaintsService from "@/services/complaints.service";
 import authService from "@/services/auth.service";
 import { SuccessFlowerBadge } from "@/components/ui/SuccessModal";
+import { isPossiblePhoneNumber } from "react-phone-number-input";
+import { CountryPhoneInput } from "@/components/ui/CountryPhoneInput";
 
 type BookingOption = { id: string; booking_number: string; scheduled_datetime: string; status: string };
 
@@ -44,13 +46,9 @@ export default function CreateComplaintPage() {
 
   const validate = (): boolean => {
     // 1. Contact number validation (optional)
-    if (contactNumber.trim()) {
-      const saudiPhoneRegex = /^(05|5|\+9665)[0-9]{8}$/;
-      const cleaned = contactNumber.replace(/\s+/g, '');
-      if (!saudiPhoneRegex.test(cleaned)) {
-        setFieldErrors({ contactNumber: "Please enter a valid Saudi phone number (e.g. +9665... or 05...)." });
-        return false;
-      }
+    if (contactNumber && !isPossiblePhoneNumber(contactNumber)) {
+      setFieldErrors({ contactNumber: "Check the phone number length for the selected country." });
+      return false;
     }
 
     // 2. Subject validation (one at a time)
@@ -134,22 +132,17 @@ export default function CreateComplaintPage() {
               <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
                 CONTACT NUMBER (OPTIONAL)
               </label>
-              <input
-                type="tel"
+              <CountryPhoneInput
                 value={contactNumber}
-                onChange={(e) => {
-                  const cleaned = e.target.value.replace(/[^\d+]/g, "").replace(/(?!^)\+/g, "");
-                  setContactNumber(cleaned);
+                onChange={(value) => {
+                  setContactNumber(value);
                   if (fieldErrors.contactNumber) {
                     setFieldErrors((prev) => ({ ...prev, contactNumber: "" }));
                   }
                 }}
-                placeholder="e.g. 05XXXXXXXX"
-                className={`w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full px-6 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none transition-all shadow-xs ${
-                  fieldErrors.contactNumber
-                    ? "ring-1 ring-red-500 focus:ring-1 focus:ring-red-500"
-                    : "focus:ring-1 focus:ring-primary/20"
-                }`}
+                invalid={!!fieldErrors.contactNumber}
+                placeholder="Phone number"
+                autoComplete="tel"
               />
               {fieldErrors.contactNumber && (
                 <p className="text-[11px] text-red-500 font-medium mt-1.5 ml-2">

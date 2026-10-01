@@ -112,6 +112,10 @@ export default function UsersPage() {
       setCreateError("Please provide full name and email address.");
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setCreateError("Enter a valid email address.");
+      return;
+    }
     if (!password || password.length < 8) {
       setCreateError("Password must be at least 8 characters.");
       return;

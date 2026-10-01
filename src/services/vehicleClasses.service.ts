@@ -4,6 +4,7 @@ export interface VehicleClass {
   id: string;
   name: string;
   description?: string;
+  vehicle_type?: string;
 }
 
 const vehicleClassesService = {

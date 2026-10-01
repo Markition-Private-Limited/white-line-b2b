@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Building2, Globe, Lock, LogOut, Eye, EyeOff, Save, Mail, Phone, MapPin, CheckCircle2, X,
+  Building2, Globe, Lock, LogOut, Eye, EyeOff, Save, Mail, MapPin, CheckCircle2, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
@@ -13,20 +13,15 @@ import { PasswordStrengthBar } from "@/components/ui/PasswordStrengthBar";
 import { cn } from "@/utils/cn";
 import profileService from "@/services/profile.service";
 import authService from "@/services/auth.service";
-
-const isValidCompanyPhone = (value: string) => {
-  const phone = value.trim();
-  return phone.startsWith("+966")
-    ? /^\+9665\d{8}$/.test(phone)
-    : /^\+[1-9]\d{7,14}$/.test(phone);
-};
+import { isPossiblePhoneNumber } from "react-phone-number-input";
+import { CountryPhoneInput } from "@/components/ui/CountryPhoneInput";
 
 export default function SettingsPage() {
   const router = useRouter();
 
   const [companyName, setCompanyName] = useState("WhiteLine Global");
   const [companyEmail, setCompanyEmail] = useState("contact@whiteline.com");
-  const [phone, setPhone] = useState("+1 (555) 000-0000");
+  const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("123 Luxury Ave, Suite 400, Manhattan, New York, NY 10001");
   const [userName, setUserName] = useState("Alexander Miller");
   const [initialData, setInitialData] = useState({ companyName: "", phone: "", address: "" });
@@ -47,7 +42,11 @@ export default function SettingsPage() {
   const [passwordSuccessModalOpen, setPasswordSuccessModalOpen] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
-  const invalidSavedPhone = !loading && !!phone.trim() && !isValidCompanyPhone(phone);
+  const invalidSavedPhone = !loading && !!phone.trim() && !isPossiblePhoneNumber(phone);
+  const hasSettingsChanges =
+    companyName.trim() !== initialData.companyName.trim() ||
+    phone.trim() !== initialData.phone.trim() ||
+    address.trim() !== initialData.address.trim();
 
   useEffect(() => {
     const user = authService.getStoredUser();
@@ -92,18 +91,10 @@ export default function SettingsPage() {
       return;
     }
 
-    const hasChanges =
-      companyName.trim() !== initialData.companyName.trim() ||
-      phone.trim() !== initialData.phone.trim() ||
-      address.trim() !== initialData.address.trim();
+    if (!hasSettingsChanges) return;
 
-    if (!hasChanges) {
-      setSaveError("No changes were made to save.");
-      return;
-    }
-
-    if (!isValidCompanyPhone(phone)) {
-      setSaveError("Enter a valid phone number in international format. Saudi mobiles must start with +9665.");
+    if (!isPossiblePhoneNumber(phone)) {
+      setSaveError("Check the phone number length for the selected country.");
       return;
     }
 
@@ -219,24 +210,18 @@ export default function SettingsPage() {
                 <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
                   PHONE NUMBER
                 </label>
-                <div className="relative">
-                  <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400">
-                    <Phone className="w-4 h-4" />
-                  </div>
-                  <input
-                    type="tel"
-                    value={phone}
-                    aria-invalid={invalidSavedPhone}
-                    onChange={(e) => {
-                      setPhone(e.target.value);
-                      setSaveError("");
-                    }}
-                    placeholder="Enter phone number"
-                    className="w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full pl-12 pr-6 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-xs"
-                  />
-                </div>
+                <CountryPhoneInput
+                  value={phone}
+                  onChange={(value) => {
+                    setPhone(value);
+                    setSaveError("");
+                  }}
+                  invalid={invalidSavedPhone}
+                  autoComplete="tel"
+                  placeholder="Enter phone number"
+                />
                 {invalidSavedPhone && (
-                  <p className="mt-1.5 text-xs text-red-600">This phone number is invalid. Saudi mobiles must use +9665XXXXXXXX.</p>
+                  <p className="mt-1.5 text-xs text-red-600">Check the phone number length for the selected country.</p>
                 )}
               </div>
             </div>
@@ -354,7 +339,7 @@ export default function SettingsPage() {
         <button
           type="button"
           onClick={handleSaveSettings}
-          disabled={saving || loading}
+          disabled={saving || loading || !hasSettingsChanges}
           className={`h-[42px] sm:h-[44px] px-9 rounded-full text-[12px] sm:text-[13px] font-medium transition-colors shadow-xs cursor-pointer disabled:opacity-50 ${
             saveSuccess
               ? "bg-[#22C55E] text-white"

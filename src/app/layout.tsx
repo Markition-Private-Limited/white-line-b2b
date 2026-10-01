@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
+import "react-phone-number-input/style.css";
 import "./globals.css";
 import PageLoader from "@/components/PageLoader";
 
