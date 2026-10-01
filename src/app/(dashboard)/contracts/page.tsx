@@ -138,6 +138,8 @@ function ContractDetailPanel({
   formatAmount: (v?: number) => string;
 }) {
   const pricingTerms = (contract.pricing_terms ?? {}) as Record<string, unknown>;
+  const rateTerms = Object.entries(pricingTerms).filter(([key]) => key !== "working_hours");
+  const workingHours = pricingTerms.working_hours;
   const vehicleTypes = Array.isArray(contract.vehicle_types_allowed)
     ? (contract.vehicle_types_allowed as string[])
     : [];
@@ -230,17 +232,25 @@ function ContractDetailPanel({
           )}
 
           {/* Pricing Terms */}
-          {Object.keys(pricingTerms).length > 0 && (
-            <div className="space-y-2">
-              <p className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider">Pricing Terms</p>
+          <div className="space-y-2">
+            <p className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider">Pricing Terms</p>
+            {rateTerms.length > 0 ? (
               <div className="space-y-2">
-                {Object.entries(pricingTerms).map(([key, val]) => (
+                {rateTerms.map(([key, val]) => (
                   <div key={key} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
                     <span className="text-fs-12 text-text-secondary capitalize">{key.replace(/_/g, " ")}</span>
                     <span className="text-fs-12 font-bold text-text-primary">{String(val)}</span>
                   </div>
                 ))}
               </div>
+            ) : (
+              <p className="text-fs-12 text-text-secondary">Pricing rates are not available for this contract.</p>
+            )}
+          </div>
+          {workingHours != null && (
+            <div className="space-y-2">
+              <p className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider">Working Hours</p>
+              <p className="text-fs-12 font-bold text-text-primary">{String(workingHours)}</p>
             </div>
           )}
 

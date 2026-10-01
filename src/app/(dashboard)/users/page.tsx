@@ -57,6 +57,8 @@ export default function UsersPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState("");
   const [toggleError, setToggleError] = useState("");
+  const [pendingStatusUser, setPendingStatusUser] = useState<SpocUser | null>(null);
+  const [statusUpdating, setStatusUpdating] = useState(false);
 
   const menuRef = useRef<HTMLDivElement>(null);
   const roleDropdownRef = useRef<HTMLDivElement>(null);
@@ -139,13 +141,19 @@ export default function UsersPage() {
     }
   };
 
-  const handleToggleActive = async (id: string) => {
+  const handleToggleActive = async () => {
+    if (!pendingStatusUser || statusUpdating) return;
+    setStatusUpdating(true);
     try {
-      const updated = await usersService.toggleStatus(id);
-      setUsers((prev) => prev.map((u) => (u.id === id ? updated : u)));
+      const updated = await usersService.toggleStatus(pendingStatusUser.id);
+      setUsers((prev) => prev.map((u) => (u.id === pendingStatusUser.id ? updated : u)));
+      setPendingStatusUser(null);
     } catch (err: any) {
       const msg = err?.response?.data?.message || "Failed to update user status.";
       setToggleError(msg);
+      setPendingStatusUser(null);
+    } finally {
+      setStatusUpdating(false);
     }
   };
 
@@ -268,7 +276,8 @@ export default function UsersPage() {
       cell: (row) => (
         <Toggle
           checked={row.status === "active"}
-          onChange={() => !row.is_account_owner && handleToggleActive(row.id)}
+          disabled={row.is_account_owner || row.id === currentUser?.id}
+          onChange={() => setPendingStatusUser(row)}
           label={row.status === "active" ? "Active" : "Inactive"}
         />
       ),
@@ -311,7 +320,7 @@ export default function UsersPage() {
         );
       },
     },
-  ], [activeMenuId, isOwner]);
+  ], [activeMenuId, isOwner, currentUser?.id]);
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
@@ -711,6 +720,27 @@ export default function UsersPage() {
         actionText="Done"
         onAction={() => setTransferSuccessModalOpen(false)}
       />
+
+      <Modal
+        isOpen={!!pendingStatusUser}
+        onClose={() => { if (!statusUpdating) setPendingStatusUser(null); }}
+        title={pendingStatusUser?.status === "active" ? "Deactivate user?" : "Activate user?"}
+        maxWidth="max-w-[440px]"
+      >
+        <p className="text-sm text-gray-600 mb-6">
+          {pendingStatusUser?.status === "active"
+            ? `${pendingStatusUser.full_name} will no longer be able to sign in.`
+            : `${pendingStatusUser?.full_name} will be able to sign in again.`}
+        </p>
+        <div className="flex justify-end gap-3">
+          <button type="button" disabled={statusUpdating} onClick={() => setPendingStatusUser(null)} className="px-5 py-2.5 rounded-full border border-gray-200 text-sm text-gray-700 disabled:opacity-50">
+            Cancel
+          </button>
+          <button type="button" disabled={statusUpdating} onClick={handleToggleActive} className="px-5 py-2.5 rounded-full bg-primary text-white text-sm disabled:opacity-50">
+            {statusUpdating ? "Updating..." : pendingStatusUser?.status === "active" ? "Deactivate" : "Activate"}
+          </button>
+        </div>
+      </Modal>
 
       {/* Toggle Error Modal */}
       <Modal

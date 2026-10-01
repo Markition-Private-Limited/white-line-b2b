@@ -16,6 +16,8 @@ import { DataTable, type ColumnDef } from "@/components/layout/DataTableContaine
 import { PageToolbar, type FilterDef } from "@/components/layout/PageToolbar";
 import { type DatePickerValue, isDateInRange } from "@/utils/dateFilterUtils";
 import invoicesService, { type Invoice } from "@/services/invoices.service";
+import profileService from "@/services/profile.service";
+import authService from "@/services/auth.service";
 
 const LIMIT = 10;
 
@@ -28,6 +30,13 @@ const formatDate = (d?: string) => {
 };
 
 const formatAmount = (v: number) => `SAR ${Number(v ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+
+const normalizeInvoiceSearch = (value: string) => {
+  const query = value.trim();
+  const amount = query.replace(/^SAR\s*/i, "").replace(/,/g, "");
+
+  return /^\d+(?:\.\d{0,2})?$/.test(amount) ? String(Number(amount)) : query;
+};
 
 const formatInvoiceBadge = (raw?: string) => {
   if (!raw) return "";
@@ -56,13 +65,39 @@ export default function InvoicesPage() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [dateFilter, setDateFilter] = useState<DatePickerValue | null>(null);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [currentCompanyName, setCurrentCompanyName] = useState("");
+  const [detailLoading, setDetailLoading] = useState(false);
+  const normalizedSearch = normalizeInvoiceSearch(search);
+
+  useEffect(() => {
+    profileService.get()
+      .then((profile) => {
+        if (profile.client?.company_name) setCurrentCompanyName(profile.client.company_name);
+      })
+      .catch(() => setCurrentCompanyName(authService.getStoredClient()?.company_name || ""));
+  }, []);
+
+  const handleInvoiceRowClick = async (row: Invoice) => {
+    setSelectedInvoice(row);
+    setDetailLoading(true);
+    try {
+      const detail = await invoicesService.get(row.id);
+      setSelectedInvoice((current) => current?.id === row.id ? detail : current);
+    } catch {
+      // Keep the list data visible if the detail request fails.
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const invoiceCompanyName = selectedInvoice?.b2b_client?.company_name || currentCompanyName || "Company name unavailable";
 
   useEffect(() => {
     setLoading(true);
     invoicesService.list({
       page,
       status: statusFilter === "All" ? undefined : statusFilter.toLowerCase(),
-      search: search.trim() || undefined,
+      search: normalizedSearch || undefined,
       start_date: dateFilter?.startDate,
       end_date: dateFilter?.endDate,
     })
@@ -72,7 +107,7 @@ export default function InvoicesPage() {
       })
       .catch(() => { })
       .finally(() => setLoading(false));
-  }, [page, statusFilter, dateFilter, search]);
+  }, [page, statusFilter, dateFilter, normalizedSearch]);
 
   const handleDownloadInvoice = async () => {
     if (!selectedInvoice) return;
@@ -104,7 +139,7 @@ export default function InvoicesPage() {
       
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
-      doc.text(selectedInvoice.b2b_client?.company_name || "Global Corp", 14, 77);
+      doc.text(invoiceCompanyName, 14, 77);
       doc.text(selectedInvoice.description || "Services Rendered", 14, 84);
 
       // Table
@@ -136,7 +171,7 @@ export default function InvoicesPage() {
 
   const filtered = useMemo(() => {
     return invoices.filter((inv) => {
-      const q = search.toLowerCase().trim();
+      const q = normalizedSearch.toLowerCase();
       const formattedBadge = formatInvoiceBadge(inv.invoice_number).toLowerCase();
       const matchSearch =
         !q ||
@@ -149,7 +184,7 @@ export default function InvoicesPage() {
       const matchDate = !dateFilter || isDateInRange(inv.invoice_date, dateFilter.preset, dateFilter.startDate, dateFilter.endDate);
       return matchSearch && matchStatus && matchDate;
     });
-  }, [invoices, search, statusFilter, dateFilter]);
+  }, [invoices, normalizedSearch, statusFilter, dateFilter]);
 
   const paidCount = invoices.filter((i) => i.status === "paid").length;
   const unpaidCount = invoices.filter((i) => i.status !== "paid").length;
@@ -261,7 +296,7 @@ export default function InvoicesPage() {
             data={filtered}
             columns={tableColumns}
             loading={loading}
-            onRowClick={(row) => setSelectedInvoice(row)}
+            onRowClick={handleInvoiceRowClick}
             pagination={{
               currentPage: page,
               totalPages,
@@ -290,7 +325,7 @@ export default function InvoicesPage() {
 
             {/* Client / Company Info Row (Dynamic Logo or First Letter Avatar) */}
             {(() => {
-              const clientName = selectedInvoice.b2b_client?.company_name ?? "Global Corp";
+              const clientName = invoiceCompanyName;
               const logoUrl = selectedInvoice.b2b_client?.logo_url || selectedInvoice.b2b_client?.logo;
               const firstLetter = clientName.trim().charAt(0).toUpperCase() || "G";
 
@@ -312,7 +347,7 @@ export default function InvoicesPage() {
                   </div>
                   <div className="min-w-0">
                     <h4 className="text-[16px] font-bold text-gray-900 leading-tight">{clientName}</h4>
-                    <p className="text-[12px] text-gray-400 mt-0.5 font-normal">{selectedInvoice.description ?? "Tier 1 Enterprise Account"}</p>
+                    <p className="text-[12px] text-gray-400 mt-0.5 font-normal">{selectedInvoice.description ?? "—"}</p>
                   </div>
                 </div>
               );
@@ -327,7 +362,7 @@ export default function InvoicesPage() {
                     CONTRACT PERIOD
                   </span>
                   <span className="text-[13px] font-bold text-gray-900 block mt-0.5">
-                    {selectedInvoice.invoice_date ? formatDate(selectedInvoice.invoice_date) : "Jan 01, 2024"} — {selectedInvoice.due_date ? formatDate(selectedInvoice.due_date) : "Dec 31, 2024"}
+                    {formatDate(selectedInvoice.invoice_date)} — {formatDate(selectedInvoice.due_date)}
                   </span>
                 </div>
               </div>
@@ -345,16 +380,17 @@ export default function InvoicesPage() {
             </div>
 
             {/* Service Details Card */}
+            {detailLoading && <p className="text-xs text-gray-500">Loading invoice details...</p>}
             <div className="bg-[#EAF6F8] rounded-[24px] p-5 space-y-3 border border-[#D5EEF2]/50">
               <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">SERVICE DETAILS</span>
               <div className="flex items-center justify-between text-[13px]">
                 <span className="text-gray-600 font-normal">Number of Drivers Required</span>
-                <span className="font-bold text-gray-900">2</span>
+                <span className="font-bold text-gray-900">{selectedInvoice.num_drivers_required ?? selectedInvoice.service_request?.num_drivers_required ?? "—"}</span>
               </div>
               <div className="border-b border-dashed border-gray-300/80 my-1" />
               <div className="flex items-center justify-between text-[13px]">
                 <span className="text-gray-600 font-normal">Number of Vehicles Required</span>
-                <span className="font-bold text-gray-900">1</span>
+                <span className="font-bold text-gray-900">{selectedInvoice.num_vehicles_required ?? selectedInvoice.service_request?.num_vehicles_required ?? "—"}</span>
               </div>
             </div>
 

@@ -11,6 +11,12 @@ export interface Invoice {
   total_amount: number;
   status: string;
   paid_at?: string;
+  num_drivers_required?: number | null;
+  num_vehicles_required?: number | null;
+  service_request?: {
+    num_drivers_required?: number | null;
+    num_vehicles_required?: number | null;
+  } | null;
   b2b_client?: { company_name?: string; logo?: string; logo_url?: string; avatar?: string };
 }
 

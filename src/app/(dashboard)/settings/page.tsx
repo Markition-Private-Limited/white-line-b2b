@@ -14,6 +14,13 @@ import { cn } from "@/utils/cn";
 import profileService from "@/services/profile.service";
 import authService from "@/services/auth.service";
 
+const isValidCompanyPhone = (value: string) => {
+  const phone = value.trim();
+  return phone.startsWith("+966")
+    ? /^\+9665\d{8}$/.test(phone)
+    : /^\+[1-9]\d{7,14}$/.test(phone);
+};
+
 export default function SettingsPage() {
   const router = useRouter();
 
@@ -40,6 +47,7 @@ export default function SettingsPage() {
   const [passwordSuccessModalOpen, setPasswordSuccessModalOpen] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+  const invalidSavedPhone = !loading && !!phone.trim() && !isValidCompanyPhone(phone);
 
   useEffect(() => {
     const user = authService.getStoredUser();
@@ -91,6 +99,11 @@ export default function SettingsPage() {
 
     if (!hasChanges) {
       setSaveError("No changes were made to save.");
+      return;
+    }
+
+    if (!isValidCompanyPhone(phone)) {
+      setSaveError("Enter a valid phone number in international format. Saudi mobiles must start with +9665.");
       return;
     }
 
@@ -211,8 +224,9 @@ export default function SettingsPage() {
                     <Phone className="w-4 h-4" />
                   </div>
                   <input
-                    type="text"
+                    type="tel"
                     value={phone}
+                    aria-invalid={invalidSavedPhone}
                     onChange={(e) => {
                       setPhone(e.target.value);
                       setSaveError("");
@@ -221,6 +235,9 @@ export default function SettingsPage() {
                     className="w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full pl-12 pr-6 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-xs"
                   />
                 </div>
+                {invalidSavedPhone && (
+                  <p className="mt-1.5 text-xs text-red-600">This phone number is invalid. Saudi mobiles must use +9665XXXXXXXX.</p>
+                )}
               </div>
             </div>
 
