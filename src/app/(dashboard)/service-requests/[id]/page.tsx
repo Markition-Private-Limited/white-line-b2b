@@ -8,6 +8,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Modal } from "@/components/ui/Modal";
 import { SuccessFlowerBadge } from "@/components/ui/SuccessModal";
 import serviceRequestsService, { type ServiceRequest } from "@/services/serviceRequests.service";
+import { getServiceRequestDisplayStatus } from "@/utils/businessStatus";
 
 export default function ServiceDetailPage() {
   const params = useParams();
@@ -41,7 +42,7 @@ export default function ServiceDetailPage() {
   };
 
   const requestId = request?.request_number ? `#${request.request_number}` : `#SR-${id}`;
-  const status = request?.status ?? "pending";
+  const status = request ? getServiceRequestDisplayStatus(request) : "pending";
 
   const formatDate = (d?: string) => {
     if (!d) return "—";

@@ -147,6 +147,14 @@ function ContractDetailPanel({
   formatDate: (d?: string | Date) => string;
   formatAmount: (v?: number) => string;
 }) {
+  useEffect(() => {
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [onClose]);
+
   const pricingTerms = (contract.pricing_terms ?? {}) as Record<string, unknown>;
   const additionalPricingTerms = Object.entries(pricingTerms).filter(([key]) => key !== "working_hours");
   const workingHours = pricingTerms.working_hours;

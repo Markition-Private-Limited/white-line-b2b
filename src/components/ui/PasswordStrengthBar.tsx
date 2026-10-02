@@ -4,6 +4,7 @@ import { cn } from "@/utils/cn";
 export interface PasswordCriteria {
   hasMinLength: boolean;
   hasUppercase: boolean;
+  hasLowercase: boolean;
   hasNumber: boolean;
   hasSpecialChar: boolean;
 }
@@ -12,6 +13,7 @@ export const getPasswordCriteria = (password: string): PasswordCriteria => {
   return {
     hasMinLength: password.length >= 8,
     hasUppercase: /[A-Z]/.test(password),
+    hasLowercase: /[a-z]/.test(password),
     hasNumber: /[0-9]/.test(password),
     hasSpecialChar: /[^A-Za-z0-9]/.test(password),
   };
@@ -21,6 +23,7 @@ export const getPasswordScore = (criteria: PasswordCriteria): number => {
   let score = 0;
   if (criteria.hasMinLength) score++;
   if (criteria.hasUppercase) score++;
+  if (criteria.hasLowercase) score++;
   if (criteria.hasNumber) score++;
   if (criteria.hasSpecialChar) score++;
   return score;
@@ -28,7 +31,7 @@ export const getPasswordScore = (criteria: PasswordCriteria): number => {
 
 export const isPasswordValid = (password: string): boolean => {
   const c = getPasswordCriteria(password);
-  return c.hasMinLength && c.hasUppercase && c.hasNumber && c.hasSpecialChar;
+  return c.hasMinLength && c.hasUppercase && c.hasLowercase && c.hasNumber && c.hasSpecialChar;
 };
 
 interface PasswordStrengthBarProps {
@@ -43,16 +46,16 @@ export function PasswordStrengthBar({
   if (!password) return null;
 
   const criteria = getPasswordCriteria(password);
-  const score = getPasswordScore(criteria); // 0 to 4
+  const score = getPasswordScore(criteria); // 0 to 5
 
   return (
     <div className={cn("pt-0.5 animate-in fade-in duration-200", className)}>
-      <div className="grid grid-cols-4 gap-1.5 w-full">
-        {[1, 2, 3, 4].map((step) => {
+      <div className="grid grid-cols-5 gap-1.5 w-full">
+        {[1, 2, 3, 4, 5].map((step) => {
           let bg = "bg-gray-200";
           if (step <= score) {
             if (score === 1) bg = "bg-red-500";
-            else if (score <= 3) bg = "bg-amber-500";
+            else if (score <= 4) bg = "bg-amber-500";
             else bg = "bg-[#22C55E]";
           }
           return (

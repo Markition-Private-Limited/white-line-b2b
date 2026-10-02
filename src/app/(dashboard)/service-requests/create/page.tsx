@@ -9,6 +9,7 @@ import { FormDropdown } from "@/components/ui/FormDropdown";
 import serviceRequestsService from "@/services/serviceRequests.service";
 import vehicleClassesService, { type VehicleClass } from "@/services/vehicleClasses.service";
 import contractsService from "@/services/contracts.service";
+import { getRiyadhISODate } from "@/utils/datetime";
 
 export default function CreateServiceRequestPage() {
   const router = useRouter();
@@ -86,6 +87,11 @@ export default function CreateServiceRequestPage() {
       return false;
     }
 
+    if (startDate < getRiyadhISODate()) {
+      setFieldErrors({ startDate: "Start date cannot be in the past." });
+      return false;
+    }
+
     // 2. End Date
     if (!endDate) {
       setFieldErrors({ endDate: "End date is required." });
@@ -100,6 +106,11 @@ export default function CreateServiceRequestPage() {
     // 3. Number of Vehicles
     if (vehiclesCount <= 0) {
       setFieldErrors({ vehiclesCount: "At least 1 vehicle is required." });
+      return false;
+    }
+
+    if (driversCount <= 0) {
+      setFieldErrors({ driversCount: "At least 1 driver is required." });
       return false;
     }
 
@@ -169,6 +180,7 @@ export default function CreateServiceRequestPage() {
               label="START DATE"
               type="date"
               required
+              min={getRiyadhISODate()}
               value={startDate}
               error={fieldErrors.startDate}
               onChange={(e) => {
@@ -210,7 +222,11 @@ export default function CreateServiceRequestPage() {
             <CounterInput
               label="NUMBER OF DRIVERS"
               value={driversCount}
-              onChange={setDriversCount}
+              error={fieldErrors.driversCount}
+              onChange={(val) => {
+                setDriversCount(val);
+                if (val > 0) setFieldErrors((prev) => ({ ...prev, driversCount: "" }));
+              }}
               min={0}
               max={100}
             />

@@ -34,12 +34,18 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Agar API 401 return karti hai, iska matlab token expire ho gaya ya invalid hai
-    if (error.response && error.response.status === 401) {
+    const requestUrl = String(error.config?.url || '');
+    const isAuthRequest = requestUrl.includes('/auth/b2b/') || requestUrl.includes('/b2b/register');
+    const hasSession = Boolean(Cookies.get('token'));
+
+    // A 401 from a protected request means the saved session is no longer valid.
+    // Login/OTP 401s are expected validation responses and must stay on the form
+    // so the API error can be shown to the user.
+    if (error.response?.status === 401 && hasSession && !isAuthRequest) {
       Cookies.remove('token');
       Cookies.remove('spoc_user');
       Cookies.remove('b2b_client');
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
         window.location.href = '/login';
       }
     }

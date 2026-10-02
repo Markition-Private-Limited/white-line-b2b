@@ -51,6 +51,19 @@ function formatRelativeTime(iso: string): string {
   return `${days} day${days === 1 ? "" : "s"} ago`;
 }
 
+function notificationDestination(notification: Notification): string | null {
+  const data = notification.data || {};
+  const stringValue = (key: string) => typeof data[key] === "string" ? data[key] as string : null;
+  const serviceRequestId = stringValue("service_request_id") || stringValue("request_id");
+  const invoiceId = stringValue("invoice_id");
+  const complaintId = stringValue("complaint_id");
+
+  if (serviceRequestId) return `/service-requests/${encodeURIComponent(serviceRequestId)}`;
+  if (invoiceId) return `/invoices?invoice=${encodeURIComponent(invoiceId)}`;
+  if (complaintId) return "/complaints";
+  return null;
+}
+
 export function HeaderNav() {
   const pathname = usePathname();
   const router = useRouter();
@@ -159,12 +172,19 @@ export function HeaderNav() {
   };
 
   const handleNotificationClick = (n: Notification) => {
-    if (n.is_read) return;
-    notificationsService.markRead(n.id).catch((err) => {
-      console.error("Failed to mark notification read:", err);
-    });
-    setUnreadNotifications((prev) => prev.filter((item) => item.id !== n.id));
-    setReadNotifications((prev) => [{ ...n, is_read: true }, ...prev]);
+    if (!n.is_read) {
+      notificationsService.markRead(n.id).catch((err) => {
+        console.error("Failed to mark notification read:", err);
+      });
+      setUnreadNotifications((prev) => prev.filter((item) => item.id !== n.id));
+      setReadNotifications((prev) => [{ ...n, is_read: true }, ...prev]);
+    }
+
+    const destination = notificationDestination(n);
+    if (destination) {
+      setNotifMenuOpen(false);
+      router.push(destination);
+    }
   };
 
   const handleMarkAllRead = () => {
@@ -239,10 +259,17 @@ export function HeaderNav() {
   }, [notifMenuOpen, notificationsLoaded]);
 
   useEffect(() => {
-    const unsubscribe = onForegroundMessage(() => {
-      loadNotifications(1);
-    });
-    return unsubscribe;
+    try {
+      const unsubscribe = onForegroundMessage(() => {
+        loadNotifications(1);
+      });
+      return unsubscribe;
+    } catch (error) {
+      // Push is optional; missing Firebase browser configuration must not
+      // prevent the authenticated portal from rendering.
+      console.warn("Foreground notifications unavailable:", error);
+      return undefined;
+    }
   }, []);
 
   const isActive = (path: string) => {
@@ -464,10 +491,12 @@ export function HeaderNav() {
                     })}
                     {readNotifications.map((n) => {
                       const Icon = NOTIFICATION_ICONS[n.notification_type] ?? Info;
+                      const destination = notificationDestination(n);
                       return (
                         <div
                           key={n.id}
-                          className="flex gap-2.5 p-2 rounded-xl bg-gray-50/60 hover:bg-gray-50 text-xs text-gray-700"
+                          onClick={() => handleNotificationClick(n)}
+                          className={`flex gap-2.5 p-2 rounded-xl bg-gray-50/60 hover:bg-gray-50 text-xs text-gray-700 ${destination ? "cursor-pointer" : ""}`}
                         >
                           <Icon className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
                           <div>
@@ -889,5 +918,3 @@ export function HeaderNav() {
     </>
   );
 }
-
-

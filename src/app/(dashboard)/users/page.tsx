@@ -7,7 +7,7 @@ import {
 import { Toggle } from "@/components/ui/Toggle";
 import { SuccessModal } from "@/components/ui/SuccessModal";
 import { Modal } from "@/components/ui/Modal";
-import { PasswordStrengthBar } from "@/components/ui/PasswordStrengthBar";
+import { PasswordStrengthBar, isPasswordValid } from "@/components/ui/PasswordStrengthBar";
 import { DataTable, type ColumnDef } from "@/components/layout/DataTableContainer";
 import usersService, { type SpocUser } from "@/services/users.service";
 import authService from "@/services/auth.service";
@@ -112,12 +112,16 @@ export default function UsersPage() {
       setCreateError("Please provide full name and email address.");
       return;
     }
+    if (!/^[\p{L}]+(?:[ '-][\p{L}]+)+$/u.test(fullName.trim())) {
+      setCreateError("Enter a valid full name using letters (first and last name).");
+      return;
+    }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       setCreateError("Enter a valid email address.");
       return;
     }
-    if (!password || password.length < 8) {
-      setCreateError("Password must be at least 8 characters.");
+    if (!isPasswordValid(password)) {
+      setCreateError("Password must be 8+ characters with uppercase, lowercase, number, and special character.");
       return;
     }
     setCreateError("");
@@ -164,8 +168,8 @@ export default function UsersPage() {
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!changePasswordUser) return;
-    if (newPassword.length < 8) {
-      setActionError("New password must be at least 8 characters.");
+    if (!isPasswordValid(newPassword)) {
+      setActionError("New password must be 8+ characters with uppercase, lowercase, number, and special character.");
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -280,7 +284,7 @@ export default function UsersPage() {
       cell: (row) => (
         <Toggle
           checked={row.status === "active"}
-          disabled={row.is_account_owner || row.id === currentUser?.id}
+          disabled={!isOwner || row.is_account_owner || row.id === currentUser?.id}
           onChange={() => setPendingStatusUser(row)}
           label={row.status === "active" ? "Active" : "Inactive"}
         />
@@ -423,6 +427,7 @@ export default function UsersPage() {
                   {showCreatePassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </div>
               </div>
+              <PasswordStrengthBar password={password} />
             </div>
 
             {/* ROLE SELECTION */}

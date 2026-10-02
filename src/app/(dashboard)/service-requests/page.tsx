@@ -10,6 +10,7 @@ import { PageToolbar, type FilterDef } from "@/components/layout/PageToolbar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { type DatePickerValue, isDateInRange } from "@/utils/dateFilterUtils";
 import serviceRequestsService, { type ServiceRequest } from "@/services/serviceRequests.service";
+import { getServiceRequestDisplayStatus } from "@/utils/businessStatus";
 
 const LIMIT = 10;
 
@@ -49,7 +50,7 @@ export default function ServiceRequestsPage() {
         r.request_number?.toLowerCase().includes(q) ||
         r.vehicle_class?.name?.toLowerCase().includes(q) ||
         r.requested_by?.toLowerCase().includes(q);
-      const s = r.status?.toLowerCase();
+      const s = getServiceRequestDisplayStatus(r);
       const matchStatus =
         statusFilter === "All" ||
         s === statusFilter.toLowerCase() ||
@@ -65,7 +66,7 @@ export default function ServiceRequestsPage() {
     const s = r.status?.toLowerCase();
     return s === "active" || s === "approved" || s === "assigned";
   }).length;
-  const pendingCount = requests.filter((r) => r.status?.toLowerCase() === "pending").length;
+  const pendingCount = requests.filter((r) => getServiceRequestDisplayStatus(r) === "pending").length;
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
   const columns = useMemo<ColumnDef<ServiceRequest>[]>(() => [
@@ -107,7 +108,7 @@ export default function ServiceRequestsPage() {
       header: "STATUS",
       className: "text-left",
       cell: (r) => (
-        <StatusBadge status={r.status} />
+        <StatusBadge status={getServiceRequestDisplayStatus(r)} />
       ),
     },
   ], []);
@@ -240,4 +241,3 @@ export default function ServiceRequestsPage() {
     </div>
   );
 }
-

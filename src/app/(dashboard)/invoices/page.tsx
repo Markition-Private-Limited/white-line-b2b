@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import {
   Clock,
@@ -19,6 +19,7 @@ import invoicesService, { type Invoice } from "@/services/invoices.service";
 import profileService from "@/services/profile.service";
 import authService from "@/services/auth.service";
 import { formatRiyadhDate } from "@/utils/datetime";
+import { getInvoiceDisplayStatus, isInvoiceDueSoon } from "@/utils/businessStatus";
 
 const LIMIT = 10;
 
@@ -46,6 +47,7 @@ export default function InvoicesPage() {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [currentCompanyName, setCurrentCompanyName] = useState("");
   const [detailLoading, setDetailLoading] = useState(false);
+  const deepLinkHandled = useRef(false);
   const normalizedSearch = normalizeInvoiceSearch(search);
 
   useEffect(() => {
@@ -70,6 +72,16 @@ export default function InvoicesPage() {
   };
 
   const invoiceCompanyName = selectedInvoice?.company_name || selectedInvoice?.b2b_client?.company_name || currentCompanyName || "Company name unavailable";
+
+  useEffect(() => {
+    if (deepLinkHandled.current || typeof window === "undefined") return;
+    deepLinkHandled.current = true;
+    const invoiceId = new URLSearchParams(window.location.search).get("invoice");
+    if (!invoiceId) return;
+    invoicesService.get(invoiceId)
+      .then(setSelectedInvoice)
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -107,7 +119,7 @@ export default function InvoicesPage() {
       doc.setTextColor(0, 0, 0);
       doc.setFontSize(10);
       doc.text(`Invoice Number: ${selectedInvoice.invoice_number || "N/A"}`, 14, 35);
-      doc.text(`Status: ${selectedInvoice.status?.toUpperCase() || "DUE"}`, 14, 42);
+      doc.text(`Status: ${getInvoiceDisplayStatus(selectedInvoice).toUpperCase()}`, 14, 42);
       doc.text(`Invoice Date: ${selectedInvoice.invoice_date ? formatDate(selectedInvoice.invoice_date) : "N/A"}`, 14, 49);
       doc.text(`Due Date: ${selectedInvoice.due_date ? formatDate(selectedInvoice.due_date) : "N/A"}`, 14, 56);
 
@@ -163,21 +175,18 @@ export default function InvoicesPage() {
         formattedBadge.includes(q) ||
         inv.description?.toLowerCase().includes(q) ||
         String(inv.total_amount).includes(q);
-      const matchStatus =
-        statusFilter === "All" || inv.status?.toLowerCase() === statusFilter.toLowerCase();
+      const filterStatus = statusFilter.toLowerCase();
+      const displayStatus = getInvoiceDisplayStatus(inv);
+      const matchStatus = statusFilter === "All" ||
+        (filterStatus === "unpaid" ? displayStatus !== "paid" : displayStatus === filterStatus);
       const matchDate = !dateFilter || isDateInRange(inv.invoice_date, dateFilter.preset, dateFilter.startDate, dateFilter.endDate);
       return matchSearch && matchStatus && matchDate;
     });
   }, [invoices, normalizedSearch, statusFilter, dateFilter]);
 
-  const paidCount = invoices.filter((i) => i.status === "paid").length;
-  const unpaidCount = invoices.filter((i) => i.status !== "paid").length;
-  const dueSoonCount = invoices.filter((i) => {
-    if (i.status === "paid" || !i.due_date) return false;
-    const due = new Date(i.due_date);
-    const now = new Date();
-    return (due.getTime() - now.getTime()) < 7 * 24 * 60 * 60 * 1000;
-  }).length;
+  const paidCount = invoices.filter((i) => getInvoiceDisplayStatus(i) === "paid").length;
+  const unpaidCount = invoices.filter((i) => getInvoiceDisplayStatus(i) !== "paid").length;
+  const dueSoonCount = invoices.filter(isInvoiceDueSoon).length;
 
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
@@ -206,7 +215,7 @@ export default function InvoicesPage() {
       header: "STATUS",
       className: "text-left",
       cell: (row) => (
-        <StatusBadge status={row.status} />
+        <StatusBadge status={getInvoiceDisplayStatus(row)} />
       ),
     },
   ], []);

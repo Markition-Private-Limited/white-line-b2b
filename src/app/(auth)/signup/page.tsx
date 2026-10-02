@@ -58,6 +58,7 @@ export default function SignUpPage() {
       const pwd = formData.password;
       if (pwd.length < 8) { setSubmitError("Password must be at least 8 characters."); return; }
       if (!/[A-Z]/.test(pwd)) { setSubmitError("Password must contain an uppercase letter."); return; }
+      if (!/[a-z]/.test(pwd)) { setSubmitError("Password must contain a lowercase letter."); return; }
       if (!/[0-9]/.test(pwd)) { setSubmitError("Password must contain a number."); return; }
       if (!/[^A-Za-z0-9]/.test(pwd)) { setSubmitError("Password must contain a special character."); return; }
       

@@ -32,6 +32,7 @@ const formatDateWithTime = (d?: string) => {
 };
 
 const formatComplaintId = (raw?: string) => raw ? raw.replace(/^#/, "").trim() : "—";
+const getComplaintDisplayId = (row: Complaint) => formatComplaintId(row.id || row.complaint_number);
 
 const renderSmallStatusBadge = (status?: string) => {
   const s = status?.toLowerCase() || "open";
@@ -112,21 +113,18 @@ export default function ComplaintsPage() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [dateFilter, setDateFilter] = useState<DatePickerValue | null>(null);
   const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [successModalOpen, setSuccessModalOpen] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [cancelSuccessModalOpen, setCancelSuccessModalOpen] = useState(false);
 
   useEffect(() => {
-    if (!selectedComplaint || deleteModalOpen || cancelModalOpen || successModalOpen || cancelSuccessModalOpen) return;
+    if (!selectedComplaint || cancelModalOpen || cancelSuccessModalOpen) return;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") setSelectedComplaint(null);
     };
     document.addEventListener("keydown", closeOnEscape);
     return () => document.removeEventListener("keydown", closeOnEscape);
-  }, [selectedComplaint, deleteModalOpen, cancelModalOpen, successModalOpen, cancelSuccessModalOpen]);
+  }, [selectedComplaint, cancelModalOpen, cancelSuccessModalOpen]);
 
   const fetchComplaints = () => {
     setLoading(true);
@@ -138,9 +136,6 @@ export default function ComplaintsPage() {
       end_date: dateFilter?.endDate,
     })
       .then((res) => {
-        if (typeof window !== "undefined" && res.data && res.data.length > 0) {
-          console.log("[DEBUG Complaints API Data]:", res.data);
-        }
         setComplaints(res.data ?? []);
         setTotal(res.total ?? 0);
       })
@@ -155,12 +150,13 @@ export default function ComplaintsPage() {
   const filteredComplaints = useMemo(() => {
     return complaints.filter((item) => {
       const q = search.toLowerCase().trim();
-      const formattedId = formatComplaintId(item.complaint_number).toLowerCase();
+      const formattedId = getComplaintDisplayId(item).toLowerCase();
       const bookingContract = formatBookingOrContract(item).toLowerCase();
       const submittedBy = formatSubmittedBy(item).toLowerCase();
       const matchSearch =
         !q ||
         item.complaint_number?.toLowerCase().includes(q) ||
+        item.id?.toLowerCase().includes(q) ||
         formattedId.includes(q) ||
         bookingContract.includes(q) ||
         submittedBy.includes(q) ||
@@ -176,27 +172,6 @@ export default function ComplaintsPage() {
   const resolvedCount = complaints.filter((c) => c.status?.toLowerCase() === "resolved").length;
   const pendingCount = complaints.filter((c) => ["open", "pending", "in review"].includes(c.status?.toLowerCase())).length;
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
-
-  const handleDelete = () => {
-    setDeleteModalOpen(true);
-  };
-
-  const handleConfirmDelete = async () => {
-    if (!selectedComplaint) return;
-    setIsDeleting(true);
-    try {
-      await complaintsService.delete(selectedComplaint.id);
-      setSelectedComplaint(null);
-      setDeleteModalOpen(false);
-      setSuccessModalOpen(true);
-      fetchComplaints();
-      setTimeout(() => setSuccessModalOpen(false), 2000);
-    } catch {
-      // Error handling
-    } finally {
-      setIsDeleting(false);
-    }
-  };
 
   const handleCancel = () => {
     setCancelModalOpen(true);
@@ -228,7 +203,7 @@ export default function ComplaintsPage() {
   const tableColumns = useMemo<ColumnDef<Complaint>[]>(() => [
     {
       header: "COMPLAINT ID",
-      cell: (row) => <span className="font-semibold text-text-primary text-fs-12">{formatComplaintId(row.complaint_number)}</span>,
+      cell: (row) => <span className="font-semibold text-text-primary text-fs-12">{getComplaintDisplayId(row)}</span>,
     },
     {
       header: "CONTACT / BOOKING REF",
@@ -370,7 +345,7 @@ export default function ComplaintsPage() {
               <div>
                 <div className="flex items-center gap-2.5">
                   <h2 className="text-[19px] sm:text-[21px] font-bold text-gray-900 font-poppins">
-                    {formatComplaintId(selectedComplaint.complaint_number)}
+                    {getComplaintDisplayId(selectedComplaint)}
                   </h2>
                   {renderSmallStatusBadge(selectedComplaint.status)}
                 </div>
@@ -420,64 +395,10 @@ export default function ComplaintsPage() {
                   {isCancelling ? "Cancelling..." : "Cancel Complaint"}
                 </button>
               )}
-              {selectedComplaint.status?.toLowerCase() !== "resolved" && (
-                <button
-                  type="button"
-                  onClick={handleDelete}
-                  disabled={isDeleting}
-                  className="h-[42px] sm:h-[44px] px-7 rounded-full border border-[#D9383A] text-[#D9383A] hover:bg-red-50 text-[12px] sm:text-[13px] font-semibold transition-colors cursor-pointer disabled:opacity-50 shadow-xs flex items-center justify-center"
-                >
-                  {isDeleting ? "Deleting..." : "Delete Complaint"}
-                </button>
-              )}
             </div>
           </div>
         </div>
       )}
-
-      {/* Delete Confirmation Modal */}
-      <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} maxWidth="max-w-[460px]" className="text-center p-8 lg:p-10">
-        <div className="flex flex-col items-center">
-          <div className="mb-6 flex justify-center">
-            <SuccessFlowerBadge />
-          </div>
-          <h3 className="text-fs-20 lg:text-fs-22 font-bold font-poppins text-text-primary mb-3 leading-tight">
-            Are you sure you want to delete this complaint?
-          </h3>
-          <p className="text-fs-13 lg:text-fs-14 text-[#64748B] mb-8 max-w-sm leading-relaxed mx-auto font-normal">
-            This action cannot be undone. Once deleted, it will be removed permanently.
-          </p>
-          <div className="flex items-center justify-center gap-3 w-full">
-            <button
-              type="button"
-              onClick={() => setDeleteModalOpen(false)}
-              className="py-2.5 px-7 text-fs-13 lg:text-fs-14 font-medium bg-[#005C66] text-white hover:bg-[#004b54] rounded-full shadow-sm transition-colors cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={handleConfirmDelete}
-              disabled={isDeleting}
-              className="py-2.5 px-7 text-fs-13 lg:text-fs-14 font-medium rounded-full border border-[#D9383A] text-[#D9383A] hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-50"
-            >
-              {isDeleting ? "Deleting..." : "Yes, Delete"}
-            </button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* Success Modal */}
-      <Modal isOpen={successModalOpen} onClose={() => setSuccessModalOpen(false)} maxWidth="max-w-[400px]" className="text-center p-8">
-        <div className="flex flex-col items-center">
-          <div className="mb-4 flex justify-center">
-            <CheckCircle2 className="w-12 h-12 text-green-500" />
-          </div>
-          <h3 className="text-lg font-bold font-poppins text-text-primary">
-            Complaint Deleted Successfully
-          </h3>
-        </div>
-      </Modal>
 
       {/* Cancel Confirmation Modal */}
       <Modal isOpen={cancelModalOpen} onClose={() => setCancelModalOpen(false)} maxWidth="max-w-[460px]" className="text-center p-8 lg:p-10">
@@ -489,7 +410,7 @@ export default function ComplaintsPage() {
             Are you sure you want to cancel this complaint?
           </h3>
           <p className="text-fs-13 lg:text-fs-14 text-[#64748B] mb-8 max-w-sm leading-relaxed mx-auto font-normal">
-            This will mark the complaint as cancelled. You can still delete it afterwards if needed.
+            This will mark the complaint as cancelled and keep it in the complaint history.
           </p>
           <div className="flex items-center justify-center gap-3 w-full">
             <button
