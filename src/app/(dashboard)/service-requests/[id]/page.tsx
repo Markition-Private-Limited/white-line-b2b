@@ -79,7 +79,7 @@ export default function ServiceDetailPage() {
             <Image src="/vehicle.png" alt="Vehicle" width={180} height={90} className="object-contain" onError={(e) => { (e.target as HTMLElement).style.display = "none"; }} />
           </div>
           <p className="text-fs-13 font-bold text-center text-text-primary font-poppins">
-            {request?.vehicle_class?.name ?? "Premium Executive SUV"}
+            {request?.vehicle_class?.name ?? "—"}
           </p>
         </div>
 
@@ -96,7 +96,7 @@ export default function ServiceDetailPage() {
             </div>
             <div>
               <span className="text-fs-11 text-gray-400 block font-medium">Request By:</span>
-              <span className="text-fs-13 font-bold text-text-primary font-poppins">{request?.requested_by ?? "Admin"}</span>
+              <span className="text-fs-13 font-bold text-text-primary font-poppins">{request?.requested_by ?? "—"}</span>
             </div>
           </div>
         </div>
@@ -146,12 +146,12 @@ export default function ServiceDetailPage() {
           <span>Notes</span>
         </div>
         <p className="body-2 text-text-secondary leading-relaxed italic">
-          {request?.special_instructions || "To maintain our commitment to delivering premium, high-quality service, we have implemented rigorous operational standards: all assigned drivers must be fluent in both English and Mandarin to ensure effective communication and a premium passenger experience, every vehicle in the fleet is strictly required to be less than two years old to uphold safety and reliability, and our team must conduct comprehensive daily maintenance checks directly at the client's site to ensure optimal vehicle performance at all times."}
+          {request?.special_instructions || "No special instructions were provided for this request."}
         </p>
       </div>
 
       {/* Cancel Action */}
-      {status !== "cancelled" && (
+      {request?.can_cancel && (
         <div className="flex items-center justify-end pt-2">
           <button
             type="button"

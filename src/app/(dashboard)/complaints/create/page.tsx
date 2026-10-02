@@ -7,6 +7,7 @@ import { Info, X, ChevronDown } from "lucide-react";
 import complaintsService from "@/services/complaints.service";
 import authService from "@/services/auth.service";
 import { SuccessFlowerBadge } from "@/components/ui/SuccessModal";
+import { formatRiyadhDate } from "@/utils/datetime";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import { CountryPhoneInput } from "@/components/ui/CountryPhoneInput";
 
@@ -169,7 +170,7 @@ export default function CreateComplaintPage() {
                   if (b.scheduled_datetime) {
                     const dt = new Date(b.scheduled_datetime);
                     if (!isNaN(dt.getTime())) {
-                      formattedDate = ` — ${dt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}`;
+                      formattedDate = ` — ${formatRiyadhDate(dt)}`;
                     }
                   }
                   return (

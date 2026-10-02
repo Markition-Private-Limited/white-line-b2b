@@ -11,6 +11,7 @@ export interface Invoice {
   total_amount: number;
   status: string;
   paid_at?: string;
+  company_name?: string | null;
   num_drivers_required?: number | null;
   num_vehicles_required?: number | null;
   service_request?: {

@@ -20,11 +20,11 @@ import Cookies from "js-cookie";
 export default function SettingsPage() {
   const router = useRouter();
 
-  const [companyName, setCompanyName] = useState("WhiteLine Global");
-  const [companyEmail, setCompanyEmail] = useState("contact@whiteline.com");
+  const [companyName, setCompanyName] = useState("");
+  const [companyEmail, setCompanyEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("123 Luxury Ave, Suite 400, Manhattan, New York, NY 10001");
-  const [userName, setUserName] = useState("Alexander Miller");
+  const [address, setAddress] = useState("");
+  const [userName, setUserName] = useState("");
   const [initialData, setInitialData] = useState({ companyName: "", phone: "", address: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -43,6 +43,7 @@ export default function SettingsPage() {
   const [passwordSuccessModalOpen, setPasswordSuccessModalOpen] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+  const phoneChanged = phone.trim() !== initialData.phone.trim();
   const invalidSavedPhone = !loading && !!phone.trim() && !isValidPhoneNumber(phone);
   const hasSettingsChanges =
     companyName.trim() !== initialData.companyName.trim() ||
@@ -82,7 +83,7 @@ export default function SettingsPage() {
       return;
     }
 
-    if (!phone.trim()) {
+    if (phoneChanged && !phone.trim()) {
       setSaveError("Phone number is required.");
       return;
     }
@@ -94,7 +95,7 @@ export default function SettingsPage() {
 
     if (!hasSettingsChanges) return;
 
-    if (!isValidPhoneNumber(phone)) {
+    if (phoneChanged && !isValidPhoneNumber(phone)) {
       setSaveError("Check the phone number length for the selected country.");
       return;
     }
@@ -103,7 +104,7 @@ export default function SettingsPage() {
     try {
       await profileService.update({
         company_name: companyName.trim(),
-        company_phone: phone.trim(),
+        ...(phoneChanged ? { company_phone: phone.trim() } : {}),
         company_address: address.trim(),
       });
       setInitialData({

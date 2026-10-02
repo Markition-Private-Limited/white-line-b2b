@@ -12,7 +12,8 @@ export interface ServiceRequest {
   special_instructions?: string;
   status: string;
   request_date: string;
-  requested_by?: string;
+  requested_by?: string | null;
+  can_cancel?: boolean;
 }
 
 export interface CreateServiceRequestPayload {

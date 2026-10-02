@@ -7,8 +7,24 @@ import {
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { DataTable, type ColumnDef } from "@/components/layout/DataTableContainer";
 import contractsService, { type Contract } from "@/services/contracts.service";
+import { formatRiyadhDate } from "@/utils/datetime";
 
 const LIMIT = 10;
+
+const documentExtension = (url?: string | null) => {
+  if (!url) return "";
+  const match = url.split(/[?#]/)[0].match(/\.([a-z0-9]{1,5})$/i);
+  return match ? match[1].toLowerCase() : "";
+};
+
+const documentTypeLabel = (url?: string | null) => {
+  const ext = documentExtension(url);
+  if (!ext) return "Document";
+  if (ext === "pdf") return "PDF Document";
+  if (["jpg", "jpeg", "png", "webp", "gif", "heic"].includes(ext)) return "Image";
+  if (["doc", "docx"].includes(ext)) return "Word Document";
+  return `${ext.toUpperCase()} File`;
+};
 
 export default function ContractsPage() {
   const [contracts, setContracts] = useState<Contract[]>([]);
@@ -41,13 +57,7 @@ export default function ContractsPage() {
     }
   };
 
-  const formatDate = (d?: string | Date) => {
-    if (!d) return "—";
-    const dt = new Date(d as string);
-    return isNaN(dt.getTime())
-      ? "—"
-      : dt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
-  };
+  const formatDate = formatRiyadhDate;
 
   const formatAmount = (v?: number) =>
     `SAR ${Number(v ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
@@ -273,9 +283,9 @@ function ContractDetailPanel({
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-fs-12 font-semibold text-text-primary truncate">
-                    Contract_{contract.contract_number}.pdf
+                    Contract_{contract.contract_number}{documentExtension(contract.contract_doc_url) ? `.${documentExtension(contract.contract_doc_url)}` : ""}
                   </p>
-                  <p className="text-fs-10 text-gray-400">PDF Document</p>
+                  <p className="text-fs-10 text-gray-400">{documentTypeLabel(contract.contract_doc_url)}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <a

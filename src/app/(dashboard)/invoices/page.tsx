@@ -18,16 +18,11 @@ import { type DatePickerValue, isDateInRange } from "@/utils/dateFilterUtils";
 import invoicesService, { type Invoice } from "@/services/invoices.service";
 import profileService from "@/services/profile.service";
 import authService from "@/services/auth.service";
+import { formatRiyadhDate } from "@/utils/datetime";
 
 const LIMIT = 10;
 
-const formatDate = (d?: string) => {
-  if (!d) return "—";
-  const dt = new Date(d);
-  return isNaN(dt.getTime())
-    ? "—"
-    : dt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
-};
+const formatDate = formatRiyadhDate;
 
 const formatAmount = (v: number) => `SAR ${Number(v ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
@@ -38,23 +33,7 @@ const normalizeInvoiceSearch = (value: string) => {
   return /^\d+(?:\.\d{0,2})?$/.test(amount) ? String(Number(amount)) : query;
 };
 
-const formatInvoiceBadge = (raw?: string) => {
-  if (!raw) return "";
-  const cleaned = raw.replace(/^#/, "").trim();
-
-  // Extract first 4 consecutive digits from the ID
-  const digitMatch = cleaned.match(/\d{4}/);
-  if (digitMatch) {
-    return `INV-${digitMatch[0]}`;
-  }
-
-  const anyDigits = cleaned.match(/\d+/);
-  if (anyDigits) {
-    return `INV-${anyDigits[0]}`;
-  }
-
-  return cleaned;
-};
+const formatInvoiceBadge = (raw?: string) => raw ? raw.replace(/^#/, "").trim() : "—";
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -90,7 +69,7 @@ export default function InvoicesPage() {
     }
   };
 
-  const invoiceCompanyName = selectedInvoice?.b2b_client?.company_name || currentCompanyName || "Company name unavailable";
+  const invoiceCompanyName = selectedInvoice?.company_name || selectedInvoice?.b2b_client?.company_name || currentCompanyName || "Company name unavailable";
 
   useEffect(() => {
     setLoading(true);
@@ -147,7 +126,8 @@ export default function InvoicesPage() {
         startY: 95,
         head: [["Description", "Amount"]],
         body: [
-          [selectedInvoice.description || "Services Rendered", formatAmount(selectedInvoice.total_amount)],
+          [selectedInvoice.description || "Services Rendered", formatAmount(selectedInvoice.subtotal)],
+          ["VAT (15%)", formatAmount(selectedInvoice.vat_amount)],
         ],
         theme: 'striped',
         headStyles: { fillColor: [0, 92, 102] },
@@ -155,9 +135,13 @@ export default function InvoicesPage() {
 
       // Total Amount
       const finalY = (doc as any).lastAutoTable?.finalY || 120;
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Subtotal: ${formatAmount(selectedInvoice.subtotal)}`, 14, finalY + 8);
+      doc.text(`VAT (15%): ${formatAmount(selectedInvoice.vat_amount)}`, 14, finalY + 15);
       doc.setFontSize(12);
       doc.setFont("helvetica", "bold");
-      doc.text(`Total Amount: ${formatAmount(selectedInvoice.total_amount)}`, 14, finalY + 15);
+      doc.text(`Total Amount: ${formatAmount(selectedInvoice.total_amount)}`, 14, finalY + 24);
 
       // Open PDF in new tab
       const pdfBlob = doc.output("blob");
@@ -353,16 +337,16 @@ export default function InvoicesPage() {
               );
             })()}
 
-            {/* Contract Period & Due Date Combined Card */}
+            {/* Invoice date and due date */}
             <div className="bg-[#F8F9FA] rounded-[22px] p-4 flex items-center justify-between gap-3 border border-gray-100/60">
               <div className="flex items-start gap-2.5">
                 <Calendar className="w-4 h-4 text-gray-500 mt-0.5 shrink-0" />
                 <div>
                   <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
-                    CONTRACT PERIOD
+                    INVOICE DATE
                   </span>
                   <span className="text-[13px] font-bold text-gray-900 block mt-0.5">
-                    {formatDate(selectedInvoice.invoice_date)} — {formatDate(selectedInvoice.due_date)}
+                    {formatDate(selectedInvoice.invoice_date)}
                   </span>
                 </div>
               </div>

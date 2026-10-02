@@ -91,7 +91,7 @@ export default function ServiceRequestsPage() {
       header: "VEHICLE CATEGORY",
       cell: (r) => (
         <span className="font-medium text-text-primary text-fs-12">
-          {r.vehicle_class?.name ?? "Corporate Mobility"}
+          {r.vehicle_class?.name ?? "—"}
         </span>
       ),
     },
@@ -99,7 +99,7 @@ export default function ServiceRequestsPage() {
       header: "REQUESTED BY",
       cell: (r) => (
         <span className="text-text-secondary text-fs-12">
-          {r.requested_by ?? "David Sterling"}
+          {r.requested_by ?? "—"}
         </span>
       ),
     },

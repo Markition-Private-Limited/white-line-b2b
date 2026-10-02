@@ -10,7 +10,6 @@ import {
   ChevronDown,
 } from "lucide-react";
 import dashboardService, { type DashboardData } from "@/services/dashboard.service";
-import invoicesService, { type Invoice } from "@/services/invoices.service";
 import { cn } from "@/utils/cn";
 
 interface MonthlyDataItem {
@@ -21,17 +20,10 @@ interface MonthlyDataItem {
 
 const ALL_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-const FALLBACK_MONTHLY: MonthlyDataItem[] = ALL_MONTHS.map((month) => ({
-  month,
-  paid: 0,
-  unpaid: 0,
-}));
-
 export default function DashboardPage() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
   const [stats, setStats] = useState<DashboardData | null>(null);
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
 
   const YEAR_OPTIONS = useMemo(() => {
@@ -40,62 +32,18 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
+    let active = true;
     setLoading(true);
-    Promise.allSettled([
-      dashboardService.getDashboard(selectedYear),
-      invoicesService.list(1),
-    ])
-      .then(([dashRes, invRes]) => {
-        if (dashRes.status === "fulfilled") {
-          setStats(dashRes.value);
-        }
-        if (invRes.status === "fulfilled") {
-          setInvoices(invRes.value.data ?? []);
-        }
-      })
+    setStats(null);
+    dashboardService.getDashboard(selectedYear)
+      .then((data) => { if (active) setStats(data); })
       .catch(() => {})
-      .finally(() => setLoading(false));
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
   }, [selectedYear]);
 
   const monthlyData: MonthlyDataItem[] = useMemo(() => {
-    // 1. If backend stats already provides populated monthly_data with non-zero values, use it
-    if (stats?.monthly_data && stats.monthly_data.some((d) => d.paid > 0 || d.unpaid > 0)) {
-      const map = new Map(stats.monthly_data.map((d) => [d.month.toLowerCase(), d]));
-      return ALL_MONTHS.map((month) => {
-        const match = map.get(month.toLowerCase());
-        return {
-          month,
-          paid: match?.paid ?? 0,
-          unpaid: match?.unpaid ?? 0,
-        };
-      });
-    }
-
-    // 2. Otherwise calculate live monthly paid and unpaid totals directly from invoices
-    const map = new Map<string, { paid: number; unpaid: number }>();
-    ALL_MONTHS.forEach((m) => map.set(m.toLowerCase(), { paid: 0, unpaid: 0 }));
-
-    if (invoices.length > 0) {
-      invoices.forEach((inv) => {
-        if (!inv.invoice_date) return;
-        const d = new Date(inv.invoice_date);
-        if (isNaN(d.getTime())) return;
-        const currentYear = Number(selectedYear);
-        if (d.getFullYear() === currentYear) {
-          const monthKey = ALL_MONTHS[d.getMonth()]?.toLowerCase();
-          const bucket = map.get(monthKey);
-          if (bucket) {
-            const amt = Number(inv.total_amount || 0);
-            if (inv.status?.toLowerCase() === "paid") {
-              bucket.paid += amt;
-            } else {
-              bucket.unpaid += amt;
-            }
-          }
-        }
-      });
-    }
-
+    const map = new Map((stats?.monthly_data ?? []).map((d) => [d.month.toLowerCase(), d]));
     return ALL_MONTHS.map((month) => {
       const bucket = map.get(month.toLowerCase()) || { paid: 0, unpaid: 0 };
       return {
@@ -104,7 +52,7 @@ export default function DashboardPage() {
         unpaid: bucket.unpaid,
       };
     });
-  }, [stats?.monthly_data, invoices, selectedYear]);
+  }, [stats?.monthly_data]);
 
   const lastMaxRef = useRef(6000);
 

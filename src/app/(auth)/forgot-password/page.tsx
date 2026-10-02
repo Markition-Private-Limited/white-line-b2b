@@ -66,22 +66,27 @@ export default function ForgotPasswordPage() {
     setIsLoading(true); setError("");
     try {
       await apiClient.post('/auth/b2b/forgot-password', { email });
-      setStep(2);
-      setTimer(60);
     } catch (err: any) {
-      const msg = err?.response?.data?.message;
-      setError(typeof msg === "string" ? msg : "Failed to send OTP. Please try again.");
-    } finally {
-      setIsLoading(false);
+      if (err?.response?.status >= 500) {
+        setError("Something went wrong. Please try again later.");
+        setIsLoading(false);
+        return;
+      }
+      // Silently ignore 400/404s to prevent email enumeration
     }
+    setStep(2);
+    setTimer(60);
+    setIsLoading(false);
   };
 
   const handleResendOtp = async () => {
     setError("");
     try {
       await apiClient.post('/auth/b2b/forgot-password', { email });
-      setTimer(60);
-    } catch {}
+    } catch (err: any) {
+      // Silently ignore to prevent email enumeration
+    }
+    setTimer(60);
   };
 
   const handleVerifyOtp = async (e: React.FormEvent) => {

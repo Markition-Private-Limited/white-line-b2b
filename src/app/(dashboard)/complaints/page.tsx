@@ -16,67 +16,22 @@ import { DataTable, type ColumnDef } from "@/components/layout/DataTableContaine
 import { PageToolbar, type FilterDef } from "@/components/layout/PageToolbar";
 import { type DatePickerValue, isDateInRange } from "@/utils/dateFilterUtils";
 import complaintsService, { type Complaint } from "@/services/complaints.service";
+import { formatRiyadhDate, formatRiyadhDateLong, formatRiyadhTime } from "@/utils/datetime";
 
 const LIMIT = 10;
 
-const formatDate = (d?: string) => {
-  if (!d) return "—";
-  const dt = new Date(d);
-  return isNaN(dt.getTime())
-    ? "—"
-    : dt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
-};
+const formatDate = formatRiyadhDate;
 
 const formatDateWithTime = (d?: string) => {
   if (!d) return "—";
   const date = new Date(d);
   if (isNaN(date.getTime())) return "—";
-  const formattedDate = date.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
-  const formattedTime = date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  const formattedDate = formatRiyadhDateLong(date);
+  const formattedTime = formatRiyadhTime(date);
   return `Reported on ${formattedDate} - ${formattedTime}`;
 };
 
-const formatComplaintId = (raw?: string) => {
-  if (!raw) return "";
-  const cleaned = raw.replace(/^#/, "").trim();
-
-  // Extract first 4 consecutive digits from the ID
-  const digitMatch = cleaned.match(/\d{4}/);
-  if (digitMatch) {
-    return `CP-${digitMatch[0]}`;
-  }
-
-  const anyDigits = cleaned.match(/\d+/);
-  if (anyDigits) {
-    return `CP-${anyDigits[0]}`;
-  }
-
-  if (cleaned.startsWith("CP-") || cleaned.startsWith("C-")) {
-    return cleaned;
-  }
-  return `CP-${cleaned}`;
-};
-
-const formatComplaintIdNoHash = (raw?: string) => {
-  if (!raw) return "";
-  const cleaned = raw.replace(/^#/, "").trim();
-
-  // Extract first 4 consecutive digits from the ID
-  const digitMatch = cleaned.match(/\d{4}/);
-  if (digitMatch) {
-    return `CP-${digitMatch[0]}`;
-  }
-
-  const anyDigits = cleaned.match(/\d+/);
-  if (anyDigits) {
-    return `CP-${anyDigits[0]}`;
-  }
-
-  if (cleaned.startsWith("CP-") || cleaned.startsWith("C-")) {
-    return cleaned;
-  }
-  return `CP-${cleaned}`;
-};
+const formatComplaintId = (raw?: string) => raw ? raw.replace(/^#/, "").trim() : "—";
 
 const renderSmallStatusBadge = (status?: string) => {
   const s = status?.toLowerCase() || "open";
@@ -163,6 +118,15 @@ export default function ComplaintsPage() {
   const [isCancelling, setIsCancelling] = useState(false);
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [cancelSuccessModalOpen, setCancelSuccessModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (!selectedComplaint || deleteModalOpen || cancelModalOpen || successModalOpen || cancelSuccessModalOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSelectedComplaint(null);
+    };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [selectedComplaint, deleteModalOpen, cancelModalOpen, successModalOpen, cancelSuccessModalOpen]);
 
   const fetchComplaints = () => {
     setLoading(true);
@@ -456,14 +420,16 @@ export default function ComplaintsPage() {
                   {isCancelling ? "Cancelling..." : "Cancel Complaint"}
                 </button>
               )}
-              <button
-                type="button"
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className="h-[42px] sm:h-[44px] px-7 rounded-full border border-[#D9383A] text-[#D9383A] hover:bg-red-50 text-[12px] sm:text-[13px] font-semibold transition-colors cursor-pointer disabled:opacity-50 shadow-xs flex items-center justify-center"
-              >
-                {isDeleting ? "Deleting..." : "Delete Complaint"}
-              </button>
+              {selectedComplaint.status?.toLowerCase() !== "resolved" && (
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="h-[42px] sm:h-[44px] px-7 rounded-full border border-[#D9383A] text-[#D9383A] hover:bg-red-50 text-[12px] sm:text-[13px] font-semibold transition-colors cursor-pointer disabled:opacity-50 shadow-xs flex items-center justify-center"
+                >
+                  {isDeleting ? "Deleting..." : "Delete Complaint"}
+                </button>
+              )}
             </div>
           </div>
         </div>
