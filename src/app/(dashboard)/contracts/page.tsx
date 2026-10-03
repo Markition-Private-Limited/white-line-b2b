@@ -158,18 +158,6 @@ function ContractDetailPanel({
   const pricingTerms = (contract.pricing_terms ?? {}) as Record<string, unknown>;
   const additionalPricingTerms = Object.entries(pricingTerms).filter(([key]) => key !== "working_hours");
   const workingHours = pricingTerms.working_hours;
-  const vehicleTypes = Array.isArray(contract.vehicle_types_allowed)
-    ? (contract.vehicle_types_allowed as string[])
-    : [];
-
-  const formatVehicleType = (type: string) => {
-    const map: Record<string, string> = {
-      "Suv": "SUV",
-      "Suv_vip": "SUV VIP",
-      "Pick_up": "Pick-Up",
-    };
-    return map[type] || type.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
-  };
 
   return (
     <>
@@ -225,7 +213,7 @@ function ContractDetailPanel({
             </div>
             <div className="bg-input-bg rounded-2xl p-4 space-y-1">
               <div className="flex items-center gap-1.5">
-                <DollarSign className="w-3.5 h-3.5 text-primary" />
+                <span className="text-[10px] font-bold text-primary font-mono leading-none">SAR</span>
                 <span className="text-fs-9 font-bold text-gray-400 uppercase tracking-wider">Amount</span>
               </div>
               <p className="text-fs-13 font-bold text-text-primary">{formatAmount(contract.contract_amount)}</p>
@@ -243,20 +231,6 @@ function ContractDetailPanel({
               <p className="text-fs-13 font-semibold text-text-primary">{contract.main_contact_phone ?? "—"}</p>
             </div>
           </div>
-
-          {/* Vehicle Types */}
-          {vehicleTypes.length > 0 && (
-            <div className="space-y-2">
-              <p className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider">Vehicle Types Allowed</p>
-              <div className="flex flex-wrap gap-2">
-                {vehicleTypes.map((v, i) => (
-                  <span key={i} className="px-3 py-1 bg-primary/8 text-primary text-fs-11 font-semibold rounded-full">
-                    {formatVehicleType(String(v))}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Pricing Terms */}
           <div className="space-y-2">

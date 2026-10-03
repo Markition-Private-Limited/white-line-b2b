@@ -8,7 +8,6 @@ import { FormInput } from "@/components/ui/FormInput";
 import { FormDropdown } from "@/components/ui/FormDropdown";
 import serviceRequestsService from "@/services/serviceRequests.service";
 import vehicleClassesService, { type VehicleClass } from "@/services/vehicleClasses.service";
-import contractsService from "@/services/contracts.service";
 import { getRiyadhISODate } from "@/utils/datetime";
 
 export default function CreateServiceRequestPage() {
@@ -21,7 +20,6 @@ export default function CreateServiceRequestPage() {
   const [selectedClassId, setSelectedClassId] = useState("");
   const [notes, setNotes] = useState("");
   const [vehicleClasses, setVehicleClasses] = useState<VehicleClass[]>([]);
-  const [allowedVehicleTypes, setAllowedVehicleTypes] = useState<string[]>([]);
   const [optionsLoading, setOptionsLoading] = useState(true);
   const [availabilityError, setAvailabilityError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,36 +30,11 @@ export default function CreateServiceRequestPage() {
   useEffect(() => {
     let cancelled = false;
 
-    const loadAllowedClasses = async () => {
+    const loadClasses = async () => {
       try {
-        const [classes, firstPage] = await Promise.all([
-          vehicleClassesService.list(),
-          contractsService.list(1),
-        ]);
-        const contracts = [...(firstPage.data ?? [])];
-        let nextPage = 2;
-        while (contracts.length < firstPage.total) {
-          const next = await contractsService.list(nextPage++);
-          if (!next.data?.length) break;
-          contracts.push(...next.data);
-        }
-        const activeContracts = contracts.filter((contract) => contract.status?.toLowerCase() === "active");
-        const details = await Promise.all(activeContracts.map((contract) =>
-          contractsService.get(contract.id).catch(() => contract)
-        ));
-        const allowedTypes = [...new Set(details.flatMap((contract) =>
-          Array.isArray(contract.vehicle_types_allowed)
-            ? contract.vehicle_types_allowed.filter((type): type is string => typeof type === "string")
-                .map((type) => type.trim().toLowerCase())
-            : []
-        ))];
-
+        const classes = await vehicleClassesService.list();
         if (cancelled) return;
         setVehicleClasses(classes);
-        setAllowedVehicleTypes(allowedTypes);
-        if (allowedTypes.length === 0) {
-          setAvailabilityError("No active contract with allowed vehicle types was found.");
-        }
       } catch {
         if (!cancelled) setAvailabilityError("Vehicle options could not be loaded. Please try again.");
       } finally {
@@ -69,16 +42,11 @@ export default function CreateServiceRequestPage() {
       }
     };
 
-    loadAllowedClasses();
+    loadClasses();
     return () => { cancelled = true; };
   }, []);
 
-  const eligibleVehicleClasses = vehicleClasses.filter((vehicleClass) => {
-    const typeWords = (vehicleClass.vehicle_type || `${vehicleClass.name} ${vehicleClass.description || ""}`)
-      .toLowerCase().split(/[^a-z0-9]+/);
-    return allowedVehicleTypes.some((type) => typeWords.includes(type));
-  });
-  const classOptions = eligibleVehicleClasses.map((vehicleClass) => vehicleClass.name);
+  const classOptions = vehicleClasses.map((vehicleClass) => vehicleClass.name);
 
   const validate = (): boolean => {
     // 1. Start Date
@@ -115,12 +83,12 @@ export default function CreateServiceRequestPage() {
     }
 
     // 4. Vehicle Category
-    if (optionsLoading || availabilityError || eligibleVehicleClasses.length === 0) {
-      setFieldErrors({ vehicleClass: availabilityError || "No vehicle categories are available under your active contract." });
+    if (optionsLoading || availabilityError || vehicleClasses.length === 0) {
+      setFieldErrors({ vehicleClass: availabilityError || "No vehicle categories are available." });
       return false;
     }
-    if (!eligibleVehicleClasses.some((vehicleClass) => vehicleClass.id === selectedClassId)) {
-      setFieldErrors({ vehicleClass: "Please select a vehicle category allowed by your contract." });
+    if (!vehicleClasses.some((vehicleClass) => vehicleClass.id === selectedClassId)) {
+      setFieldErrors({ vehicleClass: "Please select a vehicle category." });
       return false;
     }
 
@@ -156,14 +124,14 @@ export default function CreateServiceRequestPage() {
   };
 
   const handleClassSelect = (name: string) => {
-    const found = eligibleVehicleClasses.find((c) => c.name === name);
+    const found = vehicleClasses.find((c) => c.name === name);
     if (found) {
       setSelectedClassId(found.id);
       setFieldErrors((prev) => ({ ...prev, vehicleClass: "" }));
     }
   };
 
-  const selectedClassName = eligibleVehicleClasses.find((c) => c.id === selectedClassId)?.name ?? "";
+  const selectedClassName = vehicleClasses.find((c) => c.id === selectedClassId)?.name ?? "";
 
   return (
     <div className="space-y-4">
@@ -241,10 +209,10 @@ export default function CreateServiceRequestPage() {
             error={fieldErrors.vehicleClass}
             onSelect={handleClassSelect}
           />
-          {optionsLoading && <p className="text-xs text-gray-500">Loading contract vehicle options...</p>}
+          {optionsLoading && <p className="text-xs text-gray-500">Loading vehicle options...</p>}
           {!optionsLoading && availabilityError && <p className="text-xs text-red-600">{availabilityError}</p>}
           {!optionsLoading && !availabilityError && classOptions.length === 0 && (
-            <p className="text-xs text-red-600">No vehicle categories match your active contract. Contact WhiteLine support.</p>
+            <p className="text-xs text-red-600">No vehicle categories found. Contact WhiteLine support.</p>
           )}
 
           {/* Row 4: Notes */}
