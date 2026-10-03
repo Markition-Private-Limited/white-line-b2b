@@ -213,8 +213,8 @@ export default function LoginPage() {
         <div className="relative z-10 flex items-center justify-between text-fs-10 text-gray-300 border-t border-white/15 pt-4">
           <span>© 2026 ELITE CHAUFFEUR LOGISTICS</span>
           <div className="flex items-center gap-4">
-            <Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link>
-            <Link href="#" className="hover:text-white transition-colors">Terms & Conditions</Link>
+            <Link href="https://white-line-next.vercel.app/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link href="https://white-line-next.vercel.app/terms" className="hover:text-white transition-colors">Terms & Conditions</Link>
           </div>
         </div>
       </div>
