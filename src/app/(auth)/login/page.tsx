@@ -164,7 +164,9 @@ export default function LoginPage() {
     } catch (err: any) {
       setStatus("error");
       const msg = err?.response?.data?.message;
-      setErrorMessage(typeof msg === "string" ? msg : "Invalid email or password. Please try again.");
+      setErrorMessage(typeof msg === "string" && !/no account found/i.test(msg)
+        ? msg
+        : "Invalid email or password. Please try again.");
       
       // Highlight fields as error if login fails
       setEmailError(" "); // Space so we get the error styling without extra text below

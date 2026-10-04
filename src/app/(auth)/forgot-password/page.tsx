@@ -103,8 +103,9 @@ export default function ForgotPasswordPage() {
       setResetToken(result.reset_token);
       setStep(3);
     } catch (err: any) {
-      const msg = err?.response?.data?.message;
-      setError(typeof msg === "string" ? msg : "Invalid or expired OTP.");
+      setError(!err?.response || err.response.status >= 500
+        ? "Something went wrong. Please try again later."
+        : "Invalid or expired OTP.");
     } finally {
       setIsLoading(false);
     }

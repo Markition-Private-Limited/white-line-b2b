@@ -10,16 +10,20 @@ import { Modal } from "@/components/ui/Modal";
 import { PasswordStrengthBar, isPasswordValid } from "@/components/ui/PasswordStrengthBar";
 import { DataTable, type ColumnDef } from "@/components/layout/DataTableContainer";
 import usersService, { type SpocUser } from "@/services/users.service";
-import authService from "@/services/auth.service";
+import authService, { type LoginResponse } from "@/services/auth.service";
 
 const LIMIT = 10;
 
 const ROLE_OPTIONS = ["Admin", "Operations", "Finance"] as const;
 
 export default function UsersPage() {
-  // Current logged-in user (from cookie) — used to gate owner-only actions
-  const currentUser = authService.getStoredUser();
+  // Read browser cookies after hydration so the initial markup matches the server.
+  const [currentUser, setCurrentUser] = useState<LoginResponse["spoc_user"] | null>(null);
   const isOwner = currentUser?.is_account_owner === true;
+
+  useEffect(() => {
+    setCurrentUser(authService.getStoredUser());
+  }, []);
 
   const [users, setUsers] = useState<SpocUser[]>([]);
   const [total, setTotal] = useState(0);
@@ -375,7 +379,7 @@ export default function UsersPage() {
             </div>
           </div>
 
-          <form onSubmit={handleCreateUser} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <form onSubmit={handleCreateUser} autoComplete="off" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* FULL NAME */}
             <div>
               <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
@@ -398,6 +402,8 @@ export default function UsersPage() {
               </label>
               <input
                 type="email"
+                name="create-user-email"
+                autoComplete="off"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -414,6 +420,8 @@ export default function UsersPage() {
               <div className="relative">
                 <input
                   type={showCreatePassword ? "text" : "password"}
+                  name="create-user-password"
+                  autoComplete="new-password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -427,7 +435,7 @@ export default function UsersPage() {
                   {showCreatePassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </div>
               </div>
-              <PasswordStrengthBar password={password} />
+              <PasswordStrengthBar password={password} className="mt-2" />
             </div>
 
             {/* ROLE SELECTION */}

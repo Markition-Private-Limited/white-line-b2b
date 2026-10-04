@@ -155,10 +155,11 @@ export default function InvoicesPage() {
       doc.setFont("helvetica", "bold");
       doc.text(`Total Amount: ${formatAmount(selectedInvoice.total_amount)}`, 14, finalY + 24);
 
-      // Open PDF in new tab
+      // Open the PDF preview and download a copy.
       const pdfBlob = doc.output("blob");
       const blobUrl = URL.createObjectURL(pdfBlob);
       window.open(blobUrl, "_blank");
+      doc.save(`${selectedInvoice.invoice_number || "invoice"}.pdf`);
     } catch (err) {
       console.error("Failed to generate PDF:", err);
       alert("Failed to download invoice PDF.");
@@ -378,12 +379,12 @@ export default function InvoicesPage() {
               <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">SERVICE DETAILS</span>
               <div className="flex items-center justify-between text-[13px]">
                 <span className="text-gray-600 font-normal">Number of Drivers Required</span>
-                <span className="font-bold text-gray-900">{selectedInvoice.num_drivers_required ?? selectedInvoice.service_request?.num_drivers_required ?? "—"}</span>
+                <span className="font-bold text-gray-900">{selectedInvoice.number_of_drivers ?? selectedInvoice.num_drivers_required ?? selectedInvoice.service_request?.num_drivers_required ?? "—"}</span>
               </div>
               <div className="border-b border-dashed border-gray-300/80 my-1" />
               <div className="flex items-center justify-between text-[13px]">
                 <span className="text-gray-600 font-normal">Number of Vehicles Required</span>
-                <span className="font-bold text-gray-900">{selectedInvoice.num_vehicles_required ?? selectedInvoice.service_request?.num_vehicles_required ?? "—"}</span>
+                <span className="font-bold text-gray-900">{selectedInvoice.number_of_vehicles ?? selectedInvoice.num_vehicles_required ?? selectedInvoice.service_request?.num_vehicles_required ?? "—"}</span>
               </div>
             </div>
 
