@@ -286,11 +286,11 @@ export function HeaderNav() {
         : "text-gray-600 hover:text-gray-900 hover:bg-gray-100/80"
     );
 
-  const handleLogout = () => {
-    authService.logout();
+  const handleLogout = async () => {
+    await authService.logout();
     setLogoutModalOpen(false);
     setMobileMenuOpen(false);
-    router.push("/login");
+    window.location.replace("/login");
   };
 
   const getInitials = (name?: string) => {

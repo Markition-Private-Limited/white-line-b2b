@@ -312,9 +312,7 @@ export default function InvoicesPage() {
               <span className="text-[11px] font-bold text-white bg-[#8E95A5] px-3 py-0.5 rounded-full">
                 {formatInvoiceBadge(selectedInvoice.invoice_number)}
               </span>
-              <span className="text-[11px] font-bold uppercase tracking-wider bg-[#FDF3E7] text-[#D97706] px-3.5 py-1 rounded-full ml-auto">
-                {selectedInvoice.status || "DUE"}
-              </span>
+              <StatusBadge status={getInvoiceDisplayStatus(selectedInvoice)} className="ml-auto" />
             </div>
 
             {/* Client / Company Info Row (Dynamic Logo or First Letter Avatar) */}

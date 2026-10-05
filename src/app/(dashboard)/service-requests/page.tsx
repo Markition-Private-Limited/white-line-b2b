@@ -29,7 +29,9 @@ export default function ServiceRequestsPage() {
     setLoading(true);
     serviceRequestsService.list({
       page,
-      status: statusFilter === "All" ? undefined : statusFilter.toLowerCase(),
+      status: statusFilter === "All" || statusFilter === "Expired"
+        ? undefined
+        : statusFilter.toLowerCase(),
       search: search.trim() || undefined,
       start_date: dateFilter?.startDate,
       end_date: dateFilter?.endDate,
@@ -116,12 +118,12 @@ export default function ServiceRequestsPage() {
   const toolbarFilters: FilterDef[] = useMemo(() => [
     {
       defaultValue: statusFilter === "All" ? "Status: All" : `Status: ${statusFilter}`,
-      options: ["All", "Pending", "Approved", "Cancelled"],
+      options: ["All", "Pending", "Approved", "Expired", "Cancelled"],
       onSelect: (val) => { setStatusFilter(val); setPage(1); },
     },
     {
       type: "date",
-      defaultValue: dateFilter?.label || "Date",
+      defaultValue: dateFilter?.label || "Date: All",
       onSelectDate: (range) => { setDateFilter(range); setPage(1); },
     },
   ], [statusFilter, dateFilter]);

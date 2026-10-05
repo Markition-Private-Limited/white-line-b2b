@@ -14,6 +14,9 @@ import { cn } from "@/utils/cn";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import { CountryPhoneInput } from "@/components/ui/CountryPhoneInput";
 
+const FULL_NAME_MAX_LENGTH = 100;
+const VALID_FULL_NAME = /^[\p{L}]+(?:[ '-][\p{L}]+)+$/u;
+
 export default function SignUpPage() {
   const router = useRouter();
 
@@ -38,7 +41,7 @@ export default function SignUpPage() {
   });
 
   const handleChange = (field: string, value: any) => {
-    if (field === "travelBudget" || field === "companySize") {
+    if (field === "travelBudget") {
       const numericValue = value.replace(/[^0-9]/g, "");
       setFormData((prev) => ({ ...prev, [field]: numericValue }));
       return;
@@ -51,6 +54,15 @@ export default function SignUpPage() {
     setSubmitError("");
     
     if (step === 1) {
+      const fullName = formData.name.trim();
+      if (!VALID_FULL_NAME.test(fullName)) {
+        setSubmitError("Enter a valid first and last name using letters only.");
+        return;
+      }
+      if (fullName.length > FULL_NAME_MAX_LENGTH) {
+        setSubmitError(`Full name must be ${FULL_NAME_MAX_LENGTH} characters or less.`);
+        return;
+      }
       if (!formData.phone || !isValidPhoneNumber(formData.phone)) {
         setSubmitError("Check the phone number length for the selected country.");
         return;
@@ -75,7 +87,7 @@ export default function SignUpPage() {
       setIsSubmitting(true);
       try {
         await authService.register({
-          full_name: formData.name,
+          full_name: formData.name.trim(),
           phone: formData.phone,
           password: formData.password,
           company_name: formData.companyName,
@@ -83,7 +95,7 @@ export default function SignUpPage() {
           company_address: formData.companyAddress,
           designation: formData.designation,
           annual_travel_budget: parseFloat(formData.travelBudget.replace(/[^0-9.]/g, "")) || 0,
-          company_size: formData.companySize,
+          company_size: formData.companySize.trim(),
           terms_accepted: formData.termsAccepted,
         });
         setPendingModalOpen(true);
@@ -230,6 +242,7 @@ export default function SignUpPage() {
                 <FormInput
                   label="FULL NAME"
                   required
+                  maxLength={FULL_NAME_MAX_LENGTH}
                   value={formData.name}
                   onChange={(e) => handleChange("name", e.target.value)}
                   placeholder="Enter your full name"
@@ -373,6 +386,7 @@ export default function SignUpPage() {
                 <FormInput
                   label="COMPANY SIZE"
                   required
+                  maxLength={100}
                   value={formData.companySize}
                   onChange={(e) => handleChange("companySize", e.target.value)}
                   placeholder="e.g. 50-200 employees"

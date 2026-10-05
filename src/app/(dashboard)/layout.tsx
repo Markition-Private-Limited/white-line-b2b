@@ -1,5 +1,6 @@
 import React from "react";
 import { HeaderNav } from "@/components/layout/HeaderNav";
+import { AuthSessionGuard } from "@/components/auth/AuthSessionGuard";
 
 export default function DashboardLayout({
   children,
@@ -8,6 +9,7 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="flex flex-1 h-full w-full overflow-hidden bg-background">
+      <AuthSessionGuard />
       <div className="flex flex-col flex-1 overflow-hidden">
         <HeaderNav />
         <main className="flex-1 overflow-y-auto bg-background-panel flex flex-col p-3.5 sm:p-5 lg:p-6">

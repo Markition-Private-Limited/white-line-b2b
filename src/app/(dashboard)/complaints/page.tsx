@@ -32,7 +32,7 @@ const formatDateWithTime = (d?: string) => {
 };
 
 const formatComplaintId = (raw?: string) => raw ? raw.replace(/^#/, "").trim() : "—";
-const getComplaintDisplayId = (row: Complaint) => formatComplaintId(row.id || row.complaint_number);
+const getComplaintDisplayId = (row: Complaint) => formatComplaintId(row.complaint_number || row.id);
 
 const renderSmallStatusBadge = (status?: string) => {
   const s = status?.toLowerCase() || "open";

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import {
   Building2, Globe, Lock, LogOut, Eye, EyeOff, Save, Mail, MapPin, CheckCircle2, X,
 } from "lucide-react";
@@ -18,8 +17,6 @@ import { CountryPhoneInput } from "@/components/ui/CountryPhoneInput";
 import Cookies from "js-cookie";
 
 export default function SettingsPage() {
-  const router = useRouter();
-
   const [companyName, setCompanyName] = useState("");
   const [companyEmail, setCompanyEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -49,6 +46,22 @@ export default function SettingsPage() {
     companyName.trim() !== initialData.companyName.trim() ||
     phone.trim() !== initialData.phone.trim() ||
     address.trim() !== initialData.address.trim();
+
+  const resetPasswordForm = () => {
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setShowCurrentPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
+    setPasswordError("");
+  };
+
+  const closePasswordModal = () => {
+    if (passwordLoading) return;
+    setChangePasswordModalOpen(false);
+    resetPasswordForm();
+  };
 
   useEffect(() => {
     const user = authService.getStoredUser();
@@ -161,10 +174,10 @@ export default function SettingsPage() {
     }
   };
 
-  const handleLogout = () => {
-    authService.logout();
+  const handleLogout = async () => {
+    await authService.logout();
     setLogoutModalOpen(false);
-    router.push("/login");
+    window.location.replace("/login");
   };
 
   return (
@@ -333,8 +346,8 @@ export default function SettingsPage() {
           <button
             type="button"
             onClick={() => {
+              resetPasswordForm();
               setChangePasswordModalOpen(true);
-              setPasswordError("");
             }}
             className="h-[40px] sm:h-[42px] px-6 rounded-full border border-primary text-primary hover:bg-primary hover:text-white text-[12px] sm:text-[13px] font-medium transition-colors cursor-pointer bg-white shrink-0 shadow-2xs"
           >
@@ -362,7 +375,7 @@ export default function SettingsPage() {
       {changePasswordModalOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35 animate-in fade-in duration-200"
-          onClick={() => setChangePasswordModalOpen(false)}
+          onClick={closePasswordModal}
         >
           <div
             className="bg-white rounded-[36px] p-7 sm:p-9 lg:p-10 max-w-[540px] w-full relative shadow-2xl space-y-6 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
@@ -370,7 +383,7 @@ export default function SettingsPage() {
           >
             <button
               type="button"
-              onClick={() => setChangePasswordModalOpen(false)}
+              onClick={closePasswordModal}
               className="absolute right-6 top-6 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 flex items-center justify-center transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
@@ -470,7 +483,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-center gap-3.5 pt-3">
                 <button
                   type="button"
-                  onClick={() => setChangePasswordModalOpen(false)}
+                  onClick={closePasswordModal}
                   className="h-[44px] px-8 rounded-full border border-gray-300 text-[#D9383A] hover:bg-red-50/50 text-[13px] font-medium cursor-pointer transition-colors flex items-center justify-center"
                 >
                   Cancel

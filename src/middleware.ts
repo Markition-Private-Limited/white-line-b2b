@@ -19,7 +19,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+  if (!isPublic) {
+    response.headers.set('Cache-Control', 'private, no-store, max-age=0');
+  }
+  return response;
 }
 
 

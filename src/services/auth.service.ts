@@ -45,10 +45,18 @@ const authService = {
     return data.data ?? data;
   },
 
-  logout() {
-    Cookies.remove('token');
-    Cookies.remove('spoc_user');
-    Cookies.remove('b2b_client');
+  async logout(): Promise<void> {
+    try {
+      // The backend revokes the token's jti so the old Bearer token cannot be reused.
+      await apiClient.post('/auth/logout');
+    } catch (error) {
+      // Local logout must still complete if the network is unavailable.
+      console.error('Server token revocation failed:', error);
+    } finally {
+      Cookies.remove('token', { path: '/' });
+      Cookies.remove('spoc_user', { path: '/' });
+      Cookies.remove('b2b_client', { path: '/' });
+    }
   },
 
   getStoredUser() {

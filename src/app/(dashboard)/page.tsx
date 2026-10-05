@@ -10,6 +10,8 @@ import {
   ChevronDown,
 } from "lucide-react";
 import dashboardService, { type DashboardData } from "@/services/dashboard.service";
+import serviceRequestsService from "@/services/serviceRequests.service";
+import { getServiceRequestDisplayStatus } from "@/utils/businessStatus";
 import { cn } from "@/utils/cn";
 
 interface MonthlyDataItem {
@@ -25,6 +27,8 @@ export default function DashboardPage() {
   const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
   const [stats, setStats] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [pendingRequestCount, setPendingRequestCount] = useState<number | null>(null);
+  const [pendingCountLoading, setPendingCountLoading] = useState(true);
 
   const YEAR_OPTIONS = useMemo(() => {
     const current = new Date().getFullYear();
@@ -41,6 +45,36 @@ export default function DashboardPage() {
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [selectedYear]);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadEffectivePendingCount = async () => {
+      try {
+        const first = await serviceRequestsService.list({ page: 1, status: "pending" });
+        const limit = first.limit || Math.max(first.data?.length || 0, 1);
+        const pageCount = Math.max(1, Math.ceil((first.total || 0) / limit));
+        const remainingPages = await Promise.all(
+          Array.from({ length: Math.max(0, pageCount - 1) }, (_, index) =>
+            serviceRequestsService.list({ page: index + 2, status: "pending" })
+          )
+        );
+        const requests = [
+          ...(first.data ?? []),
+          ...remainingPages.flatMap((response) => response.data ?? []),
+        ];
+        const count = requests.filter((request) => getServiceRequestDisplayStatus(request) === "pending").length;
+        if (active) setPendingRequestCount(count);
+      } catch {
+        if (active) setPendingRequestCount(null);
+      } finally {
+        if (active) setPendingCountLoading(false);
+      }
+    };
+
+    loadEffectivePendingCount();
+    return () => { active = false; };
+  }, []);
 
   const monthlyData: MonthlyDataItem[] = useMemo(() => {
     const map = new Map((stats?.monthly_data ?? []).map((d) => [d.month.toLowerCase(), d]));
@@ -145,7 +179,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <span className="text-[34px] lg:text-[38px] font-semibold font-poppins text-gray-900 leading-none">
-              {loading ? "—" : (stats?.pending_requests ?? 0)}
+              {loading || pendingCountLoading ? "—" : (pendingRequestCount ?? stats?.pending_requests ?? 0)}
             </span>
           </div>
         </div>

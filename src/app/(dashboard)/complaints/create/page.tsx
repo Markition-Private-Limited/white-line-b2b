@@ -232,10 +232,14 @@ export default function CreateComplaintPage() {
               rows={6}
               value={description}
               onChange={(e) => {
-                setDescription(e.target.value);
-                if (fieldErrors.description) {
-                  setFieldErrors((prev) => ({ ...prev, description: "" }));
-                }
+                const value = e.target.value;
+                setDescription(value);
+                setFieldErrors((prev) => ({
+                  ...prev,
+                  description: value.length > MAX_CHARS
+                    ? `Description must be ${MAX_CHARS} characters or less.`
+                    : "",
+                }));
               }}
               placeholder="Provide detailed information about your concern..."
               className={`w-full bg-[#F4F5F7] rounded-[24px] p-6 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none transition-all resize-none min-h-[170px] leading-relaxed shadow-xs ${
@@ -268,7 +272,7 @@ export default function CreateComplaintPage() {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || description.length > MAX_CHARS}
+              disabled={isSubmitting}
               className="h-[42px] sm:h-[44px] px-8 rounded-full bg-[#005C66] text-white hover:bg-[#004d55] text-[12px] sm:text-[13px] font-medium cursor-pointer transition-colors shadow-xs disabled:opacity-50 flex items-center justify-center"
             >
               {isSubmitting ? "Submitting..." : "Submit Complaint"}
