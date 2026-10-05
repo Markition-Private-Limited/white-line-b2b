@@ -56,7 +56,7 @@ export default function SignUpPage() {
     if (step === 1) {
       const fullName = formData.name.trim();
       if (!VALID_FULL_NAME.test(fullName)) {
-        setSubmitError("Enter a valid first and last name using letters only.");
+        setSubmitError("Enter a valid full name using letters only.");
         return;
       }
       if (fullName.length > FULL_NAME_MAX_LENGTH) {
