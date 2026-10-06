@@ -30,17 +30,18 @@ export default function ContractsPage() {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(LIMIT);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Contract | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
   const fetchContracts = useCallback(() => {
     setLoading(true);
-    contractsService.list(page)
+    contractsService.list(page, limit)
       .then((res) => { setContracts(res.data ?? []); setTotal(res.total ?? 0); })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [page]);
+  }, [page, limit]);
 
   useEffect(() => { fetchContracts(); }, [fetchContracts]);
 
@@ -62,7 +63,7 @@ export default function ContractsPage() {
   const formatAmount = (v?: number) =>
     `SAR ${Number(v ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
-  const totalPages = Math.max(1, Math.ceil(total / LIMIT));
+  const totalPages = Math.max(1, Math.ceil(total / limit));
 
   const columns = useMemo<ColumnDef<Contract>[]>(() => [
     {
@@ -110,7 +111,14 @@ export default function ContractsPage() {
         columns={columns}
         loading={loading}
         onRowClick={handleRowClick}
-        pagination={{ currentPage: page, totalPages, totalItems: total, itemsPerPage: LIMIT, onPageChange: setPage }}
+        pagination={{
+          currentPage: page,
+          totalPages,
+          totalItems: total,
+          itemsPerPage: limit,
+          onPageChange: setPage,
+          onRowsChange: (rows) => { setLimit(rows); setPage(1); },
+        }}
         emptyState={
           <div className="flex flex-col items-center gap-3 py-16 text-center">
             <FileText className="w-12 h-12 text-gray-300" />

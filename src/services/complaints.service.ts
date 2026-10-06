@@ -36,6 +36,7 @@ export interface PaginatedResponse<T> {
 
 export interface ComplaintListParams {
   page?: number;
+  limit?: number;
   status?: string;
   search?: string;
   start_date?: string;

@@ -47,6 +47,13 @@ export function DataTable<T>({
     itemsPerPage = 10,
   } = pagination || {};
 
+  const onPageChange = pagination?.onPageChange;
+  React.useEffect(() => {
+    if (!loading && data.length === 0 && totalItems > 0 && currentPage > 1 && totalPages >= 1) {
+      onPageChange?.(Math.min(currentPage - 1, totalPages));
+    }
+  }, [loading, data.length, totalItems, currentPage, totalPages, onPageChange]);
+
   // Dynamic padding based on column count
   const getPaddingClass = (cols: number) => {
     if (cols <= 5) return "px-5 lg:px-7";
@@ -139,14 +146,28 @@ export function DataTable<T>({
 
       {/* Pagination Footer */}
       <div className="border-t border-gray-100 p-3.5 px-5 flex flex-wrap lg:flex-nowrap items-center justify-between bg-white gap-y-3 lg:gap-y-0">
-        <div className="text-fs-12 text-gray-500 order-1">
+        <div className="hidden lg:block text-fs-12 text-gray-500 order-3 lg:order-1 w-full lg:w-auto text-left mt-1 lg:mt-0">
           {totalItems === 0 || data.length === 0 ? (
-            <span>Showing <span className="font-semibold text-text-primary">0</span> of <span className="font-semibold text-text-primary">0</span> results</span>
+            <span>Showing <span className="font-semibold text-text-primary">0</span> Entities</span>
           ) : (
             <>
-              Showing <span className="font-semibold text-text-primary">{Math.min(data.length, itemsPerPage)}</span> of <span className="font-semibold text-text-primary">{totalItems.toLocaleString()}</span> results
+              Showing <span className="font-semibold text-text-primary">{(currentPage - 1) * itemsPerPage + 1} - {Math.min((currentPage - 1) * itemsPerPage + data.length, totalItems)}</span> of <span className="font-semibold text-text-primary">{totalItems.toLocaleString()}</span> Entities
             </>
           )}
+        </div>
+
+        <div className="order-1 lg:order-2 flex items-center lg:ml-5 lg:mr-auto relative">
+          <select
+            value={itemsPerPage}
+            onChange={(event) => pagination?.onRowsChange?.(Number(event.target.value))}
+            className="appearance-none h-8 pl-3.5 pr-8 border border-gray-200 rounded-[12px] flex items-center text-fs-11 font-medium text-text-secondary hover:bg-gray-50 transition-colors focus:outline-none cursor-pointer bg-transparent"
+          >
+            <option value={10}>Rows: 10</option>
+            <option value={20}>Rows: 20</option>
+            <option value={50}>Rows: 50</option>
+            <option value={100}>Rows: 100</option>
+          </select>
+          <ChevronDown className="w-3.5 h-3.5 text-gray-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
 
         <div className="flex items-center gap-1 order-2 lg:order-3">

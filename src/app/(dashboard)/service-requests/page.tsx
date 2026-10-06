@@ -20,6 +20,7 @@ export default function ServiceRequestsPage() {
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(LIMIT);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -29,6 +30,7 @@ export default function ServiceRequestsPage() {
     setLoading(true);
     serviceRequestsService.list({
       page,
+      limit,
       status: statusFilter === "All" || statusFilter === "Expired"
         ? undefined
         : statusFilter.toLowerCase(),
@@ -42,7 +44,7 @@ export default function ServiceRequestsPage() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [page, statusFilter, dateFilter, search]);
+  }, [page, limit, statusFilter, dateFilter, search]);
 
   const filtered = useMemo(() => {
     return requests.filter((r) => {
@@ -69,7 +71,7 @@ export default function ServiceRequestsPage() {
     return s === "active" || s === "approved" || s === "assigned";
   }).length;
   const pendingCount = requests.filter((r) => getServiceRequestDisplayStatus(r) === "pending").length;
-  const totalPages = Math.max(1, Math.ceil(total / LIMIT));
+  const totalPages = Math.max(1, Math.ceil(total / limit));
 
   const columns = useMemo<ColumnDef<ServiceRequest>[]>(() => [
     {
@@ -222,8 +224,9 @@ export default function ServiceRequestsPage() {
               currentPage: page,
               totalPages,
               totalItems: total,
-              itemsPerPage: LIMIT,
+              itemsPerPage: limit,
               onPageChange: setPage,
+              onRowsChange: (rows) => { setLimit(rows); setPage(1); },
             }}
             emptyState={
               <div className="flex flex-col items-center justify-center gap-3.5 py-16 text-gray-400">

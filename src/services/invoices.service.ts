@@ -25,6 +25,7 @@ export interface Invoice {
 
 export interface InvoiceListParams {
   page?: number;
+  limit?: number;
   status?: string;
   search?: string;
   start_date?: string;

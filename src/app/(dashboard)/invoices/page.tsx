@@ -40,6 +40,7 @@ export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(LIMIT);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -87,6 +88,7 @@ export default function InvoicesPage() {
     setLoading(true);
     invoicesService.list({
       page,
+      limit,
       status: statusFilter === "All" ? undefined : statusFilter.toLowerCase(),
       search: normalizedSearch || undefined,
       start_date: dateFilter?.startDate,
@@ -98,7 +100,7 @@ export default function InvoicesPage() {
       })
       .catch(() => { })
       .finally(() => setLoading(false));
-  }, [page, statusFilter, dateFilter, normalizedSearch]);
+  }, [page, limit, statusFilter, dateFilter, normalizedSearch]);
 
   const handleDownloadInvoice = async () => {
     if (!selectedInvoice) return;
@@ -189,7 +191,7 @@ export default function InvoicesPage() {
   const unpaidCount = invoices.filter((i) => getInvoiceDisplayStatus(i) !== "paid").length;
   const dueSoonCount = invoices.filter(isInvoiceDueSoon).length;
 
-  const totalPages = Math.max(1, Math.ceil(total / LIMIT));
+  const totalPages = Math.max(1, Math.ceil(total / limit));
 
   const tableColumns = useMemo<ColumnDef<Invoice>[]>(() => [
     {
@@ -295,8 +297,9 @@ export default function InvoicesPage() {
               currentPage: page,
               totalPages,
               totalItems: total,
-              itemsPerPage: LIMIT,
+              itemsPerPage: limit,
               onPageChange: setPage,
+              onRowsChange: (rows) => { setLimit(rows); setPage(1); },
             }}
           />
         </div>

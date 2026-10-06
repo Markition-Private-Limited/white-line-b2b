@@ -108,6 +108,7 @@ export default function ComplaintsPage() {
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(LIMIT);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -130,6 +131,7 @@ export default function ComplaintsPage() {
     setLoading(true);
     complaintsService.list({
       page,
+      limit,
       status: statusFilter === "All" ? undefined : statusFilter.toLowerCase(),
       search: search.trim() || undefined,
       start_date: dateFilter?.startDate,
@@ -145,7 +147,7 @@ export default function ComplaintsPage() {
 
   useEffect(() => {
     fetchComplaints();
-  }, [page, statusFilter, dateFilter, search]);
+  }, [page, limit, statusFilter, dateFilter, search]);
 
   const filteredComplaints = useMemo(() => {
     return complaints.filter((item) => {
@@ -171,7 +173,7 @@ export default function ComplaintsPage() {
 
   const resolvedCount = complaints.filter((c) => c.status?.toLowerCase() === "resolved").length;
   const pendingCount = complaints.filter((c) => ["open", "pending", "in review"].includes(c.status?.toLowerCase())).length;
-  const totalPages = Math.max(1, Math.ceil(total / LIMIT));
+  const totalPages = Math.max(1, Math.ceil(total / limit));
 
   const handleCancel = () => {
     setCancelModalOpen(true);
@@ -323,8 +325,9 @@ export default function ComplaintsPage() {
               currentPage: page,
               totalPages,
               totalItems: total,
-              itemsPerPage: LIMIT,
+              itemsPerPage: limit,
               onPageChange: setPage,
+              onRowsChange: (rows) => { setLimit(rows); setPage(1); },
             }}
           />
         </div>

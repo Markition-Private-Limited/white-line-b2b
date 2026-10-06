@@ -23,8 +23,8 @@ export interface PaginatedResponse<T> {
 }
 
 const contractsService = {
-  async list(page = 1): Promise<PaginatedResponse<Contract>> {
-    const { data } = await apiClient.get('/b2b/contracts', { params: { page } });
+  async list(page = 1, limit = 10): Promise<PaginatedResponse<Contract>> {
+    const { data } = await apiClient.get('/b2b/contracts', { params: { page, limit } });
     return data.data ?? data;
   },
 

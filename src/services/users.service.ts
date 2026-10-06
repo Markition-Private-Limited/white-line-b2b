@@ -19,8 +19,8 @@ export interface PaginatedResponse<T> {
 }
 
 const usersService = {
-  async list(page = 1): Promise<PaginatedResponse<SpocUser>> {
-    const { data } = await apiClient.get('/b2b/users', { params: { page } });
+  async list(page = 1, limit = 10): Promise<PaginatedResponse<SpocUser>> {
+    const { data } = await apiClient.get('/b2b/users', { params: { page, limit } });
     return data.data ?? data;
   },
 

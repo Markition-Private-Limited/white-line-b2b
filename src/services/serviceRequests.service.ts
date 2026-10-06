@@ -34,6 +34,7 @@ export interface PaginatedResponse<T> {
 
 export interface ServiceRequestListParams {
   page?: number;
+  limit?: number;
   status?: string;
   search?: string;
   start_date?: string;
