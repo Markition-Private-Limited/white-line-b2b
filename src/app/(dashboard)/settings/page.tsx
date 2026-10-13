@@ -328,7 +328,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="bg-[#F4F5F7] rounded-xl py-5 pl-6 pr-2.5 flex items-center justify-between gap-4 sm:gap-6 flex-1 max-w-[560px] shadow-xs">
+        <div className="bg-[#F4F5F7] rounded-xl p-4 sm:py-5 sm:pl-6 sm:pr-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 flex-1 max-w-[560px] shadow-xs">
           <div className="flex-1 min-w-0">
             <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block leading-none mb-1 font-inter">
               CURRENT PASSWORD
@@ -341,7 +341,7 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <div className="h-7 w-[1px] bg-gray-200 shrink-0" />
+          <div className="hidden sm:block h-7 w-[1px] bg-gray-200 shrink-0" />
 
           <button
             type="button"
@@ -349,7 +349,7 @@ export default function SettingsPage() {
               resetPasswordForm();
               setChangePasswordModalOpen(true);
             }}
-            className="h-[40px] sm:h-[42px] px-6 rounded-full border border-primary text-primary hover:bg-primary hover:text-white text-[12px] sm:text-[13px] font-medium transition-colors cursor-pointer bg-white shrink-0 shadow-2xs"
+            className="w-full sm:w-auto h-[40px] sm:h-[42px] px-6 rounded-full border border-primary text-primary hover:bg-primary hover:text-white text-[12px] sm:text-[13px] font-medium transition-colors cursor-pointer bg-white shrink-0 shadow-2xs"
           >
             Change Password
           </button>
