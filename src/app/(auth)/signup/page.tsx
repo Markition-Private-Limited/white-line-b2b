@@ -178,53 +178,41 @@ export default function SignUpPage() {
           </div>
 
           {/* Stepper Progress Indicator */}
-          <div className="flex items-center justify-between mb-6 relative px-4">
-            <div className="absolute top-3.5 left-8 right-8 h-[1.5px] bg-gray-100 -z-0" />
-            <div
-              className="absolute top-3.5 left-8 h-[1.5px] bg-primary -z-0 transition-all duration-300"
-              style={{ width: step === 1 ? "0%" : step === 2 ? "50%" : "88%" }}
-            />
-
+          <div className="flex items-start mb-6 px-2">
             {/* Step 1 */}
-            <div className="flex flex-col items-center gap-1 z-10">
-              <div
-                className={cn(
-                  "w-7 h-7 rounded-full flex items-center justify-center text-[10px] sm:text-[11px] font-bold transition-colors",
-                  step >= 1 ? "bg-primary text-white ring-2 ring-primary/15" : "bg-gray-100 text-gray-400"
-                )}
-              >
-                01
-              </div>
+            <div className="flex flex-col items-center gap-1">
+              <div className={cn(
+                "w-7 h-7 rounded-full flex items-center justify-center text-[10px] sm:text-[11px] font-bold transition-colors",
+                step >= 1 ? "bg-primary text-white ring-2 ring-primary/15" : "bg-gray-100 text-gray-400"
+              )}>01</div>
               <span className={cn("text-[10px] sm:text-[11px] font-medium tracking-tight", step >= 1 ? "text-primary font-semibold" : "text-gray-400")}>
                 Personal
               </span>
             </div>
 
+            {/* Connector 1→2 */}
+            <div className={cn("flex-1 h-[1.5px] mt-3.5 transition-colors duration-300", step >= 2 ? "bg-primary" : "bg-gray-200")} />
+
             {/* Step 2 */}
-            <div className="flex flex-col items-center gap-1 z-10">
-              <div
-                className={cn(
-                  "w-7 h-7 rounded-full flex items-center justify-center text-[10px] sm:text-[11px] font-bold transition-colors",
-                  step >= 2 ? "bg-primary text-white ring-2 ring-primary/15" : "bg-gray-100 text-gray-400"
-                )}
-              >
-                02
-              </div>
+            <div className="flex flex-col items-center gap-1">
+              <div className={cn(
+                "w-7 h-7 rounded-full flex items-center justify-center text-[10px] sm:text-[11px] font-bold transition-colors",
+                step >= 2 ? "bg-primary text-white ring-2 ring-primary/15" : "bg-gray-100 text-gray-400"
+              )}>02</div>
               <span className={cn("text-[10px] sm:text-[11px] font-medium tracking-tight", step >= 2 ? "text-primary font-semibold" : "text-gray-400")}>
                 Company
               </span>
             </div>
 
+            {/* Connector 2→3 */}
+            <div className={cn("flex-1 h-[1.5px] mt-3.5 transition-colors duration-300", step >= 3 ? "bg-primary" : "bg-gray-200")} />
+
             {/* Step 3 */}
-            <div className="flex flex-col items-center gap-1 z-10">
-              <div
-                className={cn(
-                  "w-7 h-7 rounded-full flex items-center justify-center text-[10px] sm:text-[11px] font-bold transition-colors",
-                  step >= 3 ? "bg-primary text-white ring-2 ring-primary/15" : "bg-gray-100 text-gray-400"
-                )}
-              >
-                03
-              </div>
+            <div className="flex flex-col items-center gap-1">
+              <div className={cn(
+                "w-7 h-7 rounded-full flex items-center justify-center text-[10px] sm:text-[11px] font-bold transition-colors",
+                step >= 3 ? "bg-primary text-white ring-2 ring-primary/15" : "bg-gray-100 text-gray-400"
+              )}>03</div>
               <span className={cn("text-[10px] sm:text-[11px] font-medium tracking-tight", step >= 3 ? "text-primary font-semibold" : "text-gray-400")}>
                 Preferences
               </span>
@@ -351,7 +339,7 @@ export default function SignUpPage() {
                     type="submit"
                     className="flex-1 h-11 sm:h-12 text-[13px] sm:text-[14px] font-semibold rounded-full bg-primary text-white hover:bg-primary-dark shadow-md shadow-primary/20 flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    Move to Last Step
+                    Next
                     <ArrowRight className="w-4 h-4" />
                   </Button>
                 </div>
@@ -427,7 +415,7 @@ export default function SignUpPage() {
                     isLoading={isSubmitting}
                     className="flex-1 h-11 sm:h-12 text-[13px] sm:text-[14px] font-semibold rounded-full bg-primary text-white hover:bg-primary-dark shadow-md shadow-primary/20 cursor-pointer"
                   >
-                    Submit Application
+                    Submit
                   </Button>
                 </div>
               </div>
