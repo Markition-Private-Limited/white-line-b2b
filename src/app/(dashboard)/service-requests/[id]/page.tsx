@@ -1,5 +1,6 @@
 "use client";
 
+import { T, useT } from "@/i18n/I18nProvider";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
@@ -9,8 +10,10 @@ import { Modal } from "@/components/ui/Modal";
 import { SuccessFlowerBadge } from "@/components/ui/SuccessModal";
 import serviceRequestsService, { type ServiceRequest } from "@/services/serviceRequests.service";
 import { getServiceRequestDisplayStatus } from "@/utils/businessStatus";
+import { dateLocale } from "@/i18n/dateLocale";
 
 export default function ServiceDetailPage() {
+  const { t } = useT();
   const params = useParams();
   const id = params.id as string;
 
@@ -49,7 +52,7 @@ export default function ServiceDetailPage() {
     const dt = new Date(d);
     return isNaN(dt.getTime())
       ? "—"
-      : dt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+      : dt.toLocaleDateString(dateLocale("en-GB"), { day: "2-digit", month: "short", year: "numeric" });
   };
 
   if (loading) {
@@ -64,7 +67,7 @@ export default function ServiceDetailPage() {
     <div className="space-y-4">
       {/* Top Header - Plain text title on left, status badge on right (no white box, no back button) */}
       <div className="flex items-center justify-between">
-        <h1 className="text-fs-22 font-semibold font-poppins text-text-primary">Service Detail: {requestId}</h1>
+        <h1 className="text-fs-22 font-semibold font-poppins text-text-primary"><T>Service Detail:</T> {requestId}</h1>
         <StatusBadge status={status} className="text-[9px] px-3 py-1" />
       </div>
 
@@ -74,13 +77,13 @@ export default function ServiceDetailPage() {
         <div className="card-base p-6 bg-white rounded-[24px] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col justify-between min-h-[220px]">
           <div className="flex items-center gap-2 text-fs-12 font-semibold text-text-primary">
             <Car className="w-4 h-4 text-primary" />
-            <span>Vehicle Category</span>
+            <span><T>Vehicle Category</T></span>
           </div>
           <div className="relative w-full h-24 my-auto flex items-center justify-center">
-            <Image src="/vehicle.png" alt="Vehicle" width={180} height={90} className="object-contain" onError={(e) => { (e.target as HTMLElement).style.display = "none"; }} />
+            <Image src="/vehicle.png" alt={t("Vehicle")} width={180} height={90} className="object-contain" onError={(e) => { (e.target as HTMLElement).style.display = "none"; }} />
           </div>
           <p className="text-fs-13 font-bold text-center text-text-primary font-poppins">
-            {request?.vehicle_class?.name ?? "—"}
+            {request?.vehicle_class?.name ? t(request.vehicle_class.name) : "—"}
           </p>
         </div>
 
@@ -88,15 +91,15 @@ export default function ServiceDetailPage() {
         <div className="card-base p-6 bg-white rounded-[24px] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col justify-between min-h-[220px]">
           <div className="flex items-center gap-2 text-fs-12 font-semibold text-text-primary">
             <FileText className="w-4 h-4 text-primary" />
-            <span>Details</span>
+            <span><T>Details</T></span>
           </div>
           <div className="space-y-4 my-auto">
             <div>
-              <span className="text-fs-11 text-gray-400 block font-medium">Request Date:</span>
+              <span className="text-fs-11 text-gray-400 block font-medium"><T>Request Date:</T></span>
               <span className="text-fs-13 font-bold text-text-primary font-poppins">{formatDate(request?.request_date)}</span>
             </div>
             <div>
-              <span className="text-fs-11 text-gray-400 block font-medium">Request By:</span>
+              <span className="text-fs-11 text-gray-400 block font-medium"><T>Request By:</T></span>
               <span className="text-fs-13 font-bold text-text-primary font-poppins">{request?.requested_by ?? "—"}</span>
             </div>
           </div>
@@ -106,16 +109,16 @@ export default function ServiceDetailPage() {
         <div className="card-base p-6 bg-white rounded-[24px] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col justify-between min-h-[220px]">
           <div className="flex items-center gap-2 text-fs-12 font-semibold text-text-primary">
             <Calendar className="w-4 h-4 text-primary" />
-            <span>Service Duration</span>
+            <span><T>Service Duration</T></span>
           </div>
           <div className="bg-input-bg rounded-2xl p-4 flex flex-col items-center justify-center text-center my-auto w-full">
             <div>
-              <span className="text-fs-10 text-gray-400 block font-medium">Start Date</span>
+              <span className="text-fs-10 text-gray-400 block font-medium"><T>Start Date</T></span>
               <span className="text-fs-13 font-bold text-text-primary font-poppins block">{formatDate(request?.start_date)}</span>
             </div>
             <div className="text-primary my-1 font-bold text-base leading-none">↓</div>
             <div>
-              <span className="text-fs-10 text-gray-400 block font-medium">End Date</span>
+              <span className="text-fs-10 text-gray-400 block font-medium"><T>End Date</T></span>
               <span className="text-fs-13 font-bold text-text-primary font-poppins block">{formatDate(request?.end_date)}</span>
             </div>
           </div>
@@ -125,15 +128,15 @@ export default function ServiceDetailPage() {
         <div className="card-base p-6 bg-white rounded-[24px] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col justify-between min-h-[220px]">
           <div className="flex items-center gap-2 text-fs-12 font-semibold text-text-primary">
             <Users className="w-4 h-4 text-primary" />
-            <span>Required Details</span>
+            <span><T>Required Details</T></span>
           </div>
           <div className="space-y-4 my-auto">
             <div className="flex items-center justify-between border-b border-gray-100 pb-2.5">
-              <span className="text-fs-12 text-text-secondary font-medium">Drivers Required</span>
+              <span className="text-fs-12 text-text-secondary font-medium"><T>Drivers Required</T></span>
               <span className="text-fs-17 font-bold text-text-primary font-poppins">{request?.num_drivers_required ?? 0}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-fs-12 text-text-secondary font-medium">Vehicles Required</span>
+              <span className="text-fs-12 text-text-secondary font-medium"><T>Vehicles Required</T></span>
               <span className="text-fs-17 font-bold text-text-primary font-poppins">{request?.num_vehicles_required ?? 0}</span>
             </div>
           </div>
@@ -144,10 +147,10 @@ export default function ServiceDetailPage() {
       <div className="card-base p-6 bg-white rounded-[24px] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
         <div className="flex items-center gap-2 text-fs-12 font-semibold text-text-primary mb-3">
           <FileText className="w-4 h-4 text-primary" />
-          <span>Notes</span>
+          <span><T>Notes</T></span>
         </div>
         <p className="body-2 text-text-secondary leading-relaxed italic">
-          {request?.special_instructions || "No special instructions were provided for this request."}
+          <T>{request?.special_instructions || "No special instructions were provided for this request."}</T>
         </p>
       </div>
 
@@ -159,8 +162,7 @@ export default function ServiceDetailPage() {
             onClick={() => setCancelModalOpen(true)}
             className="px-8 py-2.5 rounded-full text-fs-12 font-medium border border-[#EA5B5B] text-[#EA5B5B] bg-white hover:bg-red-50 shadow-xs transition-colors cursor-pointer"
           >
-            Cancel Request
-          </button>
+            <T>Cancel Request</T></button>
         </div>
       )}
 
@@ -171,26 +173,23 @@ export default function ServiceDetailPage() {
             <SuccessFlowerBadge />
           </div>
           <h3 className="text-fs-20 lg:text-fs-22 font-bold font-poppins text-text-primary mb-3 leading-tight">
-            Are you sure you want to cancel this request?
-          </h3>
+            <T>Are you sure you want to cancel this request?</T></h3>
           <p className="text-fs-13 lg:text-fs-14 text-[#64748B] mb-8 max-w-sm leading-relaxed mx-auto font-normal">
-            This action cannot be undone. Once cancelled, you will need to create a new service request.
-          </p>
+            <T>This action cannot be undone. Once cancelled, you will need to create a new service request.</T></p>
           <div className="flex items-center justify-center gap-3 w-full">
             <button
               type="button"
               onClick={() => setCancelModalOpen(false)}
               className="py-2.5 px-7 text-fs-13 lg:text-fs-14 font-medium bg-[#005C66] text-white hover:bg-[#004b54] rounded-full shadow-sm transition-colors cursor-pointer"
             >
-              Keep Request
-            </button>
+              <T>Keep Request</T></button>
             <button
               type="button"
               onClick={handleConfirmCancel}
               disabled={cancelling}
               className="py-2.5 px-7 text-fs-13 lg:text-fs-14 font-medium rounded-full border border-[#D9383A] text-[#D9383A] hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-50"
             >
-              {cancelling ? "Cancelling..." : "Yes, Cancel"}
+              <T>{cancelling ? "Cancelling..." : "Yes, Cancel"}</T>
             </button>
           </div>
         </div>

@@ -1,5 +1,6 @@
 'use client'
 
+import { T, useT } from "@/i18n/I18nProvider";
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
@@ -28,6 +29,7 @@ const FAINT_STREAKS = [
 ]
 
 export default function PageLoader() {
+  const { t } = useT();
   const [visible, setVisible] = useState(true)
   const prefersReducedMotion = useReducedMotion()
 
@@ -83,7 +85,7 @@ export default function PageLoader() {
             background: 'linear-gradient(180deg,#111314 0%,#0a0b0c 42%,#050606 67%,#020202 100%)',
           }}
           role="status"
-          aria-label="Loading page"
+          aria-label={t("Loading page")}
           aria-live="polite"
           aria-busy="true"
         >
@@ -257,8 +259,7 @@ export default function PageLoader() {
               textTransform: 'uppercase',
               whiteSpace: 'nowrap',
             }}>
-              LOADING
-            </p>
+              <T>LOADING</T></p>
             <div style={{
               width: '100%',
               height: 1,

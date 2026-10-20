@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/i18n/I18nProvider";
 import React from "react";
 import { Modal } from "./Modal";
 import { cn } from "@/utils/cn";
@@ -17,11 +18,12 @@ export interface SuccessModalProps {
 import Image from "next/image";
 
 export function SuccessFlowerBadge({ className, size = 84 }: { className?: string; size?: number }) {
+  const { t } = useT();
   return (
     <div className={cn("relative flex items-center justify-center shrink-0", className)}>
       <Image
         src="/tick_flower.png"
-        alt="Success"
+        alt={t("Success")}
         width={size}
         height={size}
         priority

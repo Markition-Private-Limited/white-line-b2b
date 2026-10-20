@@ -1,5 +1,6 @@
 "use client";
 
+import { T, useT } from "@/i18n/I18nProvider";
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,6 +14,7 @@ import { cn } from "@/utils/cn";
 import apiClient from "@/lib/axios";
 
 export default function ForgotPasswordPage() {
+  const { t } = useT();
   const router = useRouter();
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -60,7 +62,7 @@ export default function ForgotPasswordPage() {
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Please enter a valid email address.");
+      setError(t("Please enter a valid email address."));
       return;
     }
     setIsLoading(true); setError("");
@@ -68,7 +70,7 @@ export default function ForgotPasswordPage() {
       await apiClient.post('/auth/b2b/forgot-password', { email });
     } catch (err: any) {
       if (err?.response?.status >= 500) {
-        setError("Something went wrong. Please try again later.");
+        setError(t("Something went wrong. Please try again later."));
         setIsLoading(false);
         return;
       }
@@ -93,7 +95,7 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     const otpCode = otp.join("");
     if (otpCode.length !== 6) {
-      setError("Please enter the 6-digit OTP.");
+      setError(t("Please enter the 6-digit OTP."));
       return;
     }
     setIsLoading(true); setError("");
@@ -113,12 +115,12 @@ export default function ForgotPasswordPage() {
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newPassword.length < 8) { setError("Password must be at least 8 characters."); return; }
-    if (!/[A-Z]/.test(newPassword)) { setError("Password must contain an uppercase letter."); return; }
-    if (!/[0-9]/.test(newPassword)) { setError("Password must contain a number."); return; }
-    if (!/[^A-Za-z0-9]/.test(newPassword)) { setError("Password must contain a special character."); return; }
+    if (newPassword.length < 8) { setError(t("Password must be at least 8 characters.")); return; }
+    if (!/[A-Z]/.test(newPassword)) { setError(t("Password must contain an uppercase letter.")); return; }
+    if (!/[0-9]/.test(newPassword)) { setError(t("Password must contain a number.")); return; }
+    if (!/[^A-Za-z0-9]/.test(newPassword)) { setError(t("Password must contain a special character.")); return; }
     
-    if (newPassword !== confirmPassword) { setError("Passwords do not match."); return; }
+    if (newPassword !== confirmPassword) { setError(t("Passwords do not match.")); return; }
     setIsLoading(true); setError("");
     try {
       await apiClient.post('/auth/b2b/reset-password', { reset_token: resetToken, new_password: newPassword });
@@ -138,7 +140,7 @@ export default function ForgotPasswordPage() {
       <div className="hidden lg:flex lg:w-1/2 relative bg-black flex-col justify-between p-8 lg:p-10 h-full overflow-hidden">
         <Image
           src="/Auth_left_login_bg.png"
-          alt="WhiteLine Fleet Background"
+          alt={t("WhiteLine Fleet Background")}
           fill
           priority
           className="object-cover opacity-100"
@@ -149,7 +151,7 @@ export default function ForgotPasswordPage() {
         <div className="relative z-10 flex items-center">
           <Image
             src="/logo.png"
-            alt="WhiteLine B2B Client Portal"
+            alt={t("WhiteLine B2B Client Portal")}
             width={260}
             height={65}
             className="w-[260px] h-auto object-contain"
@@ -160,19 +162,17 @@ export default function ForgotPasswordPage() {
         {/* Bottom Content */}
         <div className="relative z-10 text-center max-w-md mx-auto mt-auto mb-10 lg:mb-14 py-4">
           <h1 className="h1 font-medium mb-3 tracking-tight text-white">
-            Precision in Motion
-          </h1>
+            <T>Precision in Motion</T></h1>
           <p className="body-1 text-white/90 font-light leading-relaxed">
-            The command center for the world&apos;s most elite chauffeur logistics operations.
-          </p>
+            <T>The command center for the world&apos;s most elite chauffeur logistics operations.</T></p>
         </div>
 
         {/* Bottom Footer Links */}
         <div className="relative z-10 flex items-center justify-between text-fs-10 text-gray-300 border-t border-white/15 pt-4">
-          <span>© 2026 ELITE CHAUFFEUR LOGISTICS</span>
+          <span><T>© 2026 ELITE CHAUFFEUR LOGISTICS</T></span>
           <div className="flex items-center gap-4">
-            <Link href="https://whitelineglobal.com/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-            <Link href="https://whitelineglobal.com/terms" className="hover:text-white transition-colors">Terms & Conditions</Link>
+            <Link href="https://whitelineglobal.com/privacy" className="hover:text-white transition-colors"><T>Privacy Policy</T></Link>
+            <Link href="https://whitelineglobal.com/terms" className="hover:text-white transition-colors"><T>Terms &amp; Conditions</T></Link>
           </div>
         </div>
       </div>
@@ -183,7 +183,7 @@ export default function ForgotPasswordPage() {
         <div className="absolute top-8 left-8 hidden sm:block">
           <Image
             src="/logo_back.png"
-            alt="Whiteline Watermark"
+            alt={t("Whiteline Watermark")}
             width={90}
             height={90}
             className="w-[85px] h-auto object-contain"
@@ -197,30 +197,26 @@ export default function ForgotPasswordPage() {
               href="/login"
               className="flex-1 pb-3.5 text-[15px] sm:text-[16px] font-bold text-primary border-b-2 border-primary text-center"
             >
-              Login
-            </Link>
+              <T>Login</T></Link>
             <Link
               href="/signup"
               className="flex-1 pb-3.5 text-[15px] sm:text-[16px] font-medium text-gray-400 hover:text-gray-600 text-center transition-colors"
             >
-              Sign Up
-            </Link>
+              <T>Sign Up</T></Link>
           </div>
 
           {/* Step 1: Forgot Password Form */}
           {step === 1 && (
             <form onSubmit={handleSendOtp} className="space-y-5 animate-in fade-in">
               <div className="mb-6 pt-1">
-                <h3 className="text-fs-20 sm:text-fs-22 font-bold font-poppins text-text-primary mb-1.5">Forgot Password</h3>
+                <h3 className="text-fs-20 sm:text-fs-22 font-bold font-poppins text-text-primary mb-1.5"><T>Forgot Password</T></h3>
                 <p className="text-[13px] sm:text-[14px] text-gray-text leading-relaxed">
-                  Enter your registered email address to receive a verification code
-                </p>
+                  <T>Enter your registered email address to receive a verification code</T></p>
               </div>
 
               <div>
                 <label className="text-[11px] font-semibold text-gray-text uppercase tracking-wider ml-1 mb-2 block">
-                  EMAIL ADDRESS
-                </label>
+                  <T>EMAIL ADDRESS</T></label>
                 <div className="relative">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center text-input-text">
                     <Mail className="w-4.5 h-4.5 text-gray-400" />
@@ -230,7 +226,7 @@ export default function ForgotPasswordPage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="e.g. spoc@company.com"
+                    placeholder={t("e.g. spoc@company.com")}
                     className="w-full bg-input-bg border-none rounded-full h-11 sm:h-12 pl-12 pr-4 text-[13px] sm:text-[14px] font-normal text-text-primary placeholder:text-input-placeholder placeholder:font-light placeholder:text-[13px] focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all"
                   />
                 </div>
@@ -242,15 +238,13 @@ export default function ForgotPasswordPage() {
                 isLoading={isLoading}
                 className="w-full h-11 sm:h-12 text-[14px] sm:text-[15px] font-semibold rounded-full mt-3 bg-primary hover:bg-primary-dark text-white shadow-md shadow-primary/20 flex items-center justify-center gap-2 cursor-pointer"
               >
-                Send OTP
-                <ArrowRight className="w-4 h-4" />
+                <T>Send OTP</T><ArrowRight className="w-4 h-4 rtl:rotate-180" />
               </Button>
 
               <div className="text-center pt-2">
                 <Link href="/login" className="inline-flex items-center gap-1.5 text-[13px] text-text-secondary hover:text-text-primary font-medium">
-                  <ArrowLeft className="w-4 h-4" />
-                  Back to Login
-                </Link>
+                  <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
+                  <T>Back to Login</T></Link>
               </div>
             </form>
           )}
@@ -259,9 +253,9 @@ export default function ForgotPasswordPage() {
           {step === 2 && (
             <form onSubmit={handleVerifyOtp} className="space-y-5 animate-in fade-in text-center">
               <div className="mb-6 pt-1">
-                <h3 className="text-fs-20 sm:text-fs-22 font-bold font-poppins text-text-primary mb-1.5">OTP Verification</h3>
+                <h3 className="text-fs-20 sm:text-fs-22 font-bold font-poppins text-text-primary mb-1.5"><T>OTP Verification</T></h3>
                 <p className="text-[13px] sm:text-[14px] text-gray-text">
-                  Enter the verification code sent to <span className="font-semibold text-text-primary">{email}</span>
+                  <T>Enter the verification code sent to</T> <span className="font-semibold text-text-primary">{email}</span>
                 </p>
               </div>
 
@@ -290,7 +284,7 @@ export default function ForgotPasswordPage() {
               <div className="pt-1">
                 {timer > 0 ? (
                   <p className="text-[12px] text-gray-400">
-                    Resend code in <span className="font-semibold text-text-primary">00:{timer < 10 ? `0${timer}` : timer}</span>
+                    <T>Resend code in</T> <span className="font-semibold text-text-primary">00:{timer < 10 ? `0${timer}` : timer}</span>
                   </p>
                 ) : (
                   <button
@@ -298,8 +292,7 @@ export default function ForgotPasswordPage() {
                     onClick={handleResendOtp}
                     className="text-[12px] font-semibold text-primary hover:underline cursor-pointer"
                   >
-                    Resend OTP
-                  </button>
+                    <T>Resend OTP</T></button>
                 )}
               </div>
 
@@ -308,8 +301,7 @@ export default function ForgotPasswordPage() {
                 isLoading={isLoading}
                 className="w-full h-11 sm:h-12 text-[14px] sm:text-[15px] font-semibold rounded-full mt-3 bg-primary hover:bg-primary-dark text-white shadow-md shadow-primary/20 flex items-center justify-center gap-2 cursor-pointer"
               >
-                Verify OTP
-                <ArrowRight className="w-4 h-4" />
+                <T>Verify OTP</T><ArrowRight className="w-4 h-4 rtl:rotate-180" />
               </Button>
 
               <div className="text-center pt-2">
@@ -318,9 +310,8 @@ export default function ForgotPasswordPage() {
                   onClick={() => { setStep(1); setError(""); setOtp(["", "", "", "", "", ""]); }}
                   className="inline-flex items-center gap-1.5 text-[13px] text-text-secondary hover:text-text-primary font-medium cursor-pointer"
                 >
-                  <ArrowLeft className="w-4 h-4" />
-                  Back
-                </button>
+                  <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
+                  <T>Back</T></button>
               </div>
             </form>
           )}
@@ -329,16 +320,14 @@ export default function ForgotPasswordPage() {
           {step === 3 && (
             <form onSubmit={handleResetPassword} className="space-y-5 animate-in fade-in">
               <div className="mb-6 pt-1">
-                <h3 className="text-fs-20 sm:text-fs-22 font-bold font-poppins text-text-primary mb-1.5">Create New Password</h3>
+                <h3 className="text-fs-20 sm:text-fs-22 font-bold font-poppins text-text-primary mb-1.5"><T>Create New Password</T></h3>
                 <p className="text-[13px] sm:text-[14px] text-gray-text leading-relaxed">
-                  Your new password must be different from your previous password to ensure maximum security.
-                </p>
+                  <T>Your new password must be different from your previous password to ensure maximum security.</T></p>
               </div>
 
               <div>
                 <label className="text-[11px] font-semibold text-gray-text uppercase tracking-wider ml-1 mb-2 block">
-                  NEW PASSWORD
-                </label>
+                  <T>NEW PASSWORD</T></label>
                 <div className="relative">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center text-input-text">
                     <Lock className="w-4.5 h-4.5 text-gray-400" />
@@ -348,7 +337,7 @@ export default function ForgotPasswordPage() {
                     required
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Enter new password"
+                    placeholder={t("Enter new password")}
                     className="w-full bg-input-bg border-none rounded-full h-11 sm:h-12 pl-12 pr-11 text-[13px] sm:text-[14px] font-normal text-text-primary placeholder:text-input-placeholder placeholder:font-light placeholder:text-[13px] focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all"
                   />
                   <div
@@ -365,8 +354,7 @@ export default function ForgotPasswordPage() {
 
               <div>
                 <label className="text-[11px] font-semibold text-gray-text uppercase tracking-wider ml-1 mb-2 block">
-                  CONFIRM PASSWORD
-                </label>
+                  <T>CONFIRM PASSWORD</T></label>
                 <div className="relative">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center text-input-text">
                     <Lock className="w-4.5 h-4.5 text-gray-400" />
@@ -376,7 +364,7 @@ export default function ForgotPasswordPage() {
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm new password"
+                    placeholder={t("Confirm new password")}
                     className="w-full bg-input-bg border-none rounded-full h-11 sm:h-12 pl-12 pr-11 text-[13px] sm:text-[14px] font-normal text-text-primary placeholder:text-input-placeholder placeholder:font-light placeholder:text-[13px] focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all"
                   />
                   <div
@@ -395,8 +383,7 @@ export default function ForgotPasswordPage() {
                 isLoading={isLoading}
                 className="w-full h-11 sm:h-12 text-[14px] sm:text-[15px] font-semibold rounded-full mt-3 bg-primary hover:bg-primary-dark text-white shadow-md shadow-primary/20 flex items-center justify-center gap-2 cursor-pointer"
               >
-                Reset Password
-                <ArrowRight className="w-4 h-4" />
+                <T>Reset Password</T><ArrowRight className="w-4 h-4 rtl:rotate-180" />
               </Button>
             </form>
           )}
@@ -407,8 +394,8 @@ export default function ForgotPasswordPage() {
       <SuccessModal
         isOpen={successModalOpen}
         onClose={() => router.push("/login")}
-        title="Password Reset Successfully"
-        message="Now You can login with your new password."
+        title={t("Password Reset Successfully")}
+        message={t("Now You can login with your new password.")}
         actionText="Log In →"
         onAction={() => router.push("/login")}
       />

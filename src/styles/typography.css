@@ -63,3 +63,38 @@ body {
     @apply text-fs-9 leading-tight;
   }
 }
+
+/*
+ * Arabic: Inter and Poppins have no Arabic glyphs, so Noto Sans Arabic takes the lead for
+ * everything, headings included. Latin text and digits still fall through to Inter.
+ */
+html[dir="rtl"] {
+  --font-sans: var(--font-arabic), var(--font-inter), system-ui, sans-serif;
+  --font-heading: var(--font-arabic), var(--font-poppins), system-ui, sans-serif;
+}
+
+html[dir="rtl"] body,
+html[dir="rtl"] .font-sans,
+html[dir="rtl"] .h1,
+html[dir="rtl"] .h2,
+html[dir="rtl"] .h3,
+html[dir="rtl"] .body-1,
+html[dir="rtl"] .body-2,
+html[dir="rtl"] .body-3,
+html[dir="rtl"] .caption,
+html[dir="rtl"] .text-mini,
+html[dir="rtl"] .text-micro {
+  font-family: var(--font-arabic), var(--font-inter), system-ui, sans-serif;
+}
+
+/* Arabic is taller and lower-contrast than Latin at tiny sizes; give wrapped lines room. */
+html[dir="rtl"] body {
+  line-height: 1.6;
+}
+
+/* Phone numbers and times stay left-to-right inside Arabic text (see I18nProvider). */
+html[dir="rtl"] [data-ltr] {
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: right;
+}

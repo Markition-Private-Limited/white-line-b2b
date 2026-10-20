@@ -1,5 +1,6 @@
 "use client";
 
+import { T, useT } from "@/i18n/I18nProvider";
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
@@ -105,6 +106,7 @@ const formatSubmittedBy = (row: Complaint) => {
 };
 
 export default function ComplaintsPage() {
+  const { t } = useT();
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -250,15 +252,15 @@ export default function ComplaintsPage() {
       {/* Top Header Card matching Service Requests Page */}
       <div className="bg-white rounded-full p-2 pl-4 sm:pl-6 pr-2.5 flex items-center justify-between border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
         <h1 className="text-fs-16 sm:text-fs-20 lg:text-fs-22 font-bold font-poppins text-text-primary truncate mr-2">
-          <span className="sm:hidden">Complaints</span>
-          <span className="hidden sm:inline">Complaints Management</span>
+          <span className="sm:hidden"><T>Complaints</T></span>
+          <span className="hidden sm:inline"><T>Complaints Management</T></span>
         </h1>
         <Link
           href="/complaints/create"
           className="flex items-center gap-1.5 px-3.5 sm:px-7 py-2 sm:py-2.5 rounded-full border border-primary text-primary hover:bg-primary hover:text-white text-xs sm:text-fs-12 font-medium transition-all duration-200 shrink-0"
         >
           <Plus className="w-3.5 h-3.5" />
-          <span>Create<span className="hidden sm:inline"> New Complaint</span></span>
+          <span><T>Create</T><span className="hidden sm:inline"> <T>New Complaint</T></span></span>
         </Link>
       </div>
 
@@ -269,7 +271,7 @@ export default function ComplaintsPage() {
             {/* Card 1: Total Complaints */}
             <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[155px] bg-[#E2F8FA] border border-[#CDEEF2] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
               <div className="flex items-start justify-between">
-                <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins">Total<br />Complaints</span>
+                <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins"><T>Total</T><br /><T>Complaints</T></span>
                 <div className="w-8 h-8 rounded-full bg-[#005C66] text-white flex items-center justify-center shadow-xs">
                   <Users className="w-4 h-4" />
                 </div>
@@ -282,7 +284,7 @@ export default function ComplaintsPage() {
             {/* Card 2: Resolved Complaints */}
             <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[155px] bg-[#FEF9E2] border border-[#F5ECC4] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
               <div className="flex items-start justify-between">
-                <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins">Resolved<br />Complaints</span>
+                <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins"><T>Resolved</T><br /><T>Complaints</T></span>
                 <div className="w-8 h-8 rounded-full bg-[#B2B042] text-white flex items-center justify-center shadow-xs">
                   <CheckCircle2 className="w-4 h-4" />
                 </div>
@@ -295,7 +297,7 @@ export default function ComplaintsPage() {
             {/* Card 3: Pending Complaints */}
             <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[155px] bg-[#E7F9E4] border border-[#D5F0D0] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
               <div className="flex items-start justify-between">
-                <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins">Pending<br />Complaints</span>
+                <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins"><T>Pending</T><br /><T>Complaints</T></span>
                 <div className="w-8 h-8 rounded-full bg-[#62C25D] text-white flex items-center justify-center shadow-xs">
                   <Calendar className="w-4 h-4" />
                 </div>
@@ -310,7 +312,7 @@ export default function ComplaintsPage() {
         {/* Right: Table area */}
         <div className="flex flex-col gap-2 flex-1 min-w-0">
           <PageToolbar
-            searchPlaceholder="Search by ID or subject..."
+            searchPlaceholder={t("Search by ID or subject...")}
             searchValue={search}
             onSearch={(val) => { setSearch(val); setPage(1); }}
             filters={toolbarFilters}
@@ -369,8 +371,7 @@ export default function ComplaintsPage() {
             {/* Subject Section */}
             <div>
               <span className="text-[10px] sm:text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-1.5">
-                SUBJECT
-              </span>
+                <T>SUBJECT</T></span>
               <h3 className="text-[18px] sm:text-[20px] font-bold text-gray-900">
                 {selectedComplaint.subject}
               </h3>
@@ -379,8 +380,7 @@ export default function ComplaintsPage() {
             {/* Complaint Message Card */}
             <div>
               <span className="text-[10px] sm:text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2">
-                COMPLAINT MESSAGE
-              </span>
+                <T>COMPLAINT MESSAGE</T></span>
               <div className="bg-[#EAF8FA] rounded-2xl p-5 border-l-4 border-[#005C66] text-gray-700 text-[13px] leading-relaxed">
                 “{selectedComplaint.description}”
               </div>
@@ -395,7 +395,7 @@ export default function ComplaintsPage() {
                   disabled={isCancelling}
                   className="h-[42px] sm:h-[44px] px-7 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-50 text-[12px] sm:text-[13px] font-semibold transition-colors cursor-pointer disabled:opacity-50 shadow-xs flex items-center justify-center"
                 >
-                  {isCancelling ? "Cancelling..." : "Cancel Complaint"}
+                  <T>{isCancelling ? "Cancelling..." : "Cancel Complaint"}</T>
                 </button>
               )}
             </div>
@@ -410,26 +410,23 @@ export default function ComplaintsPage() {
             <SuccessFlowerBadge />
           </div>
           <h3 className="text-fs-20 lg:text-fs-22 font-bold font-poppins text-text-primary mb-3 leading-tight">
-            Are you sure you want to cancel this complaint?
-          </h3>
+            <T>Are you sure you want to cancel this complaint?</T></h3>
           <p className="text-fs-13 lg:text-fs-14 text-[#64748B] mb-8 max-w-sm leading-relaxed mx-auto font-normal">
-            This will mark the complaint as cancelled and keep it in the complaint history.
-          </p>
+            <T>This will mark the complaint as cancelled and keep it in the complaint history.</T></p>
           <div className="flex items-center justify-center gap-3 w-full">
             <button
               type="button"
               onClick={() => setCancelModalOpen(false)}
               className="py-2.5 px-7 text-fs-13 lg:text-fs-14 font-medium bg-[#005C66] text-white hover:bg-[#004b54] rounded-full shadow-sm transition-colors cursor-pointer"
             >
-              Go Back
-            </button>
+              <T>Go Back</T></button>
             <button
               type="button"
               onClick={handleConfirmCancel}
               disabled={isCancelling}
               className="py-2.5 px-7 text-fs-13 lg:text-fs-14 font-medium rounded-full border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50"
             >
-              {isCancelling ? "Cancelling..." : "Yes, Cancel"}
+              <T>{isCancelling ? "Cancelling..." : "Yes, Cancel"}</T>
             </button>
           </div>
         </div>
@@ -442,8 +439,7 @@ export default function ComplaintsPage() {
             <CheckCircle2 className="w-12 h-12 text-green-500" />
           </div>
           <h3 className="text-lg font-bold font-poppins text-text-primary">
-            Complaint Cancelled Successfully
-          </h3>
+            <T>Complaint Cancelled Successfully</T></h3>
         </div>
       </Modal>
     </div>

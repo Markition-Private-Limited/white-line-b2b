@@ -1,5 +1,6 @@
 "use client";
 
+import { T, useT } from "@/i18n/I18nProvider";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,6 +14,7 @@ import { getFcmToken } from "@/lib/firebase";
 type ValidationState = "idle" | "error" | "success";
 
 export default function LoginPage() {
+  const { t } = useT();
   const router = useRouter();
 
   const [email, setEmail] = useState("");
@@ -159,7 +161,8 @@ export default function LoginPage() {
 
       setStatus("success");
       setTimeout(() => {
-        router.push("/");
+        // A full navigation, so the page is rendered in the language and direction just chosen for this user.
+        window.location.assign("/");
       }, 600);
     } catch (err: any) {
       setStatus("error");
@@ -182,7 +185,7 @@ export default function LoginPage() {
       <div className="hidden lg:flex lg:w-1/2 relative bg-black flex-col justify-between p-8 lg:p-10 h-full overflow-hidden">
         <Image
           src="/Auth_left_login_bg.png"
-          alt="WhiteLine Fleet Background"
+          alt={t("WhiteLine Fleet Background")}
           fill
           priority
           className="object-cover opacity-100"
@@ -193,7 +196,7 @@ export default function LoginPage() {
         <div className="relative z-10 flex items-center">
           <Image
             src="/logo.png"
-            alt="WhiteLine B2B Client Portal"
+            alt={t("WhiteLine B2B Client Portal")}
             width={260}
             height={65}
             className="w-[260px] h-auto object-contain"
@@ -204,19 +207,17 @@ export default function LoginPage() {
         {/* Bottom Content */}
         <div className="relative z-10 text-center max-w-md mx-auto mt-auto mb-10 lg:mb-14 py-4">
           <h1 className="h1 font-medium mb-3 tracking-tight text-white">
-            Precision in Motion
-          </h1>
+            <T>Precision in Motion</T></h1>
           <p className="body-1 text-white/90 font-light leading-relaxed">
-            The command center for the world&apos;s most elite chauffeur logistics operations.
-          </p>
+            <T>The command center for the world&apos;s most elite chauffeur logistics operations.</T></p>
         </div>
 
         {/* Bottom Footer Links */}
         <div className="relative z-10 flex items-center justify-between text-fs-10 text-gray-300 border-t border-white/15 pt-4">
-          <span>© 2026 ELITE CHAUFFEUR LOGISTICS</span>
+          <span><T>© 2026 ELITE CHAUFFEUR LOGISTICS</T></span>
           <div className="flex items-center gap-4">
-            <Link href="https://whitelineglobal.com/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-            <Link href="https://whitelineglobal.com/terms" className="hover:text-white transition-colors">Terms & Conditions</Link>
+            <Link href="https://whitelineglobal.com/privacy" className="hover:text-white transition-colors"><T>Privacy Policy</T></Link>
+            <Link href="https://whitelineglobal.com/terms" className="hover:text-white transition-colors"><T>Terms &amp; Conditions</T></Link>
           </div>
         </div>
       </div>
@@ -227,7 +228,7 @@ export default function LoginPage() {
         <div className="absolute top-8 left-8 hidden sm:block">
           <Image
             src="/logo_back.png"
-            alt="Whiteline Watermark"
+            alt={t("Whiteline Watermark")}
             width={90}
             height={90}
             className="w-[85px] h-auto object-contain"
@@ -242,22 +243,19 @@ export default function LoginPage() {
               type="button"
               className="flex-1 pb-3.5 text-[15px] sm:text-[16px] font-bold text-primary border-b-2 border-primary cursor-pointer"
             >
-              Login
-            </button>
+              <T>Login</T></button>
             <Link
               href="/signup"
               className="flex-1 pb-3.5 text-[15px] sm:text-[16px] font-medium text-gray-400 hover:text-gray-600 text-center cursor-pointer transition-colors"
             >
-              Sign Up
-            </Link>
+              <T>Sign Up</T></Link>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email Address */}
             <div>
               <label className="text-[11px] font-semibold text-gray-text uppercase tracking-wider ml-1 mb-2 block">
-                EMAIL ADDRESS
-              </label>
+                <T>EMAIL ADDRESS</T></label>
               <div className="relative">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center text-input-text">
                   <Mail className={`w-4.5 h-4.5 ${getIconColor(emailState)} transition-colors`} />
@@ -268,7 +266,7 @@ export default function LoginPage() {
                   value={email}
                   onBlur={handleEmailBlur}
                   onChange={handleEmailChange}
-                  placeholder="Enter your email address"
+                  placeholder={t("Enter your email address")}
                   className={getInputStyles(emailState, false)}
                 />
               </div>
@@ -281,14 +279,12 @@ export default function LoginPage() {
             <div>
               <div className="flex items-center justify-between ml-1 mb-2">
                 <label className="text-[11px] font-semibold text-gray-text uppercase tracking-wider block">
-                  PASSWORD
-                </label>
+                  <T>PASSWORD</T></label>
                 <Link
                   href="/forgot-password"
                   className="text-[11px] font-semibold text-primary hover:underline"
                 >
-                  Forgot Password?
-                </Link>
+                  <T>Forgot Password?</T></Link>
               </div>
               <div className="relative">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center text-input-text">
@@ -300,7 +296,7 @@ export default function LoginPage() {
                   value={password}
                   onBlur={handlePasswordBlur}
                   onChange={handlePasswordChange}
-                  placeholder="Enter your password"
+                  placeholder={t("Enter your password")}
                   className={getInputStyles(passwordState, true)}
                 />
                 <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center gap-2">
@@ -328,7 +324,7 @@ export default function LoginPage() {
             {status === "success" && (
               <div className="flex items-center gap-2 p-2.5 rounded-xl bg-success/10 text-success text-[12px] sm:text-[13px] animate-in fade-in">
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
-                <span>Authentication successful. Redirecting...</span>
+                <span><T>Authentication successful. Redirecting...</T></span>
               </div>
             )}
 
@@ -347,7 +343,7 @@ export default function LoginPage() {
                     <polyline points="20 6 9 17 4 12"></polyline>
                   </svg>
                 </div>
-                <span className="text-[13px] text-gray-text group-hover:text-text-primary transition-colors select-none">Remember me</span>
+                <span className="text-[13px] text-gray-text group-hover:text-text-primary transition-colors select-none"><T>Remember me</T></span>
               </label>
             </div>
 
@@ -357,8 +353,7 @@ export default function LoginPage() {
               isLoading={isLoading}
               className="w-full h-11 sm:h-12 text-[14px] sm:text-[15px] font-semibold rounded-full mt-2 bg-primary hover:bg-primary-dark text-white shadow-md shadow-primary/20 flex items-center justify-center gap-2 cursor-pointer"
             >
-              Login to Dashboard
-              <ArrowRight className="w-4 h-4" />
+              <T>Login to Dashboard</T><ArrowRight className="w-4 h-4 rtl:rotate-180" />
             </Button>
           </form>
         </div>

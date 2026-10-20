@@ -9,6 +9,7 @@ export interface LoginResponse {
     email: string;
     role: string;
     is_account_owner: boolean;
+    preferred_language?: string;
   };
   b2b_client: {
     id: string;
@@ -82,6 +83,11 @@ const authService = {
     Cookies.set('token', data.access_token, options);
     Cookies.set('spoc_user', JSON.stringify(data.spoc_user), options);
     Cookies.set('b2b_client', JSON.stringify(data.b2b_client), options);
+    // The portal opens in the language saved on this account.
+    const preferred = data.spoc_user?.preferred_language;
+    if (preferred === 'ar' || preferred === 'en') {
+      Cookies.set('lang', preferred, { expires: 365, sameSite: 'lax' });
+    }
   },
 };
 

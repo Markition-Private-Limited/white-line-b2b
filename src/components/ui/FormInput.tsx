@@ -1,5 +1,6 @@
 import React from "react";
 import { cn } from "@/utils/cn";
+import { useT } from "@/i18n/I18nProvider";
 
 export interface FormInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -24,10 +25,11 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
     },
     ref
   ) {
+    const { t } = useT();
     return (
       <div className={containerClassName}>
         <label className="text-[11px] font-semibold text-gray-text uppercase tracking-wider ml-1 mb-2 block">
-          {label}
+          {t(label)}
         </label>
         <div className="relative">
           {icon && (

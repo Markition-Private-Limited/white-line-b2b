@@ -1,5 +1,6 @@
 "use client";
 
+import { T, useT } from "@/i18n/I18nProvider";
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import {
@@ -23,6 +24,7 @@ interface MonthlyDataItem {
 const ALL_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 export default function DashboardPage() {
+  const { t } = useT();
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
   const [stats, setStats] = useState<DashboardData | null>(null);
@@ -128,8 +130,7 @@ export default function DashboardPage() {
         <div className="rounded-[28px] p-5 lg:p-6 flex flex-col justify-between min-h-[165px] bg-[#E2F8FA] border border-[#CDEEF2] shadow-[0_4px_24px_rgba(0,0,0,0.02)] relative overflow-hidden transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
           <div className="flex items-start justify-between">
             <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins">
-              Active<br />Requests
-            </span>
+              <T>Active</T><br /><T>Requests</T></span>
             <div className="w-8 h-8 rounded-full bg-[#005C66] text-white flex items-center justify-center shadow-xs">
               <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="9" />
@@ -144,13 +145,13 @@ export default function DashboardPage() {
           <div className="flex items-end justify-between mt-4">
             <div className="flex -space-x-2 overflow-hidden">
               <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white overflow-hidden bg-gray-200">
-                <Image src="/driver.png" alt="Driver" width={24} height={24} className="object-cover" />
+                <Image src="/driver.png" alt={t("Driver")} width={24} height={24} className="object-cover" />
               </div>
               <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white overflow-hidden bg-gray-300">
-                <Image src="/Avatar.png" alt="Passenger" width={24} height={24} className="object-cover" />
+                <Image src="/Avatar.png" alt={t("Passenger")} width={24} height={24} className="object-cover" />
               </div>
               <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white overflow-hidden bg-gray-400">
-                <Image src="/driver.png" alt="Driver" width={24} height={24} className="object-cover" />
+                <Image src="/driver.png" alt={t("Driver")} width={24} height={24} className="object-cover" />
               </div>
             </div>
             <span className="text-[34px] lg:text-[38px] font-semibold font-poppins text-gray-900 leading-none">
@@ -163,8 +164,7 @@ export default function DashboardPage() {
         <div className="rounded-[28px] p-5 lg:p-6 flex flex-col justify-between min-h-[165px] bg-[#E7F9E4] border border-[#D5F0D0] shadow-[0_4px_24px_rgba(0,0,0,0.02)] relative overflow-hidden transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
           <div className="flex items-start justify-between">
             <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins">
-              Pending<br />Requests
-            </span>
+              <T>Pending</T><br /><T>Requests</T></span>
             <div className="w-8 h-8 rounded-full bg-[#62C25D] text-white flex items-center justify-center shadow-xs">
               <Calendar className="w-4 h-4" />
             </div>
@@ -172,10 +172,10 @@ export default function DashboardPage() {
           <div className="flex items-end justify-between mt-4">
             <div className="flex -space-x-2 overflow-hidden">
               <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white overflow-hidden bg-gray-200">
-                <Image src="/driver.png" alt="Driver" width={24} height={24} className="object-cover" />
+                <Image src="/driver.png" alt={t("Driver")} width={24} height={24} className="object-cover" />
               </div>
               <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white overflow-hidden bg-gray-300">
-                <Image src="/Avatar.png" alt="Passenger" width={24} height={24} className="object-cover" />
+                <Image src="/Avatar.png" alt={t("Passenger")} width={24} height={24} className="object-cover" />
               </div>
             </div>
             <span className="text-[34px] lg:text-[38px] font-semibold font-poppins text-gray-900 leading-none">
@@ -188,8 +188,7 @@ export default function DashboardPage() {
         <div className="rounded-[28px] p-5 lg:p-6 flex flex-col justify-between min-h-[165px] bg-[#FEF9E2] border border-[#F5ECC4] shadow-[0_4px_24px_rgba(0,0,0,0.02)] relative overflow-hidden transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
           <div className="flex items-start justify-between">
             <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins">
-              Open<br />Complaints
-            </span>
+              <T>Open</T><br /><T>Complaints</T></span>
             <div className="w-8 h-8 rounded-full bg-[#B2B042] text-white flex items-center justify-center shadow-xs">
               <UserCheck className="w-4 h-4" />
             </div>
@@ -205,8 +204,7 @@ export default function DashboardPage() {
         <div className="rounded-[28px] p-5 lg:p-6 flex flex-col justify-between min-h-[165px] bg-[#E4EEFD] border border-[#D0DFF8] shadow-[0_4px_24px_rgba(0,0,0,0.02)] relative overflow-hidden transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
           <div className="flex items-start justify-between">
             <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins">
-              Resolved<br />Complaints
-            </span>
+              <T>Resolved</T><br /><T>Complaints</T></span>
             <div className="w-8 h-8 rounded-full bg-[#6888E0] text-white flex items-center justify-center shadow-xs">
               <CheckCircle2 className="w-4 h-4" />
             </div>
@@ -222,8 +220,7 @@ export default function DashboardPage() {
         <div className="rounded-[28px] p-5 lg:p-6 flex flex-col justify-between min-h-[165px] bg-[#005C66] bg-[url('/due_invoices_bg.png')] bg-no-repeat bg-[position:65%_bottom] bg-[length:130px] text-white shadow-[0_8px_30px_rgba(0,92,102,0.22)] relative overflow-hidden transition-all duration-200 hover:shadow-[0_12px_36px_rgba(0,92,102,0.3)]">
           <div className="flex items-start justify-between relative z-10">
             <span className="text-[16px] lg:text-[17px] font-semibold leading-snug font-poppins text-white">
-              Due<br />Invoices
-            </span>
+              <T>Due</T><br /><T>Invoices</T></span>
             <div className="w-8 h-8 rounded-full bg-white text-[#005C66] flex items-center justify-center shadow-xs">
               <FileText className="w-4 h-4" />
             </div>
@@ -243,18 +240,18 @@ export default function DashboardPage() {
         <div className="flex-1 min-w-0 rounded-[28px] p-6 lg:p-7 bg-white border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col justify-between">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
             <div>
-              <h3 className="text-base lg:text-lg font-bold text-gray-900 font-poppins">Invoice Analytics</h3>
-              <p className="text-xs text-gray-400 font-medium">Monthly Vs Payment Status</p>
+              <h3 className="text-base lg:text-lg font-bold text-gray-900 font-poppins"><T>Invoice Analytics</T></h3>
+              <p className="text-xs text-gray-400 font-medium"><T>Monthly Vs Payment Status</T></p>
             </div>
             <div className="flex items-center gap-4 flex-wrap">
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1.5">
                   <span className="w-3.5 h-3 rounded-xs bg-[#199CA8]" />
-                  <span className="text-xs text-gray-700 font-medium">Paid</span>
+                  <span className="text-xs text-gray-700 font-medium"><T>Paid</T></span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-3.5 h-3 rounded-xs bg-[#9FE4EE]" />
-                  <span className="text-xs text-gray-700 font-medium">UnPaid</span>
+                  <span className="text-xs text-gray-700 font-medium"><T>UnPaid</T></span>
                 </div>
               </div>
               <div className="relative">
@@ -263,7 +260,7 @@ export default function DashboardPage() {
                   onClick={() => setYearDropdownOpen(!yearDropdownOpen)}
                   className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-gray-200 text-[11px] font-bold text-gray-700 hover:bg-gray-50 uppercase tracking-wider cursor-pointer transition-colors select-none"
                 >
-                  YEARLY {selectedYear}
+                  <T>YEARLY</T> {selectedYear}
                   <ChevronDown className={cn("w-3 h-3 text-gray-400 transition-transform duration-200", yearDropdownOpen && "rotate-180")} />
                 </button>
 
@@ -337,7 +334,7 @@ export default function DashboardPage() {
                 <div className="flex-1 flex justify-between px-2 sm:px-4">
                   {monthlyData.map((item, idx) => (
                     <div key={idx} className="flex-1 text-center">
-                      <span className="text-[11px] sm:text-xs text-gray-700 font-medium select-none">{item.month}</span>
+                      <span className="text-[11px] sm:text-xs text-gray-700 font-medium select-none"><T>{item.month}</T></span>
                     </div>
                   ))}
                 </div>
@@ -349,13 +346,13 @@ export default function DashboardPage() {
         {/* Right: Paid & Unpaid Summary */}
         <div className="w-full lg:w-[260px] xl:w-[280px] shrink-0 flex flex-col gap-4">
           <div className="flex-1 rounded-[28px] p-5 lg:p-6 bg-white border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col justify-between min-h-[140px]">
-            <span className="text-[15px] lg:text-[16px] font-semibold text-gray-800">Paid Invoices</span>
+            <span className="text-[15px] lg:text-[16px] font-semibold text-gray-800"><T>Paid Invoices</T></span>
             <span className="text-[28px] lg:text-[32px] font-semibold font-poppins text-gray-900 leading-none">
               {loading ? "—" : `SAR ${(stats?.paid_invoices_amount ?? 0).toLocaleString()}`}
             </span>
           </div>
           <div className="flex-1 rounded-[28px] p-5 lg:p-6 bg-white border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col justify-between min-h-[140px]">
-            <span className="text-[15px] lg:text-[16px] font-semibold text-gray-800">Unpaid Invoices</span>
+            <span className="text-[15px] lg:text-[16px] font-semibold text-gray-800"><T>Unpaid Invoices</T></span>
             <span className="text-[28px] lg:text-[32px] font-semibold font-poppins text-gray-900 leading-none">
               {loading ? "—" : `SAR ${(stats?.unpaid_invoices_amount ?? 0).toLocaleString()}`}
             </span>

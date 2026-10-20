@@ -1,5 +1,6 @@
 "use client";
 
+import { T, useT } from "@/i18n/I18nProvider";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   FileText, Download, ExternalLink, Calendar, DollarSign, X, ChevronRight,
@@ -92,7 +93,7 @@ export default function ContractsPage() {
       header: "",
       className: "text-right",
       cell: () => (
-        <ChevronRight className="w-4 h-4 text-gray-400 ml-auto" />
+        <ChevronRight className="w-4 h-4 text-gray-400 ml-auto rtl:rotate-180" />
       ),
     },
   ], []);
@@ -101,8 +102,8 @@ export default function ContractsPage() {
     <div className="space-y-4">
       {/* Header */}
       <div>
-        <h1 className="h1 font-bold text-text-primary">Contracts</h1>
-        <p className="body-2 text-gray-text">All service agreements with WhiteLine</p>
+        <h1 className="h1 font-bold text-text-primary"><T>Contracts</T></h1>
+        <p className="body-2 text-gray-text"><T>All service agreements with WhiteLine</T></p>
       </div>
 
       {/* Table */}
@@ -122,8 +123,8 @@ export default function ContractsPage() {
         emptyState={
           <div className="flex flex-col items-center gap-3 py-16 text-center">
             <FileText className="w-12 h-12 text-gray-300" />
-            <p className="text-fs-14 font-semibold text-text-secondary">No contracts found</p>
-            <p className="text-fs-12 text-gray-400">Contact your WhiteLine account manager to set up a contract.</p>
+            <p className="text-fs-14 font-semibold text-text-secondary"><T>No contracts found</T></p>
+            <p className="text-fs-12 text-gray-400"><T>Contact your WhiteLine account manager to set up a contract.</T></p>
           </div>
         }
       />
@@ -155,6 +156,7 @@ function ContractDetailPanel({
   formatDate: (d?: string | Date) => string;
   formatAmount: (v?: number) => string;
 }) {
+  const { t } = useT();
   useEffect(() => {
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
@@ -180,7 +182,7 @@ function ContractDetailPanel({
         {/* Panel header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
           <div>
-            <p className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider">Contract</p>
+            <p className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider"><T>Contract</T></p>
             <p className="text-fs-17 font-bold text-text-primary font-poppins font-mono">{contract.contract_number}</p>
           </div>
           <div className="flex items-center gap-3">
@@ -208,21 +210,21 @@ function ContractDetailPanel({
             <div className="bg-input-bg rounded-2xl p-4 space-y-1">
               <div className="flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-primary" />
-                <span className="text-fs-9 font-bold text-gray-400 uppercase tracking-wider">Start</span>
+                <span className="text-fs-9 font-bold text-gray-400 uppercase tracking-wider"><T>Start</T></span>
               </div>
               <p className="text-fs-13 font-bold text-text-primary">{formatDate(contract.contract_start_date)}</p>
             </div>
             <div className="bg-input-bg rounded-2xl p-4 space-y-1">
               <div className="flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-primary" />
-                <span className="text-fs-9 font-bold text-gray-400 uppercase tracking-wider">End</span>
+                <span className="text-fs-9 font-bold text-gray-400 uppercase tracking-wider"><T>End</T></span>
               </div>
               <p className="text-fs-13 font-bold text-text-primary">{formatDate(contract.contract_end_date)}</p>
             </div>
             <div className="bg-input-bg rounded-2xl p-4 space-y-1">
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] font-bold text-primary font-mono leading-none">SAR</span>
-                <span className="text-fs-9 font-bold text-gray-400 uppercase tracking-wider">Amount</span>
+                <span className="text-[10px] font-bold text-primary font-mono leading-none"><T>SAR</T></span>
+                <span className="text-fs-9 font-bold text-gray-400 uppercase tracking-wider"><T>Amount</T></span>
               </div>
               <p className="text-fs-13 font-bold text-text-primary">{formatAmount(contract.contract_amount)}</p>
             </div>
@@ -231,18 +233,18 @@ function ContractDetailPanel({
           {/* Contact Info */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <p className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider">Primary Email</p>
+              <p className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider"><T>Primary Email</T></p>
               <p className="text-fs-13 font-semibold text-text-primary">{contract.primary_email ?? "—"}</p>
             </div>
             <div className="space-y-1">
-              <p className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider">Main Contact Phone</p>
+              <p className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider"><T>Main Contact Phone</T></p>
               <p className="text-fs-13 font-semibold text-text-primary">{contract.main_contact_phone ?? "—"}</p>
             </div>
           </div>
 
           {/* Pricing Terms */}
           <div className="space-y-2">
-            <p className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider">Pricing Terms</p>
+            <p className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider"><T>Pricing Terms</T></p>
             {additionalPricingTerms.length > 0 ? (
               <div className="space-y-2">
                 {additionalPricingTerms.map(([key, val]) => (
@@ -253,12 +255,12 @@ function ContractDetailPanel({
                 ))}
               </div>
             ) : (
-              <p className="text-fs-12 text-text-secondary">No additional pricing terms provided.</p>
+              <p className="text-fs-12 text-text-secondary"><T>No additional pricing terms provided.</T></p>
             )}
           </div>
           {workingHours != null && (
             <div className="space-y-2">
-              <p className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider">Working Hours</p>
+              <p className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider"><T>Working Hours</T></p>
               <p className="text-fs-12 font-bold text-text-primary">{String(workingHours)}</p>
             </div>
           )}
@@ -266,14 +268,14 @@ function ContractDetailPanel({
           {/* Contract Document */}
           {contract.contract_doc_url ? (
             <div className="space-y-2">
-              <p className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider">Contract Document</p>
+              <p className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider"><T>Contract Document</T></p>
               <div className="flex items-center gap-3 p-4 rounded-2xl bg-gray-50 border border-gray-100">
                 <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
                   <FileText className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-fs-12 font-semibold text-text-primary truncate">
-                    Contract_{contract.contract_number}{documentExtension(contract.contract_doc_url) ? `.${documentExtension(contract.contract_doc_url)}` : ""}
+                    <T>Contract_</T>{contract.contract_number}{documentExtension(contract.contract_doc_url) ? `.${documentExtension(contract.contract_doc_url)}` : ""}
                   </p>
                   <p className="text-fs-10 text-gray-400">{documentTypeLabel(contract.contract_doc_url)}</p>
                 </div>
@@ -283,7 +285,7 @@ function ContractDetailPanel({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-text-secondary hover:text-primary transition-colors"
-                    title="View"
+                    title={t("View")}
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
@@ -291,7 +293,7 @@ function ContractDetailPanel({
                     href={contract.contract_doc_url}
                     download
                     className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center hover:bg-primary hover:text-white transition-colors"
-                    title="Download"
+                    title={t("Download")}
                   >
                     <Download className="w-3.5 h-3.5" />
                   </a>
@@ -300,8 +302,8 @@ function ContractDetailPanel({
             </div>
           ) : (
             <div className="space-y-2">
-              <p className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider">Contract Document</p>
-              <p className="text-fs-12 text-gray-400 italic">No document attached to this contract.</p>
+              <p className="text-fs-10 font-bold text-gray-400 uppercase tracking-wider"><T>Contract Document</T></p>
+              <p className="text-fs-12 text-gray-400 italic"><T>No document attached to this contract.</T></p>
             </div>
           )}
         </div>

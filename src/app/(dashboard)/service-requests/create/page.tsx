@@ -1,5 +1,6 @@
 "use client";
 
+import { T, useT } from "@/i18n/I18nProvider";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CounterInput } from "@/components/ui/CounterInput";
@@ -11,6 +12,7 @@ import vehicleClassesService, { type VehicleClass } from "@/services/vehicleClas
 import { getRiyadhISODate } from "@/utils/datetime";
 
 export default function CreateServiceRequestPage() {
+  const { t } = useT();
   const router = useRouter();
 
   const [startDate, setStartDate] = useState("");
@@ -36,7 +38,7 @@ export default function CreateServiceRequestPage() {
         if (cancelled) return;
         setVehicleClasses(classes);
       } catch {
-        if (!cancelled) setAvailabilityError("Vehicle options could not be loaded. Please try again.");
+        if (!cancelled) setAvailabilityError(t("Vehicle options could not be loaded. Please try again."));
       } finally {
         if (!cancelled) setOptionsLoading(false);
       }
@@ -51,34 +53,34 @@ export default function CreateServiceRequestPage() {
   const validate = (): boolean => {
     // 1. Start Date
     if (!startDate) {
-      setFieldErrors({ startDate: "Start date is required." });
+      setFieldErrors({ startDate: t("Start date is required.") });
       return false;
     }
 
     if (startDate < getRiyadhISODate()) {
-      setFieldErrors({ startDate: "Start date cannot be in the past." });
+      setFieldErrors({ startDate: t("Start date cannot be in the past.") });
       return false;
     }
 
     // 2. End Date
     if (!endDate) {
-      setFieldErrors({ endDate: "End date is required." });
+      setFieldErrors({ endDate: t("End date is required.") });
       return false;
     }
 
     if (startDate && endDate && endDate < startDate) {
-      setFieldErrors({ endDate: "End date cannot be earlier than start date." });
+      setFieldErrors({ endDate: t("End date cannot be earlier than start date.") });
       return false;
     }
 
     // 3. Number of Vehicles
     if (vehiclesCount <= 0) {
-      setFieldErrors({ vehiclesCount: "At least 1 vehicle is required." });
+      setFieldErrors({ vehiclesCount: t("At least 1 vehicle is required.") });
       return false;
     }
 
     if (driversCount <= 0) {
-      setFieldErrors({ driversCount: "At least 1 driver is required." });
+      setFieldErrors({ driversCount: t("At least 1 driver is required.") });
       return false;
     }
 
@@ -88,7 +90,7 @@ export default function CreateServiceRequestPage() {
       return false;
     }
     if (!vehicleClasses.some((vehicleClass) => vehicleClass.id === selectedClassId)) {
-      setFieldErrors({ vehicleClass: "Please select a vehicle category." });
+      setFieldErrors({ vehicleClass: t("Please select a vehicle category.") });
       return false;
     }
 
@@ -138,14 +140,13 @@ export default function CreateServiceRequestPage() {
       {/* Form Container with Heading Inside */}
       <div className="card-base p-6 lg:p-8 bg-white rounded-[28px] border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
         <h1 className="text-fs-22 lg:text-fs-27 font-bold font-poppins text-text-primary mb-6">
-          Create Service Request
-        </h1>
+          <T>Create Service Request</T></h1>
 
         <form onSubmit={handleSubmit} className="space-y-6" noValidate>
           {/* Row 1: Start Date & End Date */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormInput
-              label="START DATE"
+              label={t("START DATE")}
               type="date"
               required
               min={getRiyadhISODate()}
@@ -161,7 +162,7 @@ export default function CreateServiceRequestPage() {
               }}
             />
             <FormInput
-              label="END DATE"
+              label={t("END DATE")}
               type="date"
               required
               min={startDate || undefined}
@@ -177,7 +178,7 @@ export default function CreateServiceRequestPage() {
           {/* Row 2: Counter Inputs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <CounterInput
-              label="NUMBER OF VEHICLES"
+              label={t("NUMBER OF VEHICLES")}
               value={vehiclesCount}
               error={fieldErrors.vehiclesCount}
               onChange={(val) => {
@@ -188,7 +189,7 @@ export default function CreateServiceRequestPage() {
               max={100}
             />
             <CounterInput
-              label="NUMBER OF DRIVERS"
+              label={t("NUMBER OF DRIVERS")}
               value={driversCount}
               error={fieldErrors.driversCount}
               onChange={(val) => {
@@ -202,29 +203,28 @@ export default function CreateServiceRequestPage() {
 
           {/* Row 3: Vehicle Category */}
           <FormDropdown
-            label="VEHICLE CATEGORY"
-            placeholder="Select vehicle category"
+            label={t("VEHICLE CATEGORY")}
+            placeholder={t("Select vehicle category")}
             options={classOptions}
             value={selectedClassName}
             error={fieldErrors.vehicleClass}
             onSelect={handleClassSelect}
           />
-          {optionsLoading && <p className="text-xs text-gray-500">Loading vehicle options...</p>}
+          {optionsLoading && <p className="text-xs text-gray-500"><T>Loading vehicle options...</T></p>}
           {!optionsLoading && availabilityError && <p className="text-xs text-red-600">{availabilityError}</p>}
           {!optionsLoading && !availabilityError && classOptions.length === 0 && (
-            <p className="text-xs text-red-600">No vehicle categories found. Contact WhiteLine support.</p>
+            <p className="text-xs text-red-600"><T>No vehicle categories found. Contact WhiteLine support.</T></p>
           )}
 
           {/* Row 4: Notes */}
           <div className="space-y-1">
             <label className="text-fs-10 font-semibold text-gray-text uppercase tracking-wider ml-1 mb-1.5 block">
-              NOTES (OPTIONAL)
-            </label>
+              <T>NOTES (OPTIONAL)</T></label>
             <textarea
               rows={4}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Any specific requirements or instructions..."
+              placeholder={t("Any specific requirements or instructions...")}
               className="w-full bg-input-bg border-none rounded-2xl px-4 py-3 text-fs-12 text-text-primary placeholder:text-input-placeholder focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all resize-none"
             />
           </div>
@@ -240,14 +240,13 @@ export default function CreateServiceRequestPage() {
               onClick={() => router.push("/service-requests")}
               className="py-2.5 px-8 text-fs-12 font-medium border border-gray-300 text-red-600 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
             >
-              Cancel
-            </button>
+              <T>Cancel</T></button>
             <button
               type="submit"
               disabled={isSubmitting}
               className="py-2.5 px-8 text-fs-12 font-medium bg-[#005C66] text-white hover:bg-[#004b54] rounded-full shadow-sm transition-colors cursor-pointer disabled:opacity-50"
             >
-              {isSubmitting ? "Submitting..." : "Submit Request"}
+              <T>{isSubmitting ? "Submitting..." : "Submit Request"}</T>
             </button>
           </div>
         </form>
@@ -257,8 +256,8 @@ export default function CreateServiceRequestPage() {
       <SuccessModal
         isOpen={isSuccessModalOpen}
         onClose={() => router.push("/service-requests")}
-        title="Request Submitted Successfully!"
-        message="Your service request has been received. Our team will review it and get back to you shortly."
+        title={t("Request Submitted Successfully!")}
+        message={t("Your service request has been received. Our team will review it and get back to you shortly.")}
         actionText="View Requests"
         onAction={() => router.push("/service-requests")}
       />

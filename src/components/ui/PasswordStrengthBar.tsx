@@ -1,3 +1,4 @@
+import { T } from "@/i18n/I18nProvider";
 import React from "react";
 import { cn } from "@/utils/cn";
 
@@ -66,7 +67,7 @@ export function PasswordStrengthBar({
           );
         })}
       </div>
-      <span className="text-[10px] text-gray-400 mt-1 block">Password strength</span>
+      <span className="text-[10px] text-gray-400 mt-1 block"><T>Password strength</T></span>
     </div>
   );
 }

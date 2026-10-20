@@ -1,5 +1,6 @@
 "use client";
 
+import { T, useT } from "@/i18n/I18nProvider";
 import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import {
   MoreVertical, RotateCcw, ArrowRightLeft, Lock, Eye, EyeOff, Check, ChevronDown, Search, X,
@@ -11,12 +12,14 @@ import { PasswordStrengthBar, isPasswordValid } from "@/components/ui/PasswordSt
 import { DataTable, type ColumnDef } from "@/components/layout/DataTableContainer";
 import usersService, { type SpocUser } from "@/services/users.service";
 import authService, { type LoginResponse } from "@/services/auth.service";
+import { dateLocale } from "@/i18n/dateLocale";
 
 const LIMIT = 10;
 
 const ROLE_OPTIONS = ["Admin", "Operations", "Finance"] as const;
 
 export default function UsersPage() {
+  const { t: tr } = useT();
   // Read browser cookies after hydration so the initial markup matches the server.
   const [currentUser, setCurrentUser] = useState<LoginResponse["spoc_user"] | null>(null);
   const isOwner = currentUser?.is_account_owner === true;
@@ -114,19 +117,19 @@ export default function UsersPage() {
   const handleCreateUser = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!fullName.trim() || !email.trim()) {
-      setCreateError("Please provide full name and email address.");
+      setCreateError(tr("Please provide full name and email address."));
       return;
     }
     if (!/^[\p{L}]+(?:[ '-][\p{L}]+)+$/u.test(fullName.trim())) {
-      setCreateError("Enter a valid full name using letters (first and last name).");
+      setCreateError(tr("Enter a valid full name using letters (first and last name)."));
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setCreateError("Enter a valid email address.");
+      setCreateError(tr("Enter a valid email address."));
       return;
     }
     if (!isPasswordValid(password)) {
-      setCreateError("Password must be 8+ characters with uppercase, lowercase, number, and special character.");
+      setCreateError(tr("Password must be 8+ characters with uppercase, lowercase, number, and special character."));
       return;
     }
     setCreateError("");
@@ -174,11 +177,11 @@ export default function UsersPage() {
     e.preventDefault();
     if (!changePasswordUser) return;
     if (!isPasswordValid(newPassword)) {
-      setActionError("New password must be 8+ characters with uppercase, lowercase, number, and special character.");
+      setActionError(tr("New password must be 8+ characters with uppercase, lowercase, number, and special character."));
       return;
     }
     if (newPassword !== confirmPassword) {
-      setActionError("Passwords do not match.");
+      setActionError(tr("Passwords do not match."));
       return;
     }
     setActionLoading(true);
@@ -222,21 +225,21 @@ export default function UsersPage() {
     try {
       const dt = new Date(d);
       if (isNaN(dt.getTime())) return "—";
-      return dt.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+      return dt.toLocaleDateString(dateLocale(), { month: "short", day: "2-digit", year: "numeric" });
     } catch { return "—"; }
   };
 
   const formatLastLogin = (d?: string) => {
-    if (!d) return "Never";
+    if (!d) return tr("Never");
     try {
       const diffMs = Date.now() - new Date(d).getTime();
       const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-      if (diffHours < 1) return "Just now";
-      if (diffHours < 24) return `${diffHours}h ago`;
-      if (diffHours < 48) return "Yesterday";
+      if (diffHours < 1) return tr("Just now");
+      if (diffHours < 24) return tr("{n}h ago", { n: diffHours });
+      if (diffHours < 48) return tr("Yesterday");
       const diffDays = Math.floor(diffHours / 24);
-      if (diffDays < 14) return `${diffDays} days ago`;
-      return `${Math.floor(diffDays / 7)}w ago`;
+      if (diffDays < 14) return tr("{n} days ago", { n: diffDays });
+      return tr("{n}w ago", { n: Math.floor(diffDays / 7) });
     } catch { return "—"; }
   };
 
@@ -266,8 +269,7 @@ export default function UsersPage() {
           <span className="font-semibold text-gray-900 text-[13px] font-inter">{row.full_name}</span>
           {row.is_account_owner && (
             <span className="px-2 py-0.5 rounded-full bg-[#005C66]/10 text-[#005C66] text-[10px] font-bold uppercase tracking-wide">
-              Owner
-            </span>
+              <T>Owner</T></span>
           )}
         </div>
       ),
@@ -282,7 +284,7 @@ export default function UsersPage() {
     },
     {
       header: "ROLE",
-      cell: (row) => <span className="font-bold text-gray-900 text-[13px] font-inter">{row.role}</span>,
+      cell: (row) => <span className="font-bold text-gray-900 text-[13px] font-inter">{tr(row.role)}</span>,
     },
     {
       header: "STATUS",
@@ -291,7 +293,7 @@ export default function UsersPage() {
           checked={row.status === "active"}
           disabled={!isOwner || row.is_account_owner || row.id === currentUser?.id}
           onChange={() => setPendingStatusUser(row)}
-          label={row.status === "active" ? "Active" : "Inactive"}
+          label={row.status === "active" ? tr("Active") : tr("Inactive")}
         />
       ),
     },
@@ -346,11 +348,9 @@ export default function UsersPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="text-[18px] sm:text-[20px] font-bold font-poppins text-gray-900">
-                Create New User
-              </h2>
+                <T>Create New User</T></h2>
               <p className="text-[12px] sm:text-[13px] text-gray-500 font-inter mt-0.5">
-                Assign roles and grant access to team members. New users are never account owners.
-              </p>
+                <T>Assign roles and grant access to team members. New users are never account owners.</T></p>
             </div>
             <div className="flex items-center gap-3">
               {isOwner && (
@@ -366,8 +366,7 @@ export default function UsersPage() {
                   className="h-[44px] px-6 rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50 text-[13px] font-medium transition-colors flex items-center gap-2 shrink-0 cursor-pointer"
                 >
                   <ArrowRightLeft className="w-4 h-4" />
-                  Transfer Ownership
-                </button>
+                  <T>Transfer Ownership</T></button>
               )}
               <button
                 type="button"
@@ -375,7 +374,7 @@ export default function UsersPage() {
                 disabled={creating}
                 className="h-[44px] px-8 rounded-full bg-[#005C66] text-white hover:bg-[#004d55] text-[13px] font-medium transition-colors shadow-xs flex items-center justify-center shrink-0 cursor-pointer disabled:opacity-50"
               >
-                {creating ? "Creating..." : createSuccess ? "User Created!" : "Create User"}
+                <T>{creating ? "Creating..." : createSuccess ? "User Created!" : "Create User"}</T>
               </button>
             </div>
           </div>
@@ -384,14 +383,13 @@ export default function UsersPage() {
             {/* FULL NAME */}
             <div>
               <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
-                FULL NAME
-              </label>
+                <T>FULL NAME</T></label>
               <input
                 type="text"
                 required
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="Enter Full Name"
+                placeholder={tr("Enter Full Name")}
                 className="w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full px-6 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-xs font-inter"
               />
             </div>
@@ -399,8 +397,7 @@ export default function UsersPage() {
             {/* EMAIL ADDRESS */}
             <div>
               <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
-                EMAIL ADDRESS
-              </label>
+                <T>EMAIL ADDRESS</T></label>
               <input
                 type="email"
                 name="create-user-email"
@@ -408,7 +405,7 @@ export default function UsersPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter Email Address"
+                placeholder={tr("Enter Email Address")}
                 className="w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full px-6 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-xs font-inter"
               />
             </div>
@@ -416,8 +413,7 @@ export default function UsersPage() {
             {/* PASSWORD */}
             <div>
               <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
-                PASSWORD
-              </label>
+                <T>PASSWORD</T></label>
               <div className="relative">
                 <input
                   type={showCreatePassword ? "text" : "password"}
@@ -426,7 +422,7 @@ export default function UsersPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Set a password"
+                  placeholder={tr("Set a password")}
                   className="w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full px-6 pr-12 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-xs font-inter"
                 />
                 <div
@@ -442,8 +438,7 @@ export default function UsersPage() {
             {/* ROLE SELECTION */}
             <div className="relative" ref={roleDropdownRef}>
               <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
-                ROLE SELECTION
-              </label>
+                <T>ROLE SELECTION</T></label>
               <button
                 type="button"
                 onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
@@ -492,8 +487,8 @@ export default function UsersPage() {
         }}
         emptyState={
           <div className="flex flex-col items-center gap-2 py-16 text-center">
-            <p className="text-[14px] font-semibold text-gray-500">No team members yet</p>
-            <p className="text-[12px] text-gray-400">Use the form above to invite your first team member.</p>
+            <p className="text-[14px] font-semibold text-gray-500"><T>No team members yet</T></p>
+            <p className="text-[12px] text-gray-400"><T>Use the form above to invite your first team member.</T></p>
           </div>
         }
       />
@@ -518,18 +513,16 @@ export default function UsersPage() {
 
             <div>
               <h3 className="text-[20px] sm:text-[22px] font-bold font-poppins text-gray-900 mb-1">
-                Change Password
-              </h3>
+                <T>Change Password</T></h3>
               <p className="text-[12px] sm:text-[13px] text-gray-500 font-inter">
-                Update security credentials for {changePasswordUser.full_name}
+                <T>Update security credentials for</T> {changePasswordUser.full_name}
               </p>
             </div>
 
             <form onSubmit={handleUpdatePassword} noValidate className="space-y-4">
               <div>
                 <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
-                  NEW PASSWORD
-                </label>
+                  <T>NEW PASSWORD</T></label>
                 <div className="relative">
                   <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400">
                     <Lock className="w-4 h-4" />
@@ -539,7 +532,7 @@ export default function UsersPage() {
                     required
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Enter new password"
+                    placeholder={tr("Enter new password")}
                     className="w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full pl-12 pr-12 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-xs font-inter"
                   />
                   <div
@@ -555,8 +548,7 @@ export default function UsersPage() {
 
               <div>
                 <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
-                  CONFIRM PASSWORD
-                </label>
+                  <T>CONFIRM PASSWORD</T></label>
                 <div className="relative">
                   <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400">
                     <Lock className="w-4 h-4" />
@@ -566,7 +558,7 @@ export default function UsersPage() {
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm new password"
+                    placeholder={tr("Confirm new password")}
                     className="w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full pl-12 pr-12 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-xs font-inter"
                   />
                   <div
@@ -586,14 +578,13 @@ export default function UsersPage() {
                   onClick={() => { setChangePasswordUser(null); setActionError(""); }}
                   className="h-[44px] px-8 rounded-full border border-gray-300 text-[#D9383A] hover:bg-red-50/50 text-[13px] font-medium cursor-pointer transition-colors flex items-center justify-center font-inter"
                 >
-                  Cancel
-                </button>
+                  <T>Cancel</T></button>
                 <button
                   type="submit"
                   disabled={actionLoading}
                   className="h-[44px] px-8 rounded-full bg-[#005C66] text-white hover:bg-[#004d55] text-[13px] font-medium cursor-pointer transition-colors shadow-xs disabled:opacity-50 flex items-center justify-center gap-1.5 font-inter"
                 >
-                  {actionLoading ? "Updating..." : "Update Password →"}
+                  <T>{actionLoading ? "Updating..." : "Update Password →"}</T>
                 </button>
               </div>
             </form>
@@ -621,17 +612,14 @@ export default function UsersPage() {
 
             <div>
               <h3 className="text-[20px] sm:text-[22px] font-bold font-poppins text-gray-900 mb-1.5">
-                Transfer Account Ownership
-              </h3>
+                <T>Transfer Account Ownership</T></h3>
               <p className="text-[12px] sm:text-[13px] text-gray-500 font-inter leading-relaxed">
-                Transfer full administrative control to another team member. You will lose owner privileges after this action.
-              </p>
+                <T>Transfer full administrative control to another team member. You will lose owner privileges after this action.</T></p>
             </div>
 
             <div className="space-y-2 relative" ref={transferDropdownRef}>
               <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block font-inter">
-                SELECT NEW OWNER
-              </label>
+                <T>SELECT NEW OWNER</T></label>
 
               <button
                 type="button"
@@ -641,7 +629,7 @@ export default function UsersPage() {
                 <div className="flex items-center gap-3 min-w-0">
                   <Search className="w-4 h-4 text-gray-400 shrink-0" />
                   <span className={`truncate ${selectedNewOwnerName ? "font-medium text-gray-900" : "text-gray-400"}`}>
-                    {selectedNewOwnerName || "Search team members..."}
+                    <T>{selectedNewOwnerName || "Search team members..."}</T>
                   </span>
                 </div>
                 <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200 ${transferDropdownOpen ? "rotate-180" : ""}`} />
@@ -657,7 +645,7 @@ export default function UsersPage() {
                         autoFocus
                         value={transferSearchQuery}
                         onChange={(e) => setTransferSearchQuery(e.target.value)}
-                        placeholder="Search by name or role..."
+                        placeholder={tr("Search by name or role...")}
                         className="w-full h-8 pl-8 pr-3 text-[12px] bg-white rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#005C66]/30 text-gray-800"
                         onClick={(e) => e.stopPropagation()}
                       />
@@ -667,8 +655,7 @@ export default function UsersPage() {
                   <div className="max-h-56 overflow-y-auto divide-y divide-gray-50 [scrollbar-width:thin]">
                     {filteredCandidates.length === 0 ? (
                       <div className="p-4 text-center text-xs text-gray-400 font-inter">
-                        No other team members found
-                      </div>
+                        <T>No other team members found</T></div>
                     ) : (
                       filteredCandidates.map((candidate) => {
                         const isSelected = selectedNewOwnerId === candidate.id;
@@ -686,7 +673,7 @@ export default function UsersPage() {
                           >
                             <div>
                               <p className="text-[13px] font-semibold text-gray-900 leading-tight">{candidate.full_name}</p>
-                              <p className="text-[11px] text-gray-500 mt-0.5">{candidate.role}</p>
+                              <p className="text-[11px] text-gray-500 mt-0.5">{tr(candidate.role)}</p>
                             </div>
                             {isSelected && <Check className="w-4 h-4 text-gray-900 shrink-0" />}
                           </div>
@@ -706,15 +693,14 @@ export default function UsersPage() {
                 onClick={() => { setTransferOpen(false); setActionError(""); }}
                 className="h-[44px] px-8 rounded-full border border-gray-300 text-[#D9383A] hover:bg-red-50/50 text-[13px] font-medium cursor-pointer transition-colors flex items-center justify-center font-inter"
               >
-                Cancel
-              </button>
+                <T>Cancel</T></button>
               <button
                 type="button"
                 disabled={!selectedNewOwnerId || actionLoading}
                 onClick={handleTransferOwnership}
                 className="h-[44px] px-8 rounded-full bg-[#005C66] text-white hover:bg-[#004d55] text-[13px] font-medium cursor-pointer transition-colors shadow-xs disabled:opacity-50 flex items-center justify-center gap-1.5 font-inter"
               >
-                {actionLoading ? "Transferring..." : "Transfer Ownership →"}
+                <T>{actionLoading ? "Transferring..." : "Transfer Ownership →"}</T>
               </button>
             </div>
           </div>
@@ -725,8 +711,8 @@ export default function UsersPage() {
       <SuccessModal
         isOpen={passwordSuccessModalOpen}
         onClose={() => setPasswordSuccessModalOpen(false)}
-        title="Password Updated"
-        message="The user can now log in with the new password."
+        title={tr("Password Updated")}
+        message={tr("The user can now log in with the new password.")}
         actionText="Done"
         onAction={() => setPasswordSuccessModalOpen(false)}
       />
@@ -734,8 +720,8 @@ export default function UsersPage() {
       <SuccessModal
         isOpen={transferSuccessModalOpen}
         onClose={() => setTransferSuccessModalOpen(false)}
-        title="Ownership Transferred"
-        message="Full administrative control has been transferred to the selected team member."
+        title={tr("Ownership Transferred")}
+        message={tr("Full administrative control has been transferred to the selected team member.")}
         actionText="Done"
         onAction={() => setTransferSuccessModalOpen(false)}
       />
@@ -743,7 +729,7 @@ export default function UsersPage() {
       <Modal
         isOpen={!!pendingStatusUser}
         onClose={() => { if (!statusUpdating) setPendingStatusUser(null); }}
-        title={pendingStatusUser?.status === "active" ? "Deactivate user?" : "Activate user?"}
+        title={pendingStatusUser?.status === "active" ? tr("Deactivate user?") : tr("Activate user?")}
         maxWidth="max-w-[440px]"
       >
         <p className="text-sm text-gray-600 mb-6">
@@ -753,10 +739,9 @@ export default function UsersPage() {
         </p>
         <div className="flex justify-end gap-3">
           <button type="button" disabled={statusUpdating} onClick={() => setPendingStatusUser(null)} className="px-5 py-2.5 rounded-full border border-gray-200 text-sm text-gray-700 disabled:opacity-50">
-            Cancel
-          </button>
+            <T>Cancel</T></button>
           <button type="button" disabled={statusUpdating} onClick={handleToggleActive} className="px-5 py-2.5 rounded-full bg-primary text-white text-sm disabled:opacity-50">
-            {statusUpdating ? "Updating..." : pendingStatusUser?.status === "active" ? "Deactivate" : "Activate"}
+            <T>{statusUpdating ? "Updating..." : pendingStatusUser?.status === "active" ? "Deactivate" : "Activate"}</T>
           </button>
         </div>
       </Modal>
@@ -775,8 +760,7 @@ export default function UsersPage() {
             </div>
           </div>
           <h3 className="text-fs-20 lg:text-fs-22 font-bold text-gray-900 mb-3 font-poppins leading-tight">
-            Action Failed
-          </h3>
+            <T>Action Failed</T></h3>
           <p className="text-fs-13 lg:text-fs-14 text-gray-500 mb-8 max-w-sm leading-relaxed mx-auto font-normal">
             {toggleError}
           </p>
@@ -786,8 +770,7 @@ export default function UsersPage() {
               onClick={() => setToggleError("")}
               className="py-2.5 px-8 text-fs-13 lg:text-fs-14 font-medium bg-red-600 text-white hover:bg-red-700 rounded-full shadow-sm transition-colors cursor-pointer"
             >
-              Close
-            </button>
+              <T>Close</T></button>
           </div>
         </div>
       </Modal>
@@ -815,7 +798,7 @@ export default function UsersPage() {
             className="w-full flex items-center gap-3 px-3.5 py-2.5 text-[13px] text-gray-800 hover:bg-gray-50 rounded-xl cursor-pointer transition-colors font-medium font-inter"
           >
             <RotateCcw className="w-4 h-4 text-gray-400 shrink-0" />
-            <span>Change Password</span>
+            <span><T>Change Password</T></span>
           </button>
         </div>
       )}

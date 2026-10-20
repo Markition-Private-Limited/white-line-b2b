@@ -1,5 +1,6 @@
 "use client";
 
+import { T, useT } from "@/i18n/I18nProvider";
 import React, { useState, useRef, useEffect } from "react";
 import { Calendar, ChevronDown, Check } from "lucide-react";
 import { cn } from "@/utils/cn";
@@ -29,6 +30,7 @@ export function DatePickerDropdown({
   buttonClassName,
   labelPrefix = "Date"
 }: DatePickerDropdownProps) {
+  const { t } = useT();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState<string>(defaultValue.replace("Date: ", "").replace("Date Range: ", "").trim());
   const [isCustomMode, setIsCustomMode] = useState(false);
@@ -113,7 +115,7 @@ export function DatePickerDropdown({
       >
         <div className="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap">
           <Calendar className="w-4 h-4 text-gray-500 shrink-0" />
-          <span className="truncate">{getDisplayButtonText()}</span>
+          <span className="truncate">{t(getDisplayButtonText())}</span>
         </div>
         <ChevronDown className={cn("w-3.5 h-3.5 transition-transform duration-200 text-gray-500 shrink-0", isOpen && "rotate-180")} />
       </button>
@@ -134,7 +136,7 @@ export function DatePickerDropdown({
                       isSelected ? "text-primary font-semibold bg-primary/5" : "text-gray-600 hover:bg-gray-50"
                     )}
                   >
-                    <span>{option === "All" ? "All Dates" : option}</span>
+                    <span><T>{option === "All" ? "All Dates" : option}</T></span>
                     {isSelected && <Check className="w-4 h-4 text-primary" />}
                   </button>
                 );
@@ -143,19 +145,18 @@ export function DatePickerDropdown({
           ) : (
             <div className="p-2.5 flex flex-col gap-3">
               <div className="flex items-center justify-between border-b border-gray-100 pb-2">
-                <span className="text-fs-12 font-bold text-text-primary">Select Custom Dates</span>
+                <span className="text-fs-12 font-bold text-text-primary"><T>Select Custom Dates</T></span>
                 <button
                   type="button"
                   onClick={() => setIsCustomMode(false)}
                   className="text-fs-11 text-gray-500 hover:text-primary transition-colors cursor-pointer"
                 >
-                  Back to presets
-                </button>
+                  <T>Back to presets</T></button>
               </div>
 
               <div className="flex flex-col gap-2">
                 <div className="flex flex-col gap-1">
-                  <label className="text-fs-10 font-semibold uppercase text-gray-500">From Date</label>
+                  <label className="text-fs-10 font-semibold uppercase text-gray-500"><T>From Date</T></label>
                   <input
                     type="date"
                     value={startDate}
@@ -171,7 +172,7 @@ export function DatePickerDropdown({
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-fs-10 font-semibold uppercase text-gray-500">To Date</label>
+                  <label className="text-fs-10 font-semibold uppercase text-gray-500"><T>To Date</T></label>
                   <input
                     type="date"
                     value={endDate}
@@ -188,15 +189,13 @@ export function DatePickerDropdown({
                   onClick={() => setIsCustomMode(false)}
                   className="px-3 py-1.5 rounded-full text-fs-11 font-medium text-gray-600 hover:bg-gray-100 cursor-pointer"
                 >
-                  Cancel
-                </button>
+                  <T>Cancel</T></button>
                 <button
                   type="button"
                   onClick={handleApplyCustom}
                   className="px-4 py-1.5 rounded-full text-fs-11 font-semibold bg-primary text-white hover:bg-primary/90 transition-colors shadow-sm cursor-pointer"
                 >
-                  Apply
-                </button>
+                  <T>Apply</T></button>
               </div>
             </div>
           )}

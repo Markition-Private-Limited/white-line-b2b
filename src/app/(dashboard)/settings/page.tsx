@@ -1,5 +1,6 @@
 "use client";
 
+import { T, useT } from "@/i18n/I18nProvider";
 import React, { useState, useEffect } from "react";
 import {
   Building2, Globe, Lock, LogOut, Eye, EyeOff, Save, Mail, MapPin, CheckCircle2, X,
@@ -17,6 +18,7 @@ import { CountryPhoneInput } from "@/components/ui/CountryPhoneInput";
 import Cookies from "js-cookie";
 
 export default function SettingsPage() {
+  const { t, lang, setLang } = useT();
   const [companyName, setCompanyName] = useState("");
   const [companyEmail, setCompanyEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -28,7 +30,6 @@ export default function SettingsPage() {
   const [saveError, setSaveError] = useState("");
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  const [language, setLanguage] = useState<"en">("en");
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [changePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -92,24 +93,24 @@ export default function SettingsPage() {
     setSaveError("");
 
     if (!companyName.trim()) {
-      setSaveError("Company name is required and cannot be empty.");
+      setSaveError(t("Company name is required and cannot be empty."));
       return;
     }
 
     if (phoneChanged && !phone.trim()) {
-      setSaveError("Phone number is required.");
+      setSaveError(t("Phone number is required."));
       return;
     }
 
     if (!address.trim()) {
-      setSaveError("Registered address is required.");
+      setSaveError(t("Registered address is required."));
       return;
     }
 
     if (!hasSettingsChanges) return;
 
     if (phoneChanged && !isValidPhoneNumber(phone)) {
-      setSaveError("Check the phone number length for the selected country.");
+      setSaveError(t("Check the phone number length for the selected country."));
       return;
     }
 
@@ -145,15 +146,15 @@ export default function SettingsPage() {
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentPassword.trim()) {
-      setPasswordError("Current password is required.");
+      setPasswordError(t("Current password is required."));
       return;
     }
     if (newPassword.length < 8) {
-      setPasswordError("New password must be at least 8 characters.");
+      setPasswordError(t("New password must be at least 8 characters."));
       return;
     }
     if (newPassword !== confirmPassword) {
-      setPasswordError("Passwords do not match.");
+      setPasswordError(t("Passwords do not match."));
       return;
     }
 
@@ -189,15 +190,13 @@ export default function SettingsPage() {
               <Building2 className="w-4.5 h-4.5 text-[#005C66]" />
             </div>
             <h2 className="text-[18px] sm:text-[19px] font-bold font-poppins text-gray-900">
-              Company Information
-            </h2>
+              <T>Company Information</T></h2>
           </div>
 
           <div className="space-y-4">
             <div>
               <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
-                COMPANY NAME
-              </label>
+                <T>COMPANY NAME</T></label>
               <input
                 type="text"
                 value={companyName}
@@ -205,7 +204,7 @@ export default function SettingsPage() {
                   setCompanyName(e.target.value);
                   setSaveError("");
                 }}
-                placeholder="Enter company name"
+                placeholder={t("Enter company name")}
                 className="w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full px-6 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-xs"
               />
             </div>
@@ -213,8 +212,7 @@ export default function SettingsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
-                  EMAIL ADDRESS
-                </label>
+                  <T>EMAIL ADDRESS</T></label>
                 <div className="relative">
                   <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400">
                     <Mail className="w-4 h-4" />
@@ -230,8 +228,7 @@ export default function SettingsPage() {
 
               <div>
                 <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
-                  PHONE NUMBER
-                </label>
+                  <T>PHONE NUMBER</T></label>
                 <CountryPhoneInput
                   value={phone}
                   onChange={(value) => {
@@ -240,18 +237,17 @@ export default function SettingsPage() {
                   }}
                   invalid={invalidSavedPhone}
                   autoComplete="tel"
-                  placeholder="Enter phone number"
+                  placeholder={t("Enter phone number")}
                 />
                 {invalidSavedPhone && (
-                  <p className="mt-1.5 text-xs text-red-600">Check the phone number length for the selected country.</p>
+                  <p className="mt-1.5 text-xs text-red-600"><T>Check the phone number length for the selected country.</T></p>
                 )}
               </div>
             </div>
 
             <div>
               <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
-                REGISTERED ADDRESS
-              </label>
+                <T>REGISTERED ADDRESS</T></label>
               <input
                 type="text"
                 value={address}
@@ -259,7 +255,7 @@ export default function SettingsPage() {
                   setAddress(e.target.value);
                   setSaveError("");
                 }}
-                placeholder="Enter address"
+                placeholder={t("Enter address")}
                 className="w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full px-6 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-xs"
               />
             </div>
@@ -273,42 +269,44 @@ export default function SettingsPage() {
                 <Globe className="w-4.5 h-4.5 text-[#005C66]" />
               </div>
               <h2 className="text-[18px] sm:text-[19px] font-bold font-poppins text-gray-900">
-                Language
-              </h2>
+                <T>Language</T></h2>
             </div>
 
             <p className="text-[12px] sm:text-[13px] text-gray-500 font-inter">
-              Choose your preferred interface language.
-            </p>
+              <T>Choose your preferred interface language.</T></p>
 
             <div className="space-y-2.5 pt-1">
-              <button
-                type="button"
-                onClick={() => setLanguage("en")}
-                className="w-full h-[48px] px-5 rounded-2xl flex items-center justify-between cursor-pointer transition-colors bg-[#F4F5F7] hover:bg-gray-100"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-base">🇺🇸</span>
-                  <span className="text-[13px] sm:text-[14px] font-medium text-gray-800">English</span>
-                </div>
-                <div className="w-5 h-5 rounded-full bg-[#005C66] text-white flex items-center justify-center shadow-xs">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                </div>
-              </button>
+              {([["en", "🇺🇸", "English"], ["ar", "🇸🇦", "العربية"]] as const).map(([code, flag, label]) => (
+                <button
+                  key={code}
+                  type="button"
+                  onClick={() => { if (code !== lang) void setLang(code); }}
+                  aria-current={code === lang ? "true" : undefined}
+                  className="w-full h-[48px] px-5 rounded-2xl flex items-center justify-between cursor-pointer transition-colors bg-[#F4F5F7] hover:bg-gray-100"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-base">{flag}</span>
+                    <span className="text-[13px] sm:text-[14px] font-medium text-gray-800">{label}</span>
+                  </div>
+                  {code === lang && (
+                    <div className="w-5 h-5 rounded-full bg-[#005C66] text-white flex items-center justify-center shadow-xs">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                    </div>
+                  )}
+                </button>
+              ))}
             </div>
           </div>
 
           <div className="pt-5 border-t border-gray-100">
             <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-3 font-inter">
-              LOGOUT
-            </p>
+              <T>LOGOUT</T></p>
             <button
               type="button"
               onClick={() => setLogoutModalOpen(true)}
               className="h-[42px] sm:h-[44px] px-8 rounded-full border border-gray-300 text-[#D9383A] hover:bg-red-50/50 text-[12px] sm:text-[13px] font-medium transition-colors cursor-pointer flex items-center justify-center"
             >
-              Logout
-            </button>
+              <T>Logout</T></button>
           </div>
         </div>
       </div>
@@ -320,19 +318,16 @@ export default function SettingsPage() {
           </div>
           <div>
             <h2 className="text-[17px] sm:text-[18px] font-bold font-poppins text-gray-900">
-              Security Settings
-            </h2>
+              <T>Security Settings</T></h2>
             <p className="text-[12px] sm:text-[13px] text-gray-400 font-inter mt-0.5">
-              Update your password
-            </p>
+              <T>Update your password</T></p>
           </div>
         </div>
 
         <div className="bg-[#F4F5F7] rounded-xl p-4 sm:py-5 sm:pl-6 sm:pr-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 flex-1 max-w-[560px] shadow-xs">
           <div className="flex-1 min-w-0">
             <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block leading-none mb-1 font-inter">
-              CURRENT PASSWORD
-            </label>
+              <T>CURRENT PASSWORD</T></label>
             <div className="flex items-center gap-2">
               <span className="text-[15px] sm:text-[17px] tracking-widest text-gray-700 font-mono leading-none">
                 ••••••••••••••••
@@ -351,8 +346,7 @@ export default function SettingsPage() {
             }}
             className="w-full sm:w-auto h-[40px] sm:h-[42px] px-6 rounded-full border border-primary text-primary hover:bg-primary hover:text-white text-[12px] sm:text-[13px] font-medium transition-colors cursor-pointer bg-white shrink-0 shadow-2xs"
           >
-            Change Password
-          </button>
+            <T>Change Password</T></button>
         </div>
       </div>
 
@@ -368,7 +362,7 @@ export default function SettingsPage() {
               : "bg-[#005C66] text-white hover:bg-[#004d55]"
           }`}
         >
-          {saving ? "Saving..." : saveSuccess ? "Saved Successfully!" : "Save Changes"}
+          <T>{saving ? "Saving..." : saveSuccess ? "Saved Successfully!" : "Save Changes"}</T>
         </button>
       </div>
 
@@ -391,18 +385,16 @@ export default function SettingsPage() {
 
             <div>
               <h3 className="text-[20px] sm:text-[22px] font-bold font-poppins text-gray-900 mb-1">
-                Change Password
-              </h3>
+                <T>Change Password</T></h3>
               <p className="text-[12px] sm:text-[13px] text-gray-500 font-inter">
-                Update security credentials for {userName}
+                <T>Update security credentials for</T> {userName}
               </p>
             </div>
 
             <form onSubmit={handlePasswordUpdate} noValidate className="space-y-4">
               <div>
                 <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
-                  CURRENT PASSWORD
-                </label>
+                  <T>CURRENT PASSWORD</T></label>
                 <div className="relative">
                   <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400">
                     <Lock className="w-4 h-4" />
@@ -412,7 +404,7 @@ export default function SettingsPage() {
                     required
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    placeholder="Enter current password"
+                    placeholder={t("Enter current password")}
                     className="w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full pl-12 pr-12 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-xs"
                   />
                   <div
@@ -426,8 +418,7 @@ export default function SettingsPage() {
 
               <div>
                 <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
-                  NEW PASSWORD
-                </label>
+                  <T>NEW PASSWORD</T></label>
                 <div className="relative">
                   <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400">
                     <Lock className="w-4 h-4" />
@@ -437,7 +428,7 @@ export default function SettingsPage() {
                     required
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Enter new password"
+                    placeholder={t("Enter new password")}
                     className="w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full pl-12 pr-12 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-xs"
                   />
                   <div
@@ -453,8 +444,7 @@ export default function SettingsPage() {
 
               <div>
                 <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
-                  CONFIRM PASSWORD
-                </label>
+                  <T>CONFIRM PASSWORD</T></label>
                 <div className="relative">
                   <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400">
                     <Lock className="w-4 h-4" />
@@ -464,7 +454,7 @@ export default function SettingsPage() {
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm new password"
+                    placeholder={t("Confirm new password")}
                     className="w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full pl-12 pr-12 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-xs"
                   />
                   <div
@@ -486,14 +476,13 @@ export default function SettingsPage() {
                   onClick={closePasswordModal}
                   className="h-[44px] px-8 rounded-full border border-gray-300 text-[#D9383A] hover:bg-red-50/50 text-[13px] font-medium cursor-pointer transition-colors flex items-center justify-center"
                 >
-                  Cancel
-                </button>
+                  <T>Cancel</T></button>
                 <button
                   type="submit"
                   disabled={passwordLoading}
                   className="h-[44px] px-8 rounded-full bg-[#005C66] text-white hover:bg-[#004d55] text-[13px] font-medium cursor-pointer transition-colors shadow-xs disabled:opacity-50 flex items-center justify-center gap-1.5"
                 >
-                  {passwordLoading ? "Updating..." : "Update Password →"}
+                  <T>{passwordLoading ? "Updating..." : "Update Password →"}</T>
                 </button>
               </div>
             </form>
@@ -504,8 +493,8 @@ export default function SettingsPage() {
       <SuccessModal
         isOpen={passwordSuccessModalOpen}
         onClose={() => setPasswordSuccessModalOpen(false)}
-        title="Password Reset Successfully"
-        message="Now You can login with your new password."
+        title={t("Password Reset Successfully")}
+        message={t("Now You can login with your new password.")}
         actionText="Done"
         onAction={() => setPasswordSuccessModalOpen(false)}
       />
@@ -532,12 +521,10 @@ export default function SettingsPage() {
             </div>
 
             <h3 className="text-[20px] sm:text-[22px] font-bold font-poppins text-gray-900">
-              Confirm Logout
-            </h3>
+              <T>Confirm Logout</T></h3>
 
             <p className="text-[12px] sm:text-[13px] text-gray-500 leading-relaxed max-w-[320px] mx-auto mb-6 font-inter">
-              Are you sure you want to log out of your account?
-            </p>
+              <T>Are you sure you want to log out of your account?</T></p>
 
             <div className="flex items-center justify-center gap-3 pt-1">
               <button
@@ -545,15 +532,13 @@ export default function SettingsPage() {
                 onClick={() => setLogoutModalOpen(false)}
                 className="h-[44px] px-8 rounded-full border border-gray-300 text-[#D9383A] hover:bg-red-50/50 text-[13px] font-medium cursor-pointer transition-colors flex items-center justify-center"
               >
-                Cancel
-              </button>
+                <T>Cancel</T></button>
               <button
                 type="button"
                 onClick={handleLogout}
                 className="h-[44px] px-8 rounded-full bg-[#005C66] text-white hover:bg-[#004d55] text-[13px] font-medium cursor-pointer transition-colors shadow-xs flex items-center justify-center"
               >
-                Yes, Logout
-              </button>
+                <T>Yes, Logout</T></button>
             </div>
           </div>
         </div>

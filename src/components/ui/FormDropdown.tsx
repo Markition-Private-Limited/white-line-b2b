@@ -1,5 +1,6 @@
 "use client";
 
+import { T, useT } from "@/i18n/I18nProvider";
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/utils/cn";
@@ -38,6 +39,7 @@ export function FormDropdown({
   direction = "down",
   error,
 }: FormDropdownProps) {
+  const { t } = useT();
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState(defaultValue || "");
   const [searchQuery, setSearchQuery] = useState("");
@@ -67,7 +69,7 @@ export function FormDropdown({
     if (onSelect) onSelect(val);
   };
 
-  const selectedLabel = (() => {
+  const rawSelectedLabel = (() => {
     if (!selected) return placeholder;
     const foundOption = options.find(opt => {
       if (typeof opt === "string") return opt === selected;
@@ -78,13 +80,14 @@ export function FormDropdown({
     }
     return selected;
   })();
+  const selectedLabel = t(rawSelectedLabel);
 
   const isUp = direction === "up";
 
   return (
     <div className={cn("w-full", containerClassName)} ref={dropdownRef}>
       <label className="text-fs-10 font-semibold text-gray-text uppercase tracking-wider ml-1 mb-1.5 block">
-        {label}
+        {t(label)}
       </label>
       
       <div className="relative w-full">
@@ -125,7 +128,7 @@ export function FormDropdown({
                   type="text"
                   autoFocus
                   className="w-full h-[32px] px-3 text-fs-12 bg-gray-50 rounded-lg border-none focus:outline-none focus:ring-1 focus:ring-primary/20 text-text-primary"
-                  placeholder="Search..."
+                  placeholder={t("Search...")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onClick={(e) => e.stopPropagation()}
@@ -137,14 +140,15 @@ export function FormDropdown({
                 const filteredOptions = options.filter(option => {
                   if (!searchable || !searchQuery) return true;
                   const labelStr = typeof option === "string" ? option : option.label;
-                  return labelStr.toLowerCase().includes(searchQuery.toLowerCase());
+                  const needle = searchQuery.toLowerCase();
+                  // Match what is shown (translated) as well as the stored English label.
+                  return labelStr.toLowerCase().includes(needle) || t(labelStr).toLowerCase().includes(needle);
                 });
 
                 if (filteredOptions.length === 0) {
                   return (
                     <div className="w-full text-center px-4 py-3 text-fs-12 text-gray-400">
-                      No options available
-                    </div>
+                      <T>No options available</T></div>
                   );
                 }
 
@@ -161,7 +165,7 @@ export function FormDropdown({
                         selected === optVal ? "text-primary font-medium bg-primary/5" : "text-text-secondary"
                       )}
                     >
-                      <span className="normal-case text-fs-12 tracking-normal font-medium">{optLabel}</span>
+                      <span className="normal-case text-fs-12 tracking-normal font-medium">{t(optLabel)}</span>
                     </button>
                   );
                 });

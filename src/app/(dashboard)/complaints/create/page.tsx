@@ -1,5 +1,6 @@
 "use client";
 
+import { T, useT } from "@/i18n/I18nProvider";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -14,6 +15,7 @@ import { CountryPhoneInput } from "@/components/ui/CountryPhoneInput";
 type BookingOption = { id: string; booking_number: string; scheduled_datetime: string; status: string };
 
 export default function CreateComplaintPage() {
+  const { t } = useT();
   const router = useRouter();
 
   const [submitterName, setSubmitterName] = useState("Admin User");
@@ -54,21 +56,21 @@ export default function CreateComplaintPage() {
 
     // 2. Subject validation (one at a time)
     if (!subject.trim()) {
-      setFieldErrors({ subject: "Subject is required." });
+      setFieldErrors({ subject: t("Subject is required.") });
       return false;
     }
     if (subject.trim().length < 3) {
-      setFieldErrors({ subject: "Subject must be at least 3 characters." });
+      setFieldErrors({ subject: t("Subject must be at least 3 characters.") });
       return false;
     }
 
     // 3. Description validation (one at a time)
     if (!description.trim()) {
-      setFieldErrors({ description: "Description is required." });
+      setFieldErrors({ description: t("Description is required.") });
       return false;
     }
     if (description.trim().length < 10) {
-      setFieldErrors({ description: "Please provide at least 10 characters describing your concern." });
+      setFieldErrors({ description: t("Please provide at least 10 characters describing your concern.") });
       return false;
     }
     if (description.length > MAX_CHARS) {
@@ -111,16 +113,14 @@ export default function CreateComplaintPage() {
       {/* Main Form Card with Heading inside matching Service Request */}
       <div className="bg-white rounded-[32px] p-6 sm:p-8 lg:p-10 border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
         <h1 className="text-[24px] lg:text-[27px] font-bold font-poppins text-gray-900 mb-7 tracking-tight">
-          Create Complaint
-        </h1>
+          <T>Create Complaint</T></h1>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-6">
           {/* Row 1: Submitter Name & Contact Number */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
-                SUBMITTER NAME
-              </label>
+                <T>SUBMITTER NAME</T></label>
               <input
                 type="text"
                 readOnly
@@ -131,8 +131,7 @@ export default function CreateComplaintPage() {
 
             <div>
               <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
-                CONTACT NUMBER (OPTIONAL)
-              </label>
+                <T>CONTACT NUMBER (OPTIONAL)</T></label>
               <CountryPhoneInput
                 value={contactNumber}
                 onChange={(value) => {
@@ -142,7 +141,7 @@ export default function CreateComplaintPage() {
                   }
                 }}
                 invalid={!!fieldErrors.contactNumber}
-                placeholder="Phone number"
+                placeholder={t("Phone number")}
                 autoComplete="tel"
               />
               {fieldErrors.contactNumber && (
@@ -156,15 +155,14 @@ export default function CreateComplaintPage() {
           {/* Row 1.5: Related Booking (Optional) */}
           <div>
             <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
-              RELATED BOOKING (OPTIONAL)
-            </label>
+              <T>RELATED BOOKING (OPTIONAL)</T></label>
             <div className="relative">
               <select
                 value={bookingId}
                 onChange={(e) => setBookingId(e.target.value)}
                 className="w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full pl-6 pr-12 text-[13px] sm:text-[14px] text-gray-800 border-none focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-xs appearance-none cursor-pointer"
               >
-                <option value="">None selected</option>
+                <option value=""><T>None selected</T></option>
                 {bookingOptions.map((b) => {
                   let formattedDate = "";
                   if (b.scheduled_datetime) {
@@ -175,7 +173,7 @@ export default function CreateComplaintPage() {
                   }
                   return (
                     <option key={b.id} value={b.id}>
-                      {b.booking_number || "Booking"}{formattedDate}
+                      <T>{b.booking_number || "Booking"}</T>{formattedDate}
                     </option>
                   );
                 })}
@@ -187,8 +185,7 @@ export default function CreateComplaintPage() {
           {/* Row 2: Subject */}
           <div>
             <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-2 font-inter">
-              SUBJECT
-            </label>
+              <T>SUBJECT</T></label>
             <input
               type="text"
               value={subject}
@@ -198,7 +195,7 @@ export default function CreateComplaintPage() {
                   setFieldErrors((prev) => ({ ...prev, subject: "" }));
                 }
               }}
-              placeholder="Enter a brief summary"
+              placeholder={t("Enter a brief summary")}
               className={`w-full h-[48px] sm:h-[50px] bg-[#F4F5F7] rounded-full px-6 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none transition-all shadow-xs ${
                 fieldErrors.subject
                   ? "ring-1 ring-red-500 focus:ring-1 focus:ring-red-500"
@@ -216,8 +213,7 @@ export default function CreateComplaintPage() {
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block font-inter">
-                DESCRIPTION
-              </label>
+                <T>DESCRIPTION</T></label>
               <span
                 className={`text-[12px] font-medium font-inter ${
                   description.length > MAX_CHARS || fieldErrors.description
@@ -241,7 +237,7 @@ export default function CreateComplaintPage() {
                     : "",
                 }));
               }}
-              placeholder="Provide detailed information about your concern..."
+              placeholder={t("Provide detailed information about your concern...")}
               className={`w-full bg-[#F4F5F7] rounded-[24px] p-6 text-[13px] sm:text-[14px] text-gray-800 placeholder:text-gray-400 border-none focus:outline-none transition-all resize-none min-h-[170px] leading-relaxed shadow-xs ${
                 fieldErrors.description
                   ? "ring-1 ring-red-500 focus:ring-1 focus:ring-red-500"
@@ -268,14 +264,13 @@ export default function CreateComplaintPage() {
               onClick={() => router.push("/complaints")}
               className="h-[42px] sm:h-[44px] px-8 rounded-full border border-gray-300 text-[#D9383A] hover:bg-red-50/50 text-[12px] sm:text-[13px] font-medium cursor-pointer transition-colors flex items-center justify-center"
             >
-              Cancel
-            </button>
+              <T>Cancel</T></button>
             <button
               type="submit"
               disabled={isSubmitting}
               className="h-[42px] sm:h-[44px] px-8 rounded-full bg-[#005C66] text-white hover:bg-[#004d55] text-[12px] sm:text-[13px] font-medium cursor-pointer transition-colors shadow-xs disabled:opacity-50 flex items-center justify-center"
             >
-              {isSubmitting ? "Submitting..." : "Submit Complaint"}
+              <T>{isSubmitting ? "Submitting..." : "Submit Complaint"}</T>
             </button>
           </div>
         </form>
@@ -287,8 +282,7 @@ export default function CreateComplaintPage() {
           <Info className="w-3.5 h-3.5 text-[#78350F]" />
         </div>
         <p className="text-[12px] sm:text-[13px] text-[#5C4813] font-normal leading-relaxed">
-          Our resolution team typically reviews all concierge complaints within 24 business hours. You will receive a notification once the status of this report changes.
-        </p>
+          <T>Our resolution team typically reviews all concierge complaints within 24 business hours. You will receive a notification once the status of this report changes.</T></p>
       </div>
 
       {/* Complaint Submitted Successfully Modal matching Figma View 4 */}
@@ -312,20 +306,17 @@ export default function CreateComplaintPage() {
             </div>
 
             <h3 className="text-[21px] sm:text-[23px] font-bold text-gray-900 mb-2 font-poppins leading-tight">
-              Complaint Submitted<br />Successfully!
-            </h3>
+              <T>Complaint Submitted</T><br /><T>Successfully!</T></h3>
 
             <p className="text-[12px] sm:text-[13px] text-gray-500 leading-relaxed max-w-[340px] mx-auto mb-7 font-inter">
-              Our resolution team typically reviews all concierge complaints within 24 business hours. You will receive a notification once the status of this report changes.
-            </p>
+              <T>Our resolution team typically reviews all concierge complaints within 24 business hours. You will receive a notification once the status of this report changes.</T></p>
 
             <button
               type="button"
               onClick={() => router.push("/complaints")}
               className="rounded-full bg-[#005C66] text-white hover:bg-[#004d55] px-9 h-[44px] text-[13px] font-medium transition-colors cursor-pointer shadow-xs inline-flex items-center justify-center"
             >
-              View Complaints
-            </button>
+              <T>View Complaints</T></button>
           </div>
         </div>
       )}

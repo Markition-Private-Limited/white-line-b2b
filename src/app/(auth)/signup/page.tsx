@@ -1,5 +1,6 @@
 "use client";
 
+import { T, useT } from "@/i18n/I18nProvider";
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -18,6 +19,7 @@ const FULL_NAME_MAX_LENGTH = 100;
 const VALID_FULL_NAME = /^[\p{L}]+(?:[ '-][\p{L}]+)+$/u;
 
 export default function SignUpPage() {
+  const { t } = useT();
   const router = useRouter();
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -56,29 +58,29 @@ export default function SignUpPage() {
     if (step === 1) {
       const fullName = formData.name.trim();
       if (!VALID_FULL_NAME.test(fullName)) {
-        setSubmitError("Enter a valid full name using letters only.");
+        setSubmitError(t("Enter a valid full name using letters only."));
         return;
       }
       if (fullName.length > FULL_NAME_MAX_LENGTH) {
-        setSubmitError(`Full name must be ${FULL_NAME_MAX_LENGTH} characters or less.`);
+        setSubmitError(t("Full name must be {FULL_NAME_MAX_LENGTH} characters or less.", { FULL_NAME_MAX_LENGTH }));
         return;
       }
       if (!formData.phone || !isValidPhoneNumber(formData.phone)) {
-        setSubmitError("Check the phone number length for the selected country.");
+        setSubmitError(t("Check the phone number length for the selected country."));
         return;
       }
       const pwd = formData.password;
-      if (pwd.length < 8) { setSubmitError("Password must be at least 8 characters."); return; }
-      if (!/[A-Z]/.test(pwd)) { setSubmitError("Password must contain an uppercase letter."); return; }
-      if (!/[a-z]/.test(pwd)) { setSubmitError("Password must contain a lowercase letter."); return; }
-      if (!/[0-9]/.test(pwd)) { setSubmitError("Password must contain a number."); return; }
-      if (!/[^A-Za-z0-9]/.test(pwd)) { setSubmitError("Password must contain a special character."); return; }
+      if (pwd.length < 8) { setSubmitError(t("Password must be at least 8 characters.")); return; }
+      if (!/[A-Z]/.test(pwd)) { setSubmitError(t("Password must contain an uppercase letter.")); return; }
+      if (!/[a-z]/.test(pwd)) { setSubmitError(t("Password must contain a lowercase letter.")); return; }
+      if (!/[0-9]/.test(pwd)) { setSubmitError(t("Password must contain a number.")); return; }
+      if (!/[^A-Za-z0-9]/.test(pwd)) { setSubmitError(t("Password must contain a special character.")); return; }
       
       setStep(2);
     }
     else if (step === 2) {
       if (!formData.companyEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.companyEmail)) {
-        setSubmitError("Please enter a valid company email address.");
+        setSubmitError(t("Please enter a valid company email address."));
         return;
       }
       setStep(3);
@@ -114,7 +116,7 @@ export default function SignUpPage() {
       <div className="hidden lg:flex lg:w-1/2 relative bg-black flex-col justify-between p-8 lg:p-10 h-full overflow-hidden">
         <Image
           src="/Auth_left_signup_bg.png"
-          alt="WhiteLine Fleet Background"
+          alt={t("WhiteLine Fleet Background")}
           fill
           priority
           className="object-cover opacity-100"
@@ -125,7 +127,7 @@ export default function SignUpPage() {
         <div className="relative z-10 flex items-center">
           <Image
             src="/logo.png"
-            alt="WhiteLine B2B Client Portal"
+            alt={t("WhiteLine B2B Client Portal")}
             width={260}
             height={65}
             className="w-[260px] h-auto object-contain"
@@ -136,19 +138,17 @@ export default function SignUpPage() {
         {/* Bottom Content */}
         <div className="relative z-10 text-center max-w-md mx-auto mt-auto mb-10 lg:mb-14 py-4">
           <h1 className="h1 font-medium mb-3 tracking-tight text-white">
-            Precision in Motion
-          </h1>
+            <T>Precision in Motion</T></h1>
           <p className="body-1 text-white/90 font-light leading-relaxed">
-            The command center for the world&apos;s most elite chauffeur logistics operations.
-          </p>
+            <T>The command center for the world&apos;s most elite chauffeur logistics operations.</T></p>
         </div>
 
         {/* Bottom Footer Links */}
         <div className="relative z-10 flex items-center justify-between text-fs-10 text-gray-300 border-t border-white/15 pt-4">
-          <span>© 2026 ELITE CHAUFFEUR LOGISTICS</span>
+          <span><T>© 2026 ELITE CHAUFFEUR LOGISTICS</T></span>
           <div className="flex items-center gap-4">
-            <Link href="https://whitelineglobal.com/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-            <Link href="https://whitelineglobal.com/terms" className="hover:text-white transition-colors">Terms & Conditions</Link>
+            <Link href="https://whitelineglobal.com/privacy" className="hover:text-white transition-colors"><T>Privacy Policy</T></Link>
+            <Link href="https://whitelineglobal.com/terms" className="hover:text-white transition-colors"><T>Terms &amp; Conditions</T></Link>
           </div>
         </div>
       </div>
@@ -159,7 +159,7 @@ export default function SignUpPage() {
         <div className="absolute top-8 left-8 hidden sm:block">
           <Image
             src="/logo_back.png"
-            alt="Whiteline Watermark"
+            alt={t("Whiteline Watermark")}
             width={90}
             height={90}
             className="w-[85px] h-auto object-contain"
@@ -170,11 +170,9 @@ export default function SignUpPage() {
           {/* Header */}
           <div className="mb-5">
             <h3 className="text-fs-20 sm:text-fs-22 font-bold font-poppins text-text-primary mb-1">
-              Create Your Corporate Account
-            </h3>
+              <T>Create Your Corporate Account</T></h3>
             <p className="text-[13px] sm:text-[14px] text-gray-text leading-relaxed">
-              Join WhiteLine for exclusive corporate mobility solutions.
-            </p>
+              <T>Join WhiteLine for exclusive corporate mobility solutions.</T></p>
           </div>
 
           {/* Stepper Progress Indicator */}
@@ -186,8 +184,7 @@ export default function SignUpPage() {
                 step >= 1 ? "bg-primary text-white ring-2 ring-primary/15" : "bg-gray-100 text-gray-400"
               )}>01</div>
               <span className={cn("text-[10px] sm:text-[11px] font-medium tracking-tight", step >= 1 ? "text-primary font-semibold" : "text-gray-400")}>
-                Personal
-              </span>
+                <T>Personal</T></span>
             </div>
 
             {/* Connector 1→2 */}
@@ -200,8 +197,7 @@ export default function SignUpPage() {
                 step >= 2 ? "bg-primary text-white ring-2 ring-primary/15" : "bg-gray-100 text-gray-400"
               )}>02</div>
               <span className={cn("text-[10px] sm:text-[11px] font-medium tracking-tight", step >= 2 ? "text-primary font-semibold" : "text-gray-400")}>
-                Company
-              </span>
+                <T>Company</T></span>
             </div>
 
             {/* Connector 2→3 */}
@@ -214,8 +210,7 @@ export default function SignUpPage() {
                 step >= 3 ? "bg-primary text-white ring-2 ring-primary/15" : "bg-gray-100 text-gray-400"
               )}>03</div>
               <span className={cn("text-[10px] sm:text-[11px] font-medium tracking-tight", step >= 3 ? "text-primary font-semibold" : "text-gray-400")}>
-                Preferences
-              </span>
+                <T>Preferences</T></span>
             </div>
           </div>
 
@@ -224,23 +219,21 @@ export default function SignUpPage() {
             {step === 1 && (
               <div className="space-y-4 animate-in fade-in">
                 <h4 className="text-[13px] sm:text-[14px] font-bold text-text-primary uppercase tracking-wider mb-2">
-                  Step#1 · Personal Profile
-                </h4>
+                  <T>Step#1 · Personal Profile</T></h4>
 
                 <FormInput
-                  label="FULL NAME"
+                  label={t("FULL NAME")}
                   required
                   maxLength={FULL_NAME_MAX_LENGTH}
                   value={formData.name}
                   onChange={(e) => handleChange("name", e.target.value)}
-                  placeholder="Enter your full name"
+                  placeholder={t("Enter your full name")}
                   icon={<User className="w-4.5 h-4.5" />}
                 />
 
                 <div>
                   <label className="text-[11px] font-semibold text-gray-text uppercase tracking-wider ml-1 mb-2 block">
-                    PHONE NUMBER
-                  </label>
+                    <T>PHONE NUMBER</T></label>
                   <CountryPhoneInput
                     value={formData.phone}
                     onChange={(phone) => setFormData((prev) => ({ ...prev, phone }))}
@@ -251,12 +244,12 @@ export default function SignUpPage() {
                 </div>
 
                 <FormInput
-                  label="PASSWORD"
+                  label={t("PASSWORD")}
                   type={showPassword ? "text" : "password"}
                   required
                   value={formData.password}
                   onChange={(e) => handleChange("password", e.target.value)}
-                  placeholder="Create a password"
+                  placeholder={t("Create a password")}
                   icon={<Lock className="w-4.5 h-4.5" />}
                   rightIcon={showPassword ? <EyeOff className="w-4.5 h-4.5" /> : <Eye className="w-4.5 h-4.5" />}
                   onRightIconClick={() => setShowPassword(!showPassword)}
@@ -274,8 +267,7 @@ export default function SignUpPage() {
                   type="submit"
                   className="w-full h-11 sm:h-12 text-[14px] sm:text-[15px] font-semibold rounded-full mt-2 bg-primary hover:bg-primary-dark text-white shadow-md shadow-primary/20 flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  Move to 2nd Step
-                  <ArrowRight className="w-4 h-4" />
+                  <T>Move to 2nd Step</T><ArrowRight className="w-4 h-4 rtl:rotate-180" />
                 </Button>
               </div>
             )}
@@ -284,38 +276,36 @@ export default function SignUpPage() {
             {step === 2 && (
               <div className="space-y-4 animate-in fade-in">
                 <h4 className="text-[13px] sm:text-[14px] font-bold text-text-primary uppercase tracking-wider mb-2">
-                  Step#2 · Company Details
-                </h4>
+                  <T>Step#2 · Company Details</T></h4>
 
                 <FormInput
-                  label="COMPANY NAME"
+                  label={t("COMPANY NAME")}
                   required
                   value={formData.companyName}
                   onChange={(e) => handleChange("companyName", e.target.value)}
-                  placeholder="Enter company name"
+                  placeholder={t("Enter company name")}
                   icon={<Briefcase className="w-4.5 h-4.5" />}
                 />
 
                 <FormInput
-                  label="COMPANY EMAIL ADDRESS"
+                  label={t("COMPANY EMAIL ADDRESS")}
                   type="email"
                   required
                   value={formData.companyEmail}
                   onChange={(e) => handleChange("companyEmail", e.target.value)}
-                  placeholder="Enter company email"
+                  placeholder={t("Enter company email")}
                   icon={<Mail className="w-4.5 h-4.5" />}
                 />
 
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-semibold text-gray-text uppercase tracking-wider ml-1 mb-1.5 block">
-                    COMPANY ADDRESS
-                  </label>
+                    <T>COMPANY ADDRESS</T></label>
                   <textarea
                     rows={2}
                     required
                     value={formData.companyAddress}
                     onChange={(e) => handleChange("companyAddress", e.target.value)}
-                    placeholder="Enter registered address"
+                    placeholder={t("Enter registered address")}
                     className="w-full bg-input-bg border-none rounded-2xl px-4 py-3 text-[13px] sm:text-[14px] font-normal text-text-primary placeholder:text-input-placeholder placeholder:font-light placeholder:text-[13px] focus:outline-none focus:ring-1 focus:ring-primary/20 resize-none transition-all"
                   />
                 </div>
@@ -333,14 +323,12 @@ export default function SignUpPage() {
                     onClick={() => setStep(1)}
                     className="flex-1 h-11 sm:h-12 text-[13px] sm:text-[14px] font-semibold rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50 cursor-pointer"
                   >
-                    Back
-                  </Button>
+                    <T>Back</T></Button>
                   <Button
                     type="submit"
                     className="flex-1 h-11 sm:h-12 text-[13px] sm:text-[14px] font-semibold rounded-full bg-primary text-white hover:bg-primary-dark shadow-md shadow-primary/20 flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    Next
-                    <ArrowRight className="w-4 h-4" />
+                    <T>Next</T><ArrowRight className="w-4 h-4 rtl:rotate-180" />
                   </Button>
                 </div>
               </div>
@@ -350,34 +338,33 @@ export default function SignUpPage() {
             {step === 3 && (
               <div className="space-y-4 animate-in fade-in">
                 <h4 className="text-[13px] sm:text-[14px] font-bold text-text-primary uppercase tracking-wider mb-2">
-                  Step#3 · Company Contact
-                </h4>
+                  <T>Step#3 · Company Contact</T></h4>
 
                 <FormInput
-                  label="DESIGNATION"
+                  label={t("DESIGNATION")}
                   required
                   value={formData.designation}
                   onChange={(e) => handleChange("designation", e.target.value)}
-                  placeholder="e.g. Operations Director"
+                  placeholder={t("e.g. Operations Director")}
                   icon={<Briefcase className="w-4.5 h-4.5" />}
                 />
 
                 <FormInput
-                  label="ANNUAL TRAVEL BUDGET"
+                  label={t("ANNUAL TRAVEL BUDGET")}
                   required
                   value={formData.travelBudget}
                   onChange={(e) => handleChange("travelBudget", e.target.value)}
                   placeholder="500,000"
-                  icon={<span className="text-[12px] font-bold text-gray-500 font-mono">SAR</span>}
+                  icon={<span className="text-[12px] font-bold text-gray-500 font-mono"><T>SAR</T></span>}
                 />
 
                 <FormInput
-                  label="COMPANY SIZE"
+                  label={t("COMPANY SIZE")}
                   required
                   maxLength={100}
                   value={formData.companySize}
                   onChange={(e) => handleChange("companySize", e.target.value)}
-                  placeholder="e.g. 50-200 employees"
+                  placeholder={t("e.g. 50-200 employees")}
                   icon={<Users className="w-4.5 h-4.5" />}
                 />
 
@@ -391,8 +378,7 @@ export default function SignUpPage() {
                     className="w-4.5 h-4.5 mt-0.5 rounded text-primary focus:ring-primary border-gray-300 accent-primary cursor-pointer shrink-0"
                   />
                   <label htmlFor="terms" className="text-[12px] sm:text-[13px] text-gray-500 leading-tight select-none cursor-pointer">
-                    I acknowledge the Terms &amp; Conditions and Privacy Policy of WhiteLine Global.
-                  </label>
+                    <T>I acknowledge the Terms &amp; Conditions and Privacy Policy of WhiteLine Global.</T></label>
                 </div>
 
                 {submitError && (
@@ -408,15 +394,13 @@ export default function SignUpPage() {
                     onClick={() => setStep(2)}
                     className="flex-1 h-11 sm:h-12 text-[13px] sm:text-[14px] font-semibold rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50 cursor-pointer"
                   >
-                    Back
-                  </Button>
+                    <T>Back</T></Button>
                   <Button
                     type="submit"
                     isLoading={isSubmitting}
                     className="flex-1 h-11 sm:h-12 text-[13px] sm:text-[14px] font-semibold rounded-full bg-primary text-white hover:bg-primary-dark shadow-md shadow-primary/20 cursor-pointer"
                   >
-                    Submit
-                  </Button>
+                    <T>Submit</T></Button>
                 </div>
               </div>
             )}
@@ -425,10 +409,9 @@ export default function SignUpPage() {
           {/* Bottom Login Link */}
           <div className="text-center mt-5 pt-3 border-t border-gray-100">
             <p className="text-[12px] sm:text-[13px] text-gray-500">
-              Already have an account?{" "}
+              <T>Already have an account?</T>{" "}
               <Link href="/login" className="font-semibold text-primary hover:underline">
-                Login here
-              </Link>
+                <T>Login here</T></Link>
             </p>
           </div>
         </div>
@@ -446,17 +429,14 @@ export default function SignUpPage() {
             <Clock className="w-8 h-8 animate-pulse" />
           </div>
           <h3 className="text-fs-17 font-bold font-poppins text-text-primary mb-2">
-            Account Activation Pending
-          </h3>
+            <T>Account Activation Pending</T></h3>
           <p className="text-fs-12 text-text-secondary mb-6 max-w-xs leading-relaxed">
-            Your activation is pending. One of our team members will contact you shortly.
-          </p>
+            <T>Your activation is pending. One of our team members will contact you shortly.</T></p>
           <Button
             onClick={() => router.push("/login")}
             className="w-full py-3 text-fs-14 font-medium rounded-full bg-primary text-white hover:bg-primary-dark"
           >
-            Ok
-          </Button>
+            <T>Ok</T></Button>
         </div>
       </Modal>
     </div>

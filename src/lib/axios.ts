@@ -17,6 +17,10 @@ apiClient.interceptors.request.use(
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // The API answers in the user's language (error and validation messages).
+    if (config.headers) {
+      config.headers['Accept-Language'] = Cookies.get('lang') === 'ar' ? 'ar' : 'en';
+    }
     // If request data is FormData, remove Content-Type header so Axios and browser set multipart boundary properly
     if (config.data instanceof FormData && config.headers) {
       delete config.headers['Content-Type'];

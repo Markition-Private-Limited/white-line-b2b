@@ -1,5 +1,6 @@
 "use client";
 
+import { T, useT } from "@/i18n/I18nProvider";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import PhoneInput, { getCountryCallingCode, type Country, type Value } from "react-phone-number-input";
 import flags from "react-phone-number-input/flags";
@@ -19,6 +20,7 @@ function CountryCodeSelect({
   options: CountryOption[];
   disabled?: boolean;
 }) {
+  const { t } = useT();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
@@ -54,7 +56,7 @@ function CountryCodeSelect({
       <button
         type="button"
         disabled={disabled}
-        aria-label={`Country calling code: ${selected?.label ?? "International"}${value ? ` +${getCountryCallingCode(value)}` : ""}`}
+        aria-label={t("Country calling code: {v0}{v1}", { v0: selected?.label ?? "International", v1: value ? ` +${getCountryCallingCode(value)}` : "" })}
         aria-expanded={open}
         aria-haspopup="listbox"
         onClick={() => {
@@ -64,7 +66,7 @@ function CountryCodeSelect({
         className="country-phone-input__trigger"
       >
         <span className="country-phone-input__flag">
-          {SelectedFlag ? <SelectedFlag title={selected?.label ?? value ?? "Country"} /> : <Globe2 size={18} />}
+          {SelectedFlag ? <SelectedFlag title={selected?.label ?? value ?? t("Country")} /> : <Globe2 size={18} />}
         </span>
         <span>+{value ? getCountryCallingCode(value) : ""}</span>
         <ChevronDown size={14} className={`shrink-0 text-slate-400 transition-transform ${open ? "rotate-180" : ""}`} />
@@ -75,13 +77,13 @@ function CountryCodeSelect({
             <Search size={16} className="shrink-0 text-slate-400" />
             <input
               autoFocus
-              aria-label="Search countries"
-              placeholder="Search country or code"
+              aria-label={t("Search countries")}
+              placeholder={t("Search country or code")}
               value={query}
               onChange={(event) => setQuery(event.target.value)}
             />
           </div>
-          <div role="listbox" aria-label="Choose a country" className="country-phone-input__options">
+          <div role="listbox" aria-label={t("Choose a country")} className="country-phone-input__options">
             {filteredOptions.map(({ value: country, label }) => {
               const Flag = country ? flags[country] : undefined;
               return (
@@ -105,7 +107,7 @@ function CountryCodeSelect({
                 </button>
               );
             })}
-            {filteredOptions.length === 0 && <p className="px-3 py-4 text-sm text-slate-500">No countries found</p>}
+            {filteredOptions.length === 0 && <p className="px-3 py-4 text-sm text-slate-500"><T>No countries found</T></p>}
           </div>
         </div>
       )}

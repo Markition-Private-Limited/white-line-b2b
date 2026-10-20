@@ -1,5 +1,6 @@
 "use client";
 
+import { T, useT } from "@/i18n/I18nProvider";
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import {
@@ -37,6 +38,7 @@ const normalizeInvoiceSearch = (value: string) => {
 const formatInvoiceBadge = (raw?: string) => raw ? raw.replace(/^#/, "").trim() : "—";
 
 export default function InvoicesPage() {
+  const { t } = useT();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -244,7 +246,7 @@ export default function InvoicesPage() {
           <div className="flex flex-col gap-3">
             <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[155px] bg-[#E2F8FA] border border-[#CDEEF2] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
               <div className="flex items-start justify-between">
-                <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins">Paid<br />Invoices</span>
+                <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins"><T>Paid</T><br /><T>Invoices</T></span>
                 <div className="w-8 h-8 rounded-full bg-[#005C66] text-white flex items-center justify-center shadow-xs">
                   <CheckCircle2 className="w-4 h-4" />
                 </div>
@@ -256,7 +258,7 @@ export default function InvoicesPage() {
 
             <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[155px] bg-[#FEF9E2] border border-[#F5ECC4] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
               <div className="flex items-start justify-between">
-                <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins">Due<br />Soon</span>
+                <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins"><T>Due</T><br /><T>Soon</T></span>
                 <div className="w-8 h-8 rounded-full bg-[#B2B042] text-white flex items-center justify-center shadow-xs">
                   <Clock className="w-4 h-4" />
                 </div>
@@ -268,7 +270,7 @@ export default function InvoicesPage() {
 
             <div className="rounded-[24px] p-5 flex flex-col justify-between min-h-[155px] bg-[#E7F9E4] border border-[#D5F0D0] shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
               <div className="flex items-start justify-between">
-                <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins">Unpaid<br />Invoices</span>
+                <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins"><T>Unpaid</T><br /><T>Invoices</T></span>
                 <div className="w-8 h-8 rounded-full bg-[#62C25D] text-white flex items-center justify-center shadow-xs">
                   <AlertCircle className="w-4 h-4" />
                 </div>
@@ -283,7 +285,7 @@ export default function InvoicesPage() {
         {/* Right: Table */}
         <div className="flex flex-col gap-2 flex-1 min-w-0">
           <PageToolbar
-            searchPlaceholder="Search by invoice #, description, or amount"
+            searchPlaceholder={t("Search by invoice #, description, or amount")}
             searchValue={search}
             onSearch={(val) => { setSearch(val); setPage(1); }}
             filters={toolbarFilters}
@@ -311,7 +313,7 @@ export default function InvoicesPage() {
           <div className="space-y-5">
             {/* Modal Header */}
             <div className="flex items-center gap-2.5">
-              <h3 className="text-[18px] sm:text-[19px] font-bold font-poppins text-gray-900">Invoice Details</h3>
+              <h3 className="text-[18px] sm:text-[19px] font-bold font-poppins text-gray-900"><T>Invoice Details</T></h3>
               <span className="text-[11px] font-bold text-white bg-[#8E95A5] px-3 py-0.5 rounded-full">
                 {formatInvoiceBadge(selectedInvoice.invoice_number)}
               </span>
@@ -354,8 +356,7 @@ export default function InvoicesPage() {
                 <Calendar className="w-4 h-4 text-gray-500 mt-0.5 shrink-0" />
                 <div>
                   <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
-                    INVOICE DATE
-                  </span>
+                    <T>INVOICE DATE</T></span>
                   <span className="text-[13px] font-bold text-gray-900 block mt-0.5">
                     {formatDate(selectedInvoice.invoice_date)}
                   </span>
@@ -365,8 +366,7 @@ export default function InvoicesPage() {
                 <Calendar className="w-4 h-4 text-gray-500 mt-0.5 shrink-0" />
                 <div>
                   <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
-                    DUE DATE
-                  </span>
+                    <T>DUE DATE</T></span>
                   <span className="text-[13px] font-bold text-gray-900 block mt-0.5">
                     {formatDate(selectedInvoice.due_date)}
                   </span>
@@ -375,16 +375,16 @@ export default function InvoicesPage() {
             </div>
 
             {/* Service Details Card */}
-            {detailLoading && <p className="text-xs text-gray-500">Loading invoice details...</p>}
+            {detailLoading && <p className="text-xs text-gray-500"><T>Loading invoice details...</T></p>}
             <div className="bg-[#EAF6F8] rounded-[24px] p-5 space-y-3 border border-[#D5EEF2]/50">
-              <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">SERVICE DETAILS</span>
+              <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider block"><T>SERVICE DETAILS</T></span>
               <div className="flex items-center justify-between text-[13px]">
-                <span className="text-gray-600 font-normal">Number of Drivers Required</span>
+                <span className="text-gray-600 font-normal"><T>Number of Drivers Required</T></span>
                 <span className="font-bold text-gray-900">{selectedInvoice.number_of_drivers ?? selectedInvoice.num_drivers_required ?? selectedInvoice.service_request?.num_drivers_required ?? "—"}</span>
               </div>
               <div className="border-b border-dashed border-gray-300/80 my-1" />
               <div className="flex items-center justify-between text-[13px]">
-                <span className="text-gray-600 font-normal">Number of Vehicles Required</span>
+                <span className="text-gray-600 font-normal"><T>Number of Vehicles Required</T></span>
                 <span className="font-bold text-gray-900">{selectedInvoice.number_of_vehicles ?? selectedInvoice.num_vehicles_required ?? selectedInvoice.service_request?.num_vehicles_required ?? "—"}</span>
               </div>
             </div>
@@ -392,7 +392,7 @@ export default function InvoicesPage() {
             {/* Total Amount Banner */}
             <div className="bg-[#00BCD4] rounded-[24px] p-5 text-white flex items-center justify-between shadow-xs overflow-hidden relative">
               <div className="relative z-10">
-                <span className="text-[10px] uppercase font-bold tracking-widest text-white/90 block mb-1">INVOICE AMOUNT</span>
+                <span className="text-[10px] uppercase font-bold tracking-widest text-white/90 block mb-1"><T>INVOICE AMOUNT</T></span>
                 <span className="text-[24px] font-bold font-poppins text-white leading-none">{formatAmount(selectedInvoice.total_amount)}</span>
               </div>
               <div className="flex items-end gap-1.5 shrink-0">
@@ -411,8 +411,7 @@ export default function InvoicesPage() {
                 className="h-11 sm:h-12 px-6 rounded-full bg-[#00525C] hover:bg-[#00414A] text-white text-[13px] font-semibold flex items-center gap-2 shadow-sm transition-colors cursor-pointer"
               >
                 <Download className="w-4 h-4 stroke-[2.2]" />
-                Download Invoice
-              </button>
+                <T>Download Invoice</T></button>
             </div>
           </div>
         )}

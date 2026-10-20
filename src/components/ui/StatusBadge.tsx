@@ -1,5 +1,6 @@
 import React from "react";
 import { cn } from "@/utils/cn";
+import { useT } from "@/i18n/I18nProvider";
 
 export interface StatusBadgeProps {
   status?: string | null;
@@ -65,9 +66,13 @@ export function getStatusStyle(status: string = ""): string {
 }
 
 export function StatusBadge({ status, className, customLabel }: StatusBadgeProps) {
+  const { t } = useT();
   if (!status && !customLabel) return null;
 
-  const displayStatus = (customLabel || status || "").replace(/_/g, " ");
+  // Statuses arrive in many spellings ("EN_ROUTE", "en route"); they are translated by their lower-case form.
+  const plain = (customLabel || status || "").replace(/_/g, " ");
+  const translated = t(plain.toLowerCase());
+  const displayStatus = translated !== plain.toLowerCase() ? translated : plain;
   const styleClass = getStatusStyle(status || customLabel || "");
 
   return (

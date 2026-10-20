@@ -1,3 +1,4 @@
+import { T, useT } from "@/i18n/I18nProvider";
 import React from "react";
 import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { cn } from "@/utils/cn";
@@ -39,6 +40,7 @@ export function DataTable<T>({
   loading = false,
   emptyState,
 }: DataTableProps<T>) {
+  const { t } = useT();
   // Using default values for presentation if not provided
   const {
     currentPage = 1,
@@ -78,7 +80,7 @@ export function DataTable<T>({
                     col.className
                   )}
                 >
-                  {col.header}
+                  {t(col.header)}
                 </th>
               ))}
             </tr>
@@ -105,7 +107,7 @@ export function DataTable<T>({
                     emptyState
                   ) : (
                     <div className="flex flex-col items-center justify-center py-12 text-gray-400 font-medium text-fs-13">
-                      <span>No records available</span>
+                      <span><T>No records available</T></span>
                     </div>
                   )}
                 </td>
@@ -148,11 +150,10 @@ export function DataTable<T>({
       <div className="border-t border-gray-100 p-3.5 px-5 flex flex-wrap lg:flex-nowrap items-center justify-between bg-white gap-y-3 lg:gap-y-0">
         <div className="hidden lg:block text-fs-12 text-gray-500 order-3 lg:order-1 w-full lg:w-auto text-left mt-1 lg:mt-0">
           {totalItems === 0 || data.length === 0 ? (
-            <span>Showing <span className="font-semibold text-text-primary">0</span> Entities</span>
+            <span><T>Showing</T> <span className="font-semibold text-text-primary">0</span> <T>Entities</T></span>
           ) : (
             <>
-              Showing <span className="font-semibold text-text-primary">{(currentPage - 1) * itemsPerPage + 1} - {Math.min((currentPage - 1) * itemsPerPage + data.length, totalItems)}</span> of <span className="font-semibold text-text-primary">{totalItems.toLocaleString()}</span> Entities
-            </>
+              <T>Showing</T> <span dir="ltr" className="inline-block font-semibold text-text-primary">{(currentPage - 1) * itemsPerPage + 1} - {Math.min((currentPage - 1) * itemsPerPage + data.length, totalItems)}</span> <T>of</T> <span className="font-semibold text-text-primary">{totalItems.toLocaleString()}</span> <T>Entities</T></>
           )}
         </div>
 
@@ -162,10 +163,10 @@ export function DataTable<T>({
             onChange={(event) => pagination?.onRowsChange?.(Number(event.target.value))}
             className="appearance-none h-8 pl-3.5 pr-8 border border-gray-200 rounded-[12px] flex items-center text-fs-11 font-medium text-text-secondary hover:bg-gray-50 transition-colors focus:outline-none cursor-pointer bg-transparent"
           >
-            <option value={10}>Rows: 10</option>
-            <option value={20}>Rows: 20</option>
-            <option value={50}>Rows: 50</option>
-            <option value={100}>Rows: 100</option>
+            <option value={10}><T>Rows: 10</T></option>
+            <option value={20}><T>Rows: 20</T></option>
+            <option value={50}><T>Rows: 50</T></option>
+            <option value={100}><T>Rows: 100</T></option>
           </select>
           <ChevronDown className="w-3.5 h-3.5 text-gray-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
@@ -177,7 +178,7 @@ export function DataTable<T>({
             className={cn("w-8 h-8 flex items-center justify-center rounded-full transition-colors border bg-white shrink-0", 
               currentPage === 1 ? "text-gray-300 border-gray-100 cursor-not-allowed" : "text-gray-400 hover:text-text-primary hover:bg-gray-100 border-gray-200")}
           >
-            <ChevronLeft className="w-3.5 h-3.5" />
+            <ChevronLeft className="w-3.5 h-3.5 rtl:rotate-180" />
           </button>
 
           {/* Simple pagination */}
@@ -225,7 +226,7 @@ export function DataTable<T>({
             className={cn("w-8 h-8 flex items-center justify-center rounded-full transition-colors border bg-white shrink-0", 
               (currentPage === totalPages || totalPages === 0) ? "text-gray-300 border-gray-100 cursor-not-allowed" : "text-gray-400 hover:text-text-primary hover:bg-gray-100 border-gray-200")}
           >
-            <ChevronRight className="w-3.5 h-3.5" />
+            <ChevronRight className="w-3.5 h-3.5 rtl:rotate-180" />
           </button>
         </div>
       </div>

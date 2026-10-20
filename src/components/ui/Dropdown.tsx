@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/utils/cn";
+import { useT } from "@/i18n/I18nProvider";
 
 export interface DropdownProps {
   options: string[];
@@ -13,6 +14,7 @@ export interface DropdownProps {
 }
 
 export function Dropdown({ options, defaultValue, onSelect, className, buttonClassName }: DropdownProps) {
+  const { t } = useT();
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState(defaultValue || options[0] || "");
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -50,7 +52,7 @@ export function Dropdown({ options, defaultValue, onSelect, className, buttonCla
           buttonClassName
         )}
       >
-        <span className="truncate">{selected}</span>
+        <span className="truncate">{t(selected)}</span>
         <ChevronDown className={cn("w-3.5 h-3.5 transition-transform duration-200 text-gray-500 shrink-0", isOpen && "rotate-180")} />
       </button>
 
@@ -66,7 +68,7 @@ export function Dropdown({ options, defaultValue, onSelect, className, buttonCla
                 selected === option ? "text-primary font-semibold bg-primary/5" : "text-gray-600"
               )}
             >
-              <span className="normal-case text-[12px] sm:text-[13px] tracking-normal">{option}</span>
+              <span className="normal-case text-[12px] sm:text-[13px] tracking-normal">{t(option)}</span>
             </button>
           ))}
         </div>

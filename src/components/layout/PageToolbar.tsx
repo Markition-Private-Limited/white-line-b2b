@@ -1,3 +1,4 @@
+import { T, useT } from "@/i18n/I18nProvider";
 import React, { useState, useRef, useEffect } from "react";
 import { Search, Filter, ChevronRight, ChevronLeft } from "lucide-react";
 import { cn } from "@/utils/cn";
@@ -32,6 +33,7 @@ export interface PageToolbarProps {
 }
 
 function MobileFilterMenu({ filters }: { filters: FilterDef[] }) {
+  const { t } = useT();
   const [isOpen, setIsOpen] = useState(false);
   const [activeFilterIdx, setActiveFilterIdx] = useState<number | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -91,8 +93,8 @@ function MobileFilterMenu({ filters }: { filters: FilterDef[] }) {
                   onClick={() => setActiveFilterIdx(idx)}
                   className="w-full text-left px-4 py-2.5 text-fs-12 hover:bg-gray-50 transition-colors flex items-center justify-between text-text-secondary font-medium cursor-pointer"
                 >
-                  {label}
-                  <ChevronRight className="w-3.5 h-3.5" />
+                  {t(label)}
+                  <ChevronRight className="w-3.5 h-3.5 rtl:rotate-180" />
                 </button>
               );
             })
@@ -104,9 +106,8 @@ function MobileFilterMenu({ filters }: { filters: FilterDef[] }) {
                   onClick={() => setActiveFilterIdx(null)}
                   className="w-full text-left px-3 py-2 text-fs-12 hover:bg-gray-50 transition-colors flex items-center gap-2 text-text-secondary border-b border-gray-100 font-medium bg-gray-50/50 cursor-pointer"
                 >
-                  <ChevronLeft className="w-3.5 h-3.5" />
-                  Back
-                </button>
+                  <ChevronLeft className="w-3.5 h-3.5 rtl:rotate-180" />
+                  <T>Back</T></button>
               )}
               {currentFilter.type === "date" ? (
                 <div className="p-2">
@@ -131,7 +132,7 @@ function MobileFilterMenu({ filters }: { filters: FilterDef[] }) {
                     }}
                     className="w-full text-left px-4 py-2.5 text-fs-12 hover:bg-gray-50 transition-colors text-text-secondary font-medium cursor-pointer"
                   >
-                    <span className="normal-case text-fs-12 tracking-normal font-medium">{option}</span>
+                    <span className="normal-case text-fs-12 tracking-normal font-medium">{t(option)}</span>
                   </button>
                 ))
               )}
@@ -152,6 +153,7 @@ export function PageToolbar({
   className,
   children
 }: PageToolbarProps) {
+  const { t } = useT();
   return (
     <div className={cn("flex items-center justify-between bg-white rounded-full p-1.5 sm:p-2.0 mt-1 shadow-[0px_2px_12px_0px_rgba(0,0,0,0.03)] border border-gray-100/80 relative z-30", className)}>
       <div className="flex-1 min-w-[200px] max-w-[383px] relative shrink-0 sm:shrink">
@@ -160,7 +162,7 @@ export function PageToolbar({
         </div>
         <input
           type="text"
-          placeholder={searchPlaceholder}
+          placeholder={t(searchPlaceholder)}
           value={searchValue}
           onChange={(e) => onSearch?.(e.target.value)}
           className="w-full h-[42px] sm:h-[44px] bg-background-panel border-none rounded-full pl-10 pr-4 text-[12px] sm:text-[13px] text-gray-800 placeholder:text-gray-400 placeholder:text-[12px] sm:placeholder:text-[13px] focus:outline-none focus:ring-1 focus:ring-primary/20 transition-colors"
@@ -215,7 +217,7 @@ export function PageToolbar({
             )}
           >
             {action.icon}
-            <span className={cn("hidden lg:inline", action.primary && "inline")}>{action.label}</span>
+            <span className={cn("hidden lg:inline", action.primary && "inline")}>{t(action.label)}</span>
           </button>
         ))}
         {children}

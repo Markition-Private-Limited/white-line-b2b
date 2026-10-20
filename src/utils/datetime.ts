@@ -1,3 +1,4 @@
+import { dateLocale } from "@/i18n/dateLocale";
 /** Business dates and times are displayed in Riyadh regardless of viewer location. */
 export const RIYADH_TIME_ZONE = "Asia/Riyadh";
 
@@ -35,15 +36,15 @@ function toDate(value?: string | Date | null): Date | null {
 
 export function formatRiyadhDate(value?: string | Date | null): string {
   const date = toDate(value);
-  return date ? date.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: RIYADH_TIME_ZONE }) : "—";
+  return date ? date.toLocaleDateString(dateLocale("en-GB"), { day: "2-digit", month: "short", year: "numeric", timeZone: RIYADH_TIME_ZONE }) : "—";
 }
 
 export function formatRiyadhTime(value?: string | Date | null): string {
   const date = toDate(value);
-  return date ? date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: RIYADH_TIME_ZONE }) : "—";
+  return date ? date.toLocaleTimeString(dateLocale("en-GB"), { hour: "2-digit", minute: "2-digit", timeZone: RIYADH_TIME_ZONE }) : "—";
 }
 
 export function formatRiyadhDateLong(value?: string | Date | null): string {
   const date = toDate(value);
-  return date ? date.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric", timeZone: RIYADH_TIME_ZONE }) : "—";
+  return date ? date.toLocaleDateString(dateLocale(), { month: "short", day: "2-digit", year: "numeric", timeZone: RIYADH_TIME_ZONE }) : "—";
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { T, useT } from "@/i18n/I18nProvider";
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -11,10 +12,12 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { type DatePickerValue, isDateInRange } from "@/utils/dateFilterUtils";
 import serviceRequestsService, { type ServiceRequest } from "@/services/serviceRequests.service";
 import { getServiceRequestDisplayStatus } from "@/utils/businessStatus";
+import { dateLocale } from "@/i18n/dateLocale";
 
 const LIMIT = 10;
 
 export default function ServiceRequestsPage() {
+  const { t } = useT();
   const router = useRouter();
 
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
@@ -87,7 +90,7 @@ export default function ServiceRequestsPage() {
       cell: (r) => (
         <span className="text-text-secondary text-fs-12">
           {r.request_date && !isNaN(new Date(r.request_date).getTime())
-            ? new Date(r.request_date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+            ? new Date(r.request_date).toLocaleDateString(dateLocale(), { month: "long", day: "numeric", year: "numeric" })
             : "—"}
         </span>
       ),
@@ -96,7 +99,7 @@ export default function ServiceRequestsPage() {
       header: "VEHICLE CATEGORY",
       cell: (r) => (
         <span className="font-medium text-text-primary text-fs-12">
-          {r.vehicle_class?.name ?? "—"}
+          {r.vehicle_class?.name ? t(r.vehicle_class.name) : "—"}
         </span>
       ),
     },
@@ -135,15 +138,15 @@ export default function ServiceRequestsPage() {
       {/* Top Header Card */}
       <div className="bg-white rounded-full p-2 pl-4 sm:pl-6 pr-2.5 flex items-center justify-between border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
         <h1 className="text-fs-16 sm:text-fs-20 lg:text-fs-22 font-bold font-poppins text-text-primary truncate mr-2">
-          <span className="sm:hidden">Services</span>
-          <span className="hidden sm:inline">Service Requests</span>
+          <span className="sm:hidden"><T>Services</T></span>
+          <span className="hidden sm:inline"><T>Service Requests</T></span>
         </h1>
         <Link
           href="/service-requests/create"
           className="flex items-center gap-1.5 px-3.5 sm:px-7 py-2 sm:py-2.5 rounded-full border border-primary text-primary hover:bg-primary hover:text-white text-xs sm:text-fs-12 font-medium transition-all duration-200 shrink-0"
         >
           <Plus className="w-3.5 h-3.5" />
-          <span>Create<span className="hidden sm:inline"> New Request</span></span>
+          <span><T>Create</T><span className="hidden sm:inline"> <T>New Request</T></span></span>
         </Link>
       </div>
 
@@ -173,7 +176,7 @@ export default function ServiceRequestsPage() {
             ].map((card) => (
               <div key={card.label} className={`rounded-[24px] p-5 flex flex-col justify-between min-h-[155px] border shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] ${card.cardBg}`}>
                 <div className="flex items-start justify-between">
-                  <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins">{card.label}<br />{card.label2}</span>
+                  <span className="text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-snug font-poppins"><T>{card.label}</T><br /><T>{card.label2}</T></span>
                   <div className={`w-8 h-8 rounded-full ${card.iconBg} flex items-center justify-center shadow-xs`}>
                     <card.icon className="w-4 h-4" />
                   </div>
@@ -183,17 +186,17 @@ export default function ServiceRequestsPage() {
                   <div className="flex -space-x-2 overflow-hidden items-center">
                     {card.avatarCount >= 1 && (
                       <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white overflow-hidden bg-gray-200 shrink-0">
-                        <Image src="/driver.png" alt="Driver" width={24} height={24} className="object-cover" />
+                        <Image src="/driver.png" alt={t("Driver")} width={24} height={24} className="object-cover" />
                       </div>
                     )}
                     {card.avatarCount >= 2 && (
                       <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white overflow-hidden bg-gray-300 shrink-0">
-                        <Image src="/Avatar.png" alt="Passenger" width={24} height={24} className="object-cover" />
+                        <Image src="/Avatar.png" alt={t("Passenger")} width={24} height={24} className="object-cover" />
                       </div>
                     )}
                     {card.avatarCount >= 3 && (
                       <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white overflow-hidden bg-gray-400 shrink-0">
-                        <Image src="/driver.png" alt="Driver" width={24} height={24} className="object-cover" />
+                        <Image src="/driver.png" alt={t("Driver")} width={24} height={24} className="object-cover" />
                       </div>
                     )}
                   </div>
@@ -208,7 +211,7 @@ export default function ServiceRequestsPage() {
         <div className="flex flex-col gap-2 flex-1 min-w-0">
           {/* Toolbar */}
           <PageToolbar
-            searchPlaceholder="Search by service request ID"
+            searchPlaceholder={t("Search by service request ID")}
             searchValue={search}
             onSearch={(val) => { setSearch(val); setPage(1); }}
             filters={toolbarFilters}
@@ -230,14 +233,13 @@ export default function ServiceRequestsPage() {
             }}
             emptyState={
               <div className="flex flex-col items-center justify-center gap-3.5 py-16 text-gray-400">
-                <p className="text-fs-13 font-medium text-gray-500 font-poppins">No Request Found</p>
+                <p className="text-fs-13 font-medium text-gray-500 font-poppins"><T>No Request Found</T></p>
                 <Link
                   href="/service-requests/create"
                   className="flex items-center gap-1.5 px-8 py-2.5 rounded-full border border-primary text-primary hover:bg-primary hover:text-white text-fs-12 font-medium transition-all duration-200 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  Create New Request
-                </Link>
+                  <T>Create New Request</T></Link>
               </div>
             }
           />

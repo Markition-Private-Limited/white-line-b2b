@@ -1,5 +1,6 @@
 import React from "react";
 import { cn } from "@/utils/cn";
+import { useT } from "@/i18n/I18nProvider";
 
 export interface StatCardProps {
   title: React.ReactNode;
@@ -22,6 +23,7 @@ export function StatCard({
   subtitleClass,
   onClick
 }: StatCardProps) {
+  const { t } = useT();
   return (
     <div 
       onClick={onClick}
@@ -33,7 +35,7 @@ export function StatCard({
     >
       <div className={cn("flex flex-col flex-1 px-4 justify-between", subtitle ? "pt-2 pb-1" : "py-3.5")}>
         <div className="flex items-center justify-between gap-1">
-          <span className="text-[14px] lg:text-[15px] font-semibold text-text-secondary leading-tight truncate">{title}</span>
+          <span className="text-[14px] lg:text-[15px] font-semibold text-text-secondary leading-tight truncate">{typeof title === "string" ? t(title) : title}</span>
           {icon && (
             <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0 border-none", iconWrapperClass)}>
               {icon}
@@ -44,7 +46,7 @@ export function StatCard({
       </div>
       {subtitle && (
         <div className={cn("h-[31px] flex items-center px-4 w-full text-fs-10", subtitleClass)}>
-          {subtitle}
+          {typeof subtitle === "string" ? t(subtitle) : subtitle}
         </div>
       )}
     </div>
