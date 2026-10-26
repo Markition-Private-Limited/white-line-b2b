@@ -8,7 +8,7 @@ export const arPart2: Record<string, string> = {
   "pending": "معلق", "assigned": "مُسند", "accepted": "مقبول", "en route": "في الطريق", "arrived": "وصل",
   "started": "بدأت", "completed": "مكتمل", "cancelled": "ملغى", "canceled": "ملغى", "new": "جديد",
   "approved": "موافق عليه", "rejected": "مرفوض", "suspended": "موقوف", "active": "نشط", "inactive": "غير نشط",
-  "online": "متصل", "offline": "غير متصل", "paid": "مدفوع", "unpaid": "غير مدفوع", "open": "مفتوح",
+  "online": "متصل", "offline": "غير متصل", "paid": "مدفوع", "unpaid": "غير مدفوع", "created": "تم الإنشاء", "sent": "مُرسلة", "partial": "مدفوعة جزئيًا", "open": "مفتوح",
   "resolved": "محلول", "in progress": "قيد المعالجة", "in review": "قيد المراجعة", "expired": "منتهي",
   "overdue": "متأخر", "refunded": "مسترد", "scheduled": "مجدول", "confirmed": "مؤكد", "closed": "مغلق",
   "owner": "المالك", "admin": "مسؤول", "member": "عضو",
