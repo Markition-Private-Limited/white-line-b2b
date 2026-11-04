@@ -10,6 +10,8 @@ import { FormDropdown } from "@/components/ui/FormDropdown";
 import serviceRequestsService from "@/services/serviceRequests.service";
 import vehicleClassesService, { type VehicleClass } from "@/services/vehicleClasses.service";
 import { getRiyadhISODate } from "@/utils/datetime";
+import LocationPickerModal from "@/components/modals/LocationPickerModal";
+import { SERVICE_TYPE_OPTIONS } from "@/constants/serviceTypes";
 
 export default function CreateServiceRequestPage() {
   const { t } = useT();
@@ -21,6 +23,12 @@ export default function CreateServiceRequestPage() {
   const [driversCount, setDriversCount] = useState(0);
   const [selectedClassId, setSelectedClassId] = useState("");
   const [notes, setNotes] = useState("");
+  const [serviceType, setServiceType] = useState("");
+  const [pickupAddress, setPickupAddress] = useState("");
+  const [dropoffAddress, setDropoffAddress] = useState("");
+  const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [dropoffCoords, setDropoffCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [pickerOpen, setPickerOpen] = useState<"pickup" | "dropoff" | null>(null);
   const [vehicleClasses, setVehicleClasses] = useState<VehicleClass[]>([]);
   const [optionsLoading, setOptionsLoading] = useState(true);
   const [availabilityError, setAvailabilityError] = useState("");
@@ -115,6 +123,13 @@ export default function CreateServiceRequestPage() {
         num_vehicles_required: vehiclesCount,
         vehicle_class_id: selectedClassId,
         special_instructions: notes || undefined,
+        service_type: serviceType || undefined,
+        pickup_address: pickupAddress.trim() || undefined,
+        pickup_lat: pickupCoords?.lat,
+        pickup_lng: pickupCoords?.lng,
+        dropoff_address: dropoffAddress.trim() || undefined,
+        dropoff_lat: dropoffCoords?.lat,
+        dropoff_lng: dropoffCoords?.lng,
       });
       setIsSuccessModalOpen(true);
     } catch (err: any) {
@@ -216,6 +231,34 @@ export default function CreateServiceRequestPage() {
             <p className="text-xs text-red-600"><T>No vehicle categories found. Contact WhiteLine support.</T></p>
           )}
 
+          {/* Service type */}
+          <FormDropdown
+            label={t("SERVICE TYPE")}
+            placeholder={t("Select Service Type")}
+            options={SERVICE_TYPE_OPTIONS.map((s) => ({ label: t(s.label), value: s.key }))}
+            onSelect={(val) => setServiceType(val)}
+          />
+
+          {/* Pickup and drop-off */}
+          {(["pickup", "dropoff"] as const).map((kind) => (
+            <div key={kind} className="space-y-1">
+              <label className="text-fs-10 font-semibold text-gray-text uppercase tracking-wider ml-1 mb-1.5 block">
+                <T>{kind === "pickup" ? "PICKUP LOCATION" : "DROP-OFF LOCATION"}</T></label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={kind === "pickup" ? pickupAddress : dropoffAddress}
+                  onChange={(e) => (kind === "pickup" ? setPickupAddress : setDropoffAddress)(e.target.value)}
+                  placeholder={t(kind === "pickup" ? "Enter pickup address" : "Enter drop-off address")}
+                  className="flex-1 bg-input-bg border-none rounded-full h-[44px] px-5 text-fs-12 text-text-primary placeholder:text-input-placeholder focus:outline-none focus:ring-1 focus:ring-primary/20"
+                />
+                <button type="button" onClick={() => setPickerOpen(kind)} className="h-[44px] px-5 rounded-full border border-primary text-primary text-fs-12 font-semibold hover:bg-primary/5 cursor-pointer">
+                  <T>Pick on map</T>
+                </button>
+              </div>
+            </div>
+          ))}
+
           {/* Row 4: Notes */}
           <div className="space-y-1">
             <label className="text-fs-10 font-semibold text-gray-text uppercase tracking-wider ml-1 mb-1.5 block">
@@ -251,6 +294,19 @@ export default function CreateServiceRequestPage() {
           </div>
         </form>
       </div>
+
+      <LocationPickerModal
+        isOpen={pickerOpen !== null}
+        onClose={() => setPickerOpen(null)}
+        title={t(pickerOpen === "dropoff" ? "Select Drop-off Location" : "Select Pickup Location")}
+        initialPos={pickerOpen === "dropoff" ? dropoffCoords : pickupCoords}
+        initialAddress={pickerOpen === "dropoff" ? dropoffAddress : pickupAddress}
+        onSelectLocation={(loc) => {
+          if (pickerOpen === "dropoff") { setDropoffCoords({ lat: loc.lat, lng: loc.lng }); setDropoffAddress(loc.address); }
+          else { setPickupCoords({ lat: loc.lat, lng: loc.lng }); setPickupAddress(loc.address); }
+          setPickerOpen(null);
+        }}
+      />
 
       {/* Success Modal */}
       <SuccessModal

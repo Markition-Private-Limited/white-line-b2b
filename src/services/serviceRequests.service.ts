@@ -10,6 +10,9 @@ export interface ServiceRequest {
   vehicle_class_id: string;
   vehicle_class?: { id: string; name: string };
   special_instructions?: string;
+  service_type?: string | null;
+  pickup_address?: string | null;
+  dropoff_address?: string | null;
   status: string;
   request_date: string;
   requested_by?: string | null;
@@ -23,6 +26,13 @@ export interface CreateServiceRequestPayload {
   num_vehicles_required: number;
   vehicle_class_id: string;
   special_instructions?: string;
+  service_type?: string;
+  pickup_address?: string;
+  pickup_lat?: number;
+  pickup_lng?: number;
+  dropoff_address?: string;
+  dropoff_lat?: number;
+  dropoff_lng?: number;
 }
 
 export interface PaginatedResponse<T> {
