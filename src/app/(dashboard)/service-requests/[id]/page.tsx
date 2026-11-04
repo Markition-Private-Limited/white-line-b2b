@@ -11,6 +11,7 @@ import { SuccessFlowerBadge } from "@/components/ui/SuccessModal";
 import serviceRequestsService, { type ServiceRequest } from "@/services/serviceRequests.service";
 import { getServiceRequestDisplayStatus } from "@/utils/businessStatus";
 import { dateLocale } from "@/i18n/dateLocale";
+import { SERVICE_TYPE_OPTIONS } from "@/constants/serviceTypes";
 
 export default function ServiceDetailPage() {
   const { t } = useT();
@@ -142,6 +143,24 @@ export default function ServiceDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Service type and locations */}
+      {(request?.service_type || request?.pickup_address || request?.dropoff_address) && (
+        <div className="card-base p-6 bg-white rounded-[24px] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <span className="text-fs-11 text-gray-400 block font-medium"><T>Service Type</T></span>
+            <span className="text-fs-13 font-bold text-text-primary font-poppins">{request?.service_type ? t(SERVICE_TYPE_OPTIONS.find((s) => s.key === request.service_type)?.label ?? request.service_type.replace(/_/g, " ")) : "—"}</span>
+          </div>
+          <div>
+            <span className="text-fs-11 text-gray-400 block font-medium"><T>Pickup Location</T></span>
+            <span className="text-fs-13 font-bold text-text-primary">{request?.pickup_address || "—"}</span>
+          </div>
+          <div>
+            <span className="text-fs-11 text-gray-400 block font-medium"><T>Drop-off Location</T></span>
+            <span className="text-fs-13 font-bold text-text-primary">{request?.dropoff_address || "—"}</span>
+          </div>
+        </div>
+      )}
 
       {/* Notes Card */}
       <div className="card-base p-6 bg-white rounded-[24px] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
